@@ -1,0 +1,212 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.openecomp.sdc.jtosca</groupId>
+	<artifactId>jtosca</artifactId>
+	<version>1.1.0-SNAPSHOT</version>
+
+	<properties>
+
+		<!-- ==================== -->
+		<!-- Generic properties -->
+		<!-- ==================== -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- ==================== -->
+		<!-- Versions -->
+		<!-- ==================== -->
+		<!-- Global project version -->
+
+		<!-- Dependencies projects version -->
+		<sonar.skipDesign>true</sonar.skipDesign>
+		<sonar.projectBaseDir>${project.basedir}</sonar.projectBaseDir>
+		<sonar.jacoco.reportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.reportPath>
+		<nexus.proxy>https://nexus.onap.org</nexus.proxy>
+		<sitePath>/content/sites/site/org/openecomp/sdc/jtosca/${project.version}</sitePath>
+		<snapshots.path>snapshots</snapshots.path>
+		<releases.path>releases</releases.path>
+		<!--<staging.profile.id>176c31dfe190a</staging.profile.id> -->
+
+	</properties>
+
+	<dependencies>
+		<!-- YAML parser -->
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.14</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.25</version>
+		</dependency>
+
+		<!-- <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-classic</artifactId> 
+			<version>1.1.2</version> <scope>test</scope> </dependency> -->
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+		</dependency>
+	</dependencies>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<configuration>
+					<failOnError>false</failOnError>
+					<doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
+					<docletArtifact>
+						<groupId>org.umlgraph</groupId>
+						<artifactId>umlgraph</artifactId>
+						<version>5.6</version>
+					</docletArtifact>
+					<additionalparam>-views</additionalparam>
+					<useStandardDocletOptions>true</useStandardDocletOptions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.4</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.wagon</groupId>
+						<artifactId>wagon-webdav-jackrabbit</artifactId>
+						<version>2.10</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.8</version>
+				<executions>
+					<!-- Unit-Tests -->
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<destFile>${sonar.jacoco.reportPath}</destFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Staging Plugin -->
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<nexusUrl>${nexus.proxy}</nexusUrl>
+					<stagingProfileId>${staging.profile.id}</stagingProfileId>
+					<serverId>ecomp-staging</serverId>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.5.1</version>
+				<inherited>true</inherited>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.3</version>
+				<configuration />
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>1.10</version>
+				<configuration>
+					<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+					<processStartTag>============LICENSE_START=======================================================</processStartTag>
+					<processEndTag>============LICENSE_END=========================================================</processEndTag>
+					<sectionDelimiter>================================================================================</sectionDelimiter>
+					<licenseName>apache_v2</licenseName>
+					<inceptionYear>2017</inceptionYear>
+					<organizationName>AT&amp;T Intellectual Property. All rights
+						reserved.</organizationName>
+					<projectName>jtosca</projectName>
+					<canUpdateCopyright>true</canUpdateCopyright>
+					<canUpdateDescription>true</canUpdateDescription>
+					<canUpdateLicense>true</canUpdateLicense>
+					<emptyLineAfterHeader>true</emptyLineAfterHeader>
+					<verbose>false</verbose>
+					<includes>
+						<include>**/*.java</include>
+					</includes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>first</id>
+						<goals>
+							<goal>update-file-header</goal>
+						</goals>
+						<!--phase>process-sources</phase -->
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>central</id>
+			<name>Official Maven repository</name>
+			<url>http://repo2.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>ecomp-releases</id>
+			<name>Release Repository</name>
+			<url>${nexus.proxy}/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>ecomp-staging</id>
+			<name>Staging Repository</name>
+			<url>${nexus.proxy}/content/repositories/staging/</url>
+		</repository>
+	</repositories>
+
+	<distributionManagement>
+		<repository>
+			<id>ecomp-releases</id>
+			<name>Release Repository</name>
+			<url>${nexus.proxy}/content/repositories/${releases.path}/</url>
+		</repository>
+		<snapshotRepository>
+			<id>ecomp-snapshots</id>
+			<name>Snapshot Repository</name>
+			<url>${nexus.proxy}/content/repositories/${snapshots.path}/</url>
+		</snapshotRepository>
+		<site>
+			<id>ecomp-site</id>
+			<url>dav:${nexus.proxy}${sitePath}</url>
+		</site>
+	</distributionManagement>
+
+</project>
