@@ -1,5 +1,6 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Metadata {
@@ -12,6 +13,13 @@ public class Metadata {
 
 	public String getValue(String key)  {
 		return !isEmpty() ? String.valueOf(this.metadataMap.get(key)) : null;
+	}
+	
+	public Map<String, Object> getPropertyMap()  {
+		if(metadataMap == null){
+			return null;
+		}
+		return new HashMap<>(metadataMap);
 	}
 	
 	public void setValue(String key, Object value)  {
