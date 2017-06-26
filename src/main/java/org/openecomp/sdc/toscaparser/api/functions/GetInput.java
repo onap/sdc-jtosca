@@ -18,12 +18,17 @@ public class GetInput extends Function {
 
 	@Override
 	void validate() {
-	    if(args.size() != 1) {
-	    	//PA - changed to WARNING from CRITICAL after talking to Renana, 22/05/2017
-	        ThreadLocalsHolder.getCollector().appendWarning(String.format(
-	            "ValueError: Expected one argument for function \"get_input\" but received \"%s\"",
-	            args.toString()));
-	    }
+//	    if(args.size() != 1) {
+//	    	//PA - changed to WARNING from CRITICAL after talking to Renana, 22/05/2017
+//	        ThreadLocalsHolder.getCollector().appendWarning(String.format(
+//	            "ValueError: Expected one argument for function \"get_input\" but received \"%s\"",
+//	            args.toString()));
+//	    }
+		if(args.size() > 2) {
+			ThreadLocalsHolder.getCollector().appendWarning(String.format(
+					"ValueError: Expected max 2 arguments for function \"get_input\" but received \"%s\"",
+					args.size()));
+		}
 	    boolean bFound = false;
 	    for(Input inp: toscaTpl.getInputs()) {
 	    	if(inp.getName().equals(args.get(0))) {
@@ -56,6 +61,11 @@ public class GetInput extends Function {
 			}
 		}
 		if(inputDef != null) {
+			if (args.size() == 2 && args.get(1) instanceof Integer) {
+				if (inputDef.getDefault() != null && inputDef.getDefault() instanceof ArrayList) {
+					return ((ArrayList) inputDef.getDefault()).get(((Integer)args.get(1)).intValue());
+				}
+			}
 			return inputDef.getDefault();
 		}
 		return null;

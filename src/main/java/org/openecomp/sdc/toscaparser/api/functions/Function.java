@@ -113,23 +113,28 @@ public abstract class Function {
 		        	}
 		        	else if(funcType.equals("GetAttribute")) {
 		        		return new GetAttribute(ttpl,context,funcName,funcArgs);
-		        	} 
+		        	}
 		        	else if(funcType.equals("GetProperty")) {
 		        		return new GetProperty(ttpl,context,funcName,funcArgs);
-		        	} 
+		        	}
 		        	else if(funcType.equals("GetOperationOutput")) {
 		        		return new GetOperationOutput(ttpl,context,funcName,funcArgs);
-		        	} 
+		        	}
 		        	else if(funcType.equals("Concat")) {
 		        		return new Concat(ttpl,context,funcName,funcArgs);
-		        	} 
+		        	}
 		        	else if(funcType.equals("Token")) {
 		        		return new Token(ttpl,context,funcName,funcArgs);
-		        	} 
+		        	}
 		        }
 	        }
 	    }
 	    return rawFunctionObj;
+	}
+
+	@Override
+	public String toString() {
+		return name + ":" + args.toString();
 	}
 }
 

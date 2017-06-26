@@ -26,3 +26,16 @@ SDC Javadoc and Maven site
  
 *** to be completed on rrelease ***
 
+# Release notes for versions
+
+1.1.0-SNAPSHOT
+
+Initial after separating into separate repo
+
+-------------------------------
+
+1.1.1-SNAPSHOT
+
+Added toString of Function (GetInput, etc.)
+
+Allowed two arguments for GetInput - name of list input and index in list
