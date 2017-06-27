@@ -134,7 +134,8 @@ public abstract class Function {
 
 	@Override
 	public String toString() {
-		return name + ":" + args.toString();
+		String argsStr = args.size() > 1 ? args.toString() : args.get(0).toString();
+		return name + ":" + argsStr;
 	}
 }
 
