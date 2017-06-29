@@ -41,6 +41,12 @@ public class Input {
     private Schema schema;
 	private LinkedHashMap<String,Object> customDefs;
 	
+	public Input(){
+		/**
+		 * Added to support Input serialization
+		 */
+	}
+	
 	public Input(String _name,LinkedHashMap<String,Object> _schemaDict,LinkedHashMap<String,Object> _customDefs) {
 		name = _name;
 		schema = new Schema(_name,_schemaDict);
