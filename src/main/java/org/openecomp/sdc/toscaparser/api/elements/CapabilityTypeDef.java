@@ -49,13 +49,15 @@ public class CapabilityTypeDef extends StatefulEntityType {
 		if(parentProperties != null) {
 			for(Map.Entry<String,Object> me: parentProperties.entrySet()) {
 				LinkedHashMap<String,Object> props = (LinkedHashMap<String,Object>)me.getValue();
-				for(Map.Entry<String,Object> pe: props.entrySet()) {
-					String prop = pe.getKey();
-					LinkedHashMap<String,Object> schema = (LinkedHashMap<String,Object>)pe.getValue();
-                    // add parent property if not overridden by children type
-                    if(properties == null || properties.get(prop) == null) {
-                        propsdefs.add(new PropertyDef(prop, null, schema));
-                    }
+				if (props != null)  {
+					for(Map.Entry<String,Object> pe: props.entrySet()) {
+						String prop = pe.getKey();
+						LinkedHashMap<String,Object> schema = (LinkedHashMap<String,Object>)pe.getValue();
+	                    // add parent property if not overridden by children type
+	                    if(properties == null || properties.get(prop) == null) {
+	                        propsdefs.add(new PropertyDef(prop, null, schema));
+	                    }
+					}
 				}
 			}
 		}
