@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.elements.*;
 import org.openecomp.sdc.toscaparser.api.utils.CopyUtils;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
@@ -19,7 +18,6 @@ public class NodeTemplate extends EntityTemplate {
 	private ArrayList<RelationshipTemplate> relationshipTpl;
 	private LinkedHashMap<RelationshipType,NodeTemplate> _relationships;
 	private SubstitutionMappings subMappingToscaTemplate;
-	private SubstitutionMappings subMappingToscaTemplate2;
 	private Metadata metadata;
 
 	private static final String METADATA = "metadata";
@@ -42,7 +40,6 @@ public class NodeTemplate extends EntityTemplate {
        availableRelTypes = ntavailableRelTypes;
        _relationships = new LinkedHashMap<RelationshipType,NodeTemplate>();
        subMappingToscaTemplate = null;
-       subMappingToscaTemplate2 = null;
        metadata = _metaData();
 	}
 
@@ -440,22 +437,14 @@ public class NodeTemplate extends EntityTemplate {
 	}
 	
 	// getter/setter
-	
+
+	// multilevel nesting
 	public SubstitutionMappings getSubMappingToscaTemplate() {
 		return subMappingToscaTemplate;
 	}
 	
 	public void setSubMappingToscaTemplate(SubstitutionMappings sm) {
 		subMappingToscaTemplate = sm;
-	}
-	
-	// **experimental** (multilevel nesting)
-	public SubstitutionMappings getSubMappingToscaTemplate2() {
-		return subMappingToscaTemplate2;
-	}
-	
-	public void setSubMappingToscaTemplate2(SubstitutionMappings sm) {
-		subMappingToscaTemplate2 = sm;
 	}
 	
 	public Metadata getMetaData() {

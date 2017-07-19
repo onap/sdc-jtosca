@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.common.JToscaException;
@@ -81,7 +82,7 @@ public class ToscaTemplate extends Object {
     private ArrayList<NodeTemplate> nodeTemplates;
     private ArrayList<Output> outputs;
 	private ArrayList<Policy> policies;
-    private LinkedHashMap<String,Object> nestedToscaTplsWithTopology;
+    private ConcurrentHashMap<String,Object> nestedToscaTplsWithTopology;
     private ArrayList<TopologyTemplate> nestedToscaTemplatesWithTopology;
     private ToscaGraph graph;
     private String csarTempDir;
@@ -113,7 +114,7 @@ public class ToscaTemplate extends Object {
 		path = null;
 		tpl = null;
 		csarTempDir = null;
-		nestedToscaTplsWithTopology = new LinkedHashMap<String,Object>(); 
+		nestedToscaTplsWithTopology = new ConcurrentHashMap<>();
 		nestedToscaTemplatesWithTopology = new ArrayList<TopologyTemplate>();
 
 		if(_path != null && !_path.isEmpty()) {
@@ -179,7 +180,8 @@ public class ToscaTemplate extends Object {
                 this.nodeTemplates = _nodeTemplates();
                 this.outputs = _outputs();
                 this.policies = _policies();
-                _handleNestedToscaTemplatesWithTopology();
+//                _handleNestedToscaTemplatesWithTopology();
+				_handleNestedToscaTemplatesWithTopology(topologyTemplate);
                 graph = new ToscaGraph(nodeTemplates);
             }
         }
@@ -361,10 +363,10 @@ public class ToscaTemplate extends Object {
 		}
 	}
 
-	// **experimental** (multi level nesting) RECURSIVE - BEWARE OF INIFINITE LOOPS...
-	private void _handleNestedToscaTemplatesWithTopology2(TopologyTemplate tt) {
+	// multi level nesting - RECURSIVE
+	private void _handleNestedToscaTemplatesWithTopology(TopologyTemplate tt) {
 		if(++nestingLoopCounter > 10) {
-			log.error("ToscaTemplate - _handleNestedToscaTemplatesWithTopology2 - Nested Topologies Loop: too many levels, aborting");
+			log.error("ToscaTemplate - _handleNestedToscaTemplatesWithTopology - Nested Topologies Loop: too many levels, aborting");
 			return;
 		}
 		for(Map.Entry<String,Object> me: nestedToscaTplsWithTopology.entrySet()) {
@@ -372,13 +374,14 @@ public class ToscaTemplate extends Object {
 			LinkedHashMap<String,Object> toscaTpl = 
 							(LinkedHashMap<String,Object>)me.getValue();
 			for(NodeTemplate nt: tt.getNodeTemplates()) {
-				if(_isSubMappedNode2(nt,toscaTpl)) {
+				if(_isSubMappedNode(nt,toscaTpl)) {
 					parsedParams = _getParamsForNestedTemplate(nt);
+					ArrayList<Object> alim = (ArrayList<Object>)toscaTpl.get(IMPORTS);
 					LinkedHashMap<String,Object> topologyTpl = 
 							(LinkedHashMap<String,Object>)toscaTpl.get(TOPOLOGY_TEMPLATE);
 					TopologyTemplate topologyWithSubMapping = 
 						new TopologyTemplate(topologyTpl,
-											 _getAllCustomDefs(null), 
+											 _getAllCustomDefs(alim),
 											 relationshipTypes, 
 											 parsedParams,
 											 nt);
@@ -386,44 +389,44 @@ public class ToscaTemplate extends Object {
                         // Record nested topology templates in top level template
                         //nestedToscaTemplatesWithTopology.add(topologyWithSubMapping);
                         // Set substitution mapping object for mapped node
-                        nt.setSubMappingToscaTemplate2(
+                        nt.setSubMappingToscaTemplate(
                         		topologyWithSubMapping.getSubstitutionMappings());
-                        _handleNestedToscaTemplatesWithTopology2(topologyWithSubMapping);
+                        _handleNestedToscaTemplatesWithTopology(topologyWithSubMapping);
 					}
 				}
 			}
 		}
 	}
 	
-	private void _handleNestedToscaTemplatesWithTopology() {
-		for(Map.Entry<String,Object> me: nestedToscaTplsWithTopology.entrySet()) {
-			String fname = me.getKey();
-			LinkedHashMap<String,Object> toscaTpl = 
-							(LinkedHashMap<String,Object>)me.getValue();
-			for(NodeTemplate nt: nodeTemplates) {
-				if(_isSubMappedNode(nt,toscaTpl)) {
-					parsedParams = _getParamsForNestedTemplate(nt);
-                    ArrayList<Object> alim = (ArrayList<Object>)toscaTpl.get(IMPORTS);
-					LinkedHashMap<String,Object> topologyTpl = 
-							(LinkedHashMap<String,Object>)toscaTpl.get(TOPOLOGY_TEMPLATE);
-					TopologyTemplate topologyWithSubMapping = 
-							new TopologyTemplate(topologyTpl,
-												//_getAllCustomDefs(null),
-												_getAllCustomDefs(alim),
-												relationshipTypes, 
-												parsedParams,
-												nt);
-					if(topologyWithSubMapping.getSubstitutionMappings() != null) {
-                        // Record nested topology templates in top level template
-                        nestedToscaTemplatesWithTopology.add(topologyWithSubMapping);
-                        // Set substitution mapping object for mapped node
-                        nt.setSubMappingToscaTemplate(
-                        		topologyWithSubMapping.getSubstitutionMappings());
-					}
-				}
-			}
-		}
-	}
+//	private void _handleNestedToscaTemplatesWithTopology() {
+//		for(Map.Entry<String,Object> me: nestedToscaTplsWithTopology.entrySet()) {
+//			String fname = me.getKey();
+//			LinkedHashMap<String,Object> toscaTpl =
+//							(LinkedHashMap<String,Object>)me.getValue();
+//			for(NodeTemplate nt: nodeTemplates) {
+//				if(_isSubMappedNode(nt,toscaTpl)) {
+//					parsedParams = _getParamsForNestedTemplate(nt);
+//                    ArrayList<Object> alim = (ArrayList<Object>)toscaTpl.get(IMPORTS);
+//					LinkedHashMap<String,Object> topologyTpl =
+//							(LinkedHashMap<String,Object>)toscaTpl.get(TOPOLOGY_TEMPLATE);
+//					TopologyTemplate topologyWithSubMapping =
+//							new TopologyTemplate(topologyTpl,
+//												//_getAllCustomDefs(null),
+//												_getAllCustomDefs(alim),
+//												relationshipTypes,
+//												parsedParams,
+//												nt);
+//					if(topologyWithSubMapping.getSubstitutionMappings() != null) {
+//                        // Record nested topology templates in top level template
+//                        nestedToscaTemplatesWithTopology.add(topologyWithSubMapping);
+//                        // Set substitution mapping object for mapped node
+//                        nt.setSubMappingToscaTemplate(
+//                        		topologyWithSubMapping.getSubstitutionMappings());
+//					}
+//				}
+//			}
+//		}
+//	}
 
 	private void _validateField() {
 		String sVersion = _tplVersion();
@@ -575,19 +578,19 @@ public class ToscaTemplate extends Object {
 		return metaProperties.get(propertiesFile);
 	}
 	
-	private boolean _isSubMappedNode(NodeTemplate nt,LinkedHashMap<String,Object> toscaTpl) {
+//	private boolean _isSubMappedNode(NodeTemplate nt,LinkedHashMap<String,Object> toscaTpl) {
+//		// Return True if the nodetemple is substituted
+//		if(nt != null && nt.getSubMappingToscaTemplate() == null &&
+//				getSubMappingNodeType(toscaTpl).equals(nt.getType()) &&
+//				nt.getInterfaces().size() < 1) {
+//			return true;
+//		}
+//		return false;
+//	}
+
+	private boolean _isSubMappedNode(NodeTemplate nt, LinkedHashMap<String,Object> toscaTpl) {
 		// Return True if the nodetemple is substituted
 		if(nt != null && nt.getSubMappingToscaTemplate() == null &&
-				getSubMappingNodeType(toscaTpl).equals(nt.getType()) &&
-				nt.getInterfaces().size() < 1) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean _isSubMappedNode2(NodeTemplate nt,LinkedHashMap<String,Object> toscaTpl) {
-		// Return True if the nodetemple is substituted
-		if(nt != null && nt.getSubMappingToscaTemplate2() == null &&
 				getSubMappingNodeType(toscaTpl).equals(nt.getType()) &&
 				nt.getInterfaces().size() < 1) {
 			return true;
