@@ -48,9 +48,15 @@ public class GetInput extends Function {
 			LinkedHashMap<String,Object> ttinp = (LinkedHashMap<String,Object>)toscaTpl.getTpl().get("inputs");
 			LinkedHashMap<String,Object> ttinpinp = (LinkedHashMap<String,Object>)ttinp.get(getInputName());
 			String type = (String)ttinpinp.get("type");
-			
-			return DataEntity.validateDatatype(
+
+			Object value = DataEntity.validateDatatype(
 					type, toscaTpl.getParsedParams().get(getInputName()),null,null,null);
+
+			if (value instanceof ArrayList && args.size() == 2 && args.get(1) instanceof Integer) {
+				return ((ArrayList) value).get((Integer)args.get(1));
+			}
+
+			return value;
 		}
 		
 		Input inputDef = null;

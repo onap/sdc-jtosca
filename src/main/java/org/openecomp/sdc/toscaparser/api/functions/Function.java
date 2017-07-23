@@ -1,6 +1,7 @@
 package org.openecomp.sdc.toscaparser.api.functions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -91,45 +92,51 @@ public abstract class Function {
 	    // :param raw_function: The raw function as dict.
 	    // :return: Template function as Function instance or the raw_function if
 	    //  parsing was unsuccessful.
-		
-	    if(isFunction(rawFunctionObj)) {
-	        if(rawFunctionObj instanceof LinkedHashMap) {
-	        	LinkedHashMap<String,Object> rawFunction = (LinkedHashMap<String,Object>)rawFunctionObj;
-		        String funcName = (new ArrayList<String>(rawFunction.keySet())).get(0);
-		        if(functionMappings.keySet().contains(funcName)) {
-		        	String funcType = functionMappings.get(funcName);
-		        	Object oargs = (new ArrayList<Object>(rawFunction.values())).get(0);
-		        	ArrayList<Object> funcArgs;
-		        	if(oargs instanceof ArrayList) {
-		        		funcArgs = (ArrayList<Object>)oargs;
-		        	}
-		        	else {
-		        		funcArgs = new ArrayList<>();
-		        		funcArgs.add(oargs);
-		        	}
+		if (rawFunctionObj instanceof LinkedHashMap) {
+			return getFunctionForObjectItem(ttpl, context, rawFunctionObj);
+		} else if (rawFunctionObj instanceof ArrayList) {
+			ArrayList<Object> rawFunctionObjList = new ArrayList<>();
+			for (Object rawFunctionObjItem: (ArrayList) rawFunctionObj) {
+				rawFunctionObjList.add(getFunctionForObjectItem(ttpl, context, rawFunctionObjItem));
+			}
+			return rawFunctionObjList;
+		}
 
-		        	if(funcType.equals("GetInput")) {
-		        		return new GetInput(ttpl,context,funcName,funcArgs);
-		        	}
-		        	else if(funcType.equals("GetAttribute")) {
-		        		return new GetAttribute(ttpl,context,funcName,funcArgs);
-		        	}
-		        	else if(funcType.equals("GetProperty")) {
-		        		return new GetProperty(ttpl,context,funcName,funcArgs);
-		        	}
-		        	else if(funcType.equals("GetOperationOutput")) {
-		        		return new GetOperationOutput(ttpl,context,funcName,funcArgs);
-		        	}
-		        	else if(funcType.equals("Concat")) {
-		        		return new Concat(ttpl,context,funcName,funcArgs);
-		        	}
-		        	else if(funcType.equals("Token")) {
-		        		return new Token(ttpl,context,funcName,funcArgs);
-		        	}
-		        }
-	        }
-	    }
 	    return rawFunctionObj;
+	}
+
+	private static Object getFunctionForObjectItem(TopologyTemplate ttpl, Object context, Object rawFunctionObjItem) {
+		if(isFunction(rawFunctionObjItem)) {
+			LinkedHashMap<String, Object> rawFunction = (LinkedHashMap<String, Object>) rawFunctionObjItem;
+			String funcName = (new ArrayList<String>(rawFunction.keySet())).get(0);
+			if (functionMappings.keySet().contains(funcName)) {
+				String funcType = functionMappings.get(funcName);
+				Object oargs = (new ArrayList<Object>(rawFunction.values())).get(0);
+				ArrayList<Object> funcArgs;
+				if (oargs instanceof ArrayList) {
+					funcArgs = (ArrayList<Object>) oargs;
+				} else {
+					funcArgs = new ArrayList<>();
+					funcArgs.add(oargs);
+				}
+
+				if (funcType.equals("GetInput")) {
+					return new GetInput(ttpl, context, funcName, funcArgs);
+				} else if (funcType.equals("GetAttribute")) {
+					return new GetAttribute(ttpl, context, funcName, funcArgs);
+				} else if (funcType.equals("GetProperty")) {
+					return new GetProperty(ttpl, context, funcName, funcArgs);
+				} else if (funcType.equals("GetOperationOutput")) {
+					return new GetOperationOutput(ttpl, context, funcName, funcArgs);
+				} else if (funcType.equals("Concat")) {
+					return new Concat(ttpl, context, funcName, funcArgs);
+				} else if (funcType.equals("Token")) {
+					return new Token(ttpl, context, funcName, funcArgs);
+				}
+			}
+		}
+
+		return rawFunctionObjItem;
 	}
 
 	@Override
