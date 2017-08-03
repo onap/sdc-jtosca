@@ -1,9 +1,6 @@
 package org.openecomp.sdc.toscaparser.api.functions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 import org.openecomp.sdc.toscaparser.api.TopologyTemplate;
 
@@ -92,12 +89,32 @@ public abstract class Function {
 	    // :param raw_function: The raw function as dict.
 	    // :return: Template function as Function instance or the raw_function if
 	    //  parsing was unsuccessful.
-		if (rawFunctionObj instanceof LinkedHashMap) {
-			return getFunctionForObjectItem(ttpl, context, rawFunctionObj);
-		} else if (rawFunctionObj instanceof ArrayList) {
+
+
+        // iterate over leaves of the properties's tree and convert function leaves to function object,
+        // support List and Map nested,
+        // assuming that leaf value of function is always map type contains 1 item (e.g. my_leaf: {get_input: xxx}).
+
+        if (rawFunctionObj instanceof LinkedHashMap) { // In map type case
+			LinkedHashMap rawFunction = ((LinkedHashMap) rawFunctionObj);
+			if(rawFunction.size() == 1) { // End point
+				return getFunctionForObjectItem(ttpl, context, rawFunction);
+			} else {
+			    // iterate over map nested properties in recursion, convert leaves to function,
+                // and collect them in the same hierarchy as the original map.
+				LinkedHashMap rawFunctionObjMap = new LinkedHashMap();
+				for (Object rawFunctionObjItem: rawFunction.entrySet()) {
+					Object itemValue = getFunction(ttpl, context, ((Map.Entry)rawFunctionObjItem).getValue());
+					rawFunctionObjMap.put(((Map.Entry)rawFunctionObjItem).getKey(), itemValue);
+				}
+				return rawFunctionObjMap;
+			}
+		} else if (rawFunctionObj instanceof ArrayList) { // In list type case
+            // iterate over list properties in recursion, convert leaves to function,
+            // and collect them in the same hierarchy as the original list.
 			ArrayList<Object> rawFunctionObjList = new ArrayList<>();
 			for (Object rawFunctionObjItem: (ArrayList) rawFunctionObj) {
-				rawFunctionObjList.add(getFunctionForObjectItem(ttpl, context, rawFunctionObjItem));
+				rawFunctionObjList.add(getFunction(ttpl, context, rawFunctionObjItem));
 			}
 			return rawFunctionObjList;
 		}
