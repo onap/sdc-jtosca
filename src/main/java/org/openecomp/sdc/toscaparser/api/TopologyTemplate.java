@@ -1,11 +1,7 @@
 package org.openecomp.sdc.toscaparser.api;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.elements.InterfacesDef;
 import org.openecomp.sdc.toscaparser.api.elements.NodeType;
 import org.openecomp.sdc.toscaparser.api.elements.RelationshipType;
@@ -415,27 +411,20 @@ public class TopologyTemplate {
     					}
     				}
     			}
-    			if(nt.getRequirements() != null &&
-    					nt.getRequirements() instanceof ArrayList) {
-    				for(Object oreq: nt.getRequirements()) {
-    					LinkedHashMap<String,Object> req = (LinkedHashMap<String,Object>)oreq;
-    					LinkedHashMap<String,Object> rel = req;
-    					for(String reqName: req.keySet()) {
-    						Object reqItem = req.get(reqName);
-    						if(reqItem instanceof LinkedHashMap) {
-    							Object t = ((LinkedHashMap<String,Object>)reqItem).get("relationship");
-    							// it can be a string or a LHM...
-    							if(t instanceof LinkedHashMap) {
-    								rel = (LinkedHashMap<String,Object>)t;
-    							}
-    							else {
-    								// we set it to null to fail the next test
-    								// and avoid the get("proprties")
-    								rel = null;
-    							}
-    							break;
-    						}
-    					}
+    			if(nt.getRequirements() != null) {
+    				for(RequirementAssignment req: nt.getRequirements().getAll()) {
+						LinkedHashMap<String,Object> rel;
+						Object t = req.getRelationship();
+						// it can be a string or a LHM...
+						if(t instanceof LinkedHashMap) {
+							rel = (LinkedHashMap<String,Object>)t;
+						}
+						else {
+							// we set it to null to fail the next test
+							// and avoid the get("proprties")
+							rel = null;
+						}
+
     					if(rel != null && rel.get("properties") != null) {
     						LinkedHashMap<String,Object> relprops = 
     								(LinkedHashMap<String,Object>)rel.get("properties");
@@ -448,7 +437,7 @@ public class TopologyTemplate {
     				}
     			}
     			if(nt.getCapabilitiesObjects() != null) {
-    				for(Capability cap: nt.getCapabilitiesObjects()) {
+    				for(CapabilityAssignment cap: nt.getCapabilitiesObjects()) {
     					if(cap.getPropertiesObjects() != null) {
     						for(Property prop: cap.getPropertiesObjects()) {
     							Object propvalue = Function.getFunction(this,nt,prop.getValue(), resolveGetInput);

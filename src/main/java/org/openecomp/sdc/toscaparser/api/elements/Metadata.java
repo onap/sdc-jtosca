@@ -1,36 +1,34 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Metadata {
 	
 	private final Map<String, Object> metadataMap;
 
 	public Metadata(Map<String, Object> metadataMap) {
-        this.metadataMap = metadataMap;
+        this.metadataMap = metadataMap != null ? metadataMap : new HashMap<>();
     }
 
 	public String getValue(String key)  {
-		return !isEmpty() ? String.valueOf(this.metadataMap.get(key)) : null;
-	}
-	
-	public Map<String, Object> getPropertyMap()  {
-		if(metadataMap == null){
-			return null;
+
+		Object obj = this.metadataMap.get(key);
+		if (obj != null){
+			return String.valueOf(obj);
 		}
-		return new HashMap<>(metadataMap);
-	}
-	
-	public void setValue(String key, Object value)  {
-		if (!isEmpty())  {
-			this.metadataMap.put(key, value);
-		}
+		return null;
 	}
 
-
-	private boolean isEmpty() {
-		return this.metadataMap == null || this.metadataMap.size() == 0;
+	/**
+	 * Get all properties of a Metadata object.<br>
+	 * This object represents the "metadata" section of some entity.
+	 * @return all properties of this Metadata, as a key-value.
+	 */
+	public Map<String, String> getAllProperties()  {
+		return metadataMap.entrySet().stream().map(e-> new AbstractMap.SimpleEntry<String, String>(e.getKey(), String.valueOf(e.getValue()))).collect(Collectors.toMap(Map.Entry::getKey,Map.Entry::getValue));
 	}
 
 	@Override

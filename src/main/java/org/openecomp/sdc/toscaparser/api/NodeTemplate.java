@@ -2,6 +2,7 @@ package org.openecomp.sdc.toscaparser.api;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.openecomp.sdc.toscaparser.api.elements.*;
@@ -46,17 +47,14 @@ public class NodeTemplate extends EntityTemplate {
 	@SuppressWarnings("unchecked")
 	public LinkedHashMap<RelationshipType,NodeTemplate> getRelationships() {
 		if(_relationships.isEmpty()) {
-			ArrayList<Object> requires = getRequirements();
-			if(requires != null && requires instanceof ArrayList) {
-				for(Object ro: requires) {
-					LinkedHashMap<String,Object> r = (LinkedHashMap<String,Object>)ro;
-					for(Map.Entry<String,Object> me: r.entrySet()) {
-						LinkedHashMap<RelationshipType,NodeTemplate> explicit = _getExplicitRelationship(r,me.getValue());
-						if(explicit != null) {
-							// _relationships.putAll(explicit)...
-							for(Map.Entry<RelationshipType,NodeTemplate> ee: explicit.entrySet()) {
-								_relationships.put(ee.getKey(), ee.getValue());
-							}
+			List<RequirementAssignment> requires = getRequirements().getAll();
+			if(requires != null && requires instanceof List) {
+				for(RequirementAssignment r: requires) {
+					LinkedHashMap<RelationshipType,NodeTemplate> explicit = _getExplicitRelationship(r);
+					if(explicit != null) {
+						// _relationships.putAll(explicit)...
+						for(Map.Entry<RelationshipType,NodeTemplate> ee: explicit.entrySet()) {
+							_relationships.put(ee.getKey(), ee.getValue());
 						}
 					}
 				}
@@ -66,7 +64,7 @@ public class NodeTemplate extends EntityTemplate {
 	}
 
 	@SuppressWarnings("unchecked")
-	private LinkedHashMap<RelationshipType,NodeTemplate> _getExplicitRelationship(LinkedHashMap<String,Object> req,Object value) {
+	private LinkedHashMap<RelationshipType,NodeTemplate> _getExplicitRelationship(RequirementAssignment req) {
         // Handle explicit relationship
 
         // For example,
@@ -75,13 +73,7 @@ public class NodeTemplate extends EntityTemplate {
         //     relationship: tosca.relationships.HostedOn
 		
 		LinkedHashMap<RelationshipType,NodeTemplate> explicitRelation = new LinkedHashMap<RelationshipType,NodeTemplate>();
-		String node;
-		if(value instanceof LinkedHashMap) {
-			node = (String)((LinkedHashMap<String,Object>)value).get("node");
-		}
-		else {
-			node = (String)value;
-		}
+		String node = req.getNodeTemplateName();
 		
 		if(node != null && !node.isEmpty()) {
             //msg = _('Lookup by TOSCA types is not supported. '
@@ -105,35 +97,33 @@ public class NodeTemplate extends EntityTemplate {
                     return null;
 			}
 			NodeTemplate relatedTpl = new NodeTemplate(node,templates,customDef,null,null);
-			Object relationship = null;
+			Object relationship = req.getRelationship();
 			String relationshipString = null;
-			if(value instanceof LinkedHashMap) {
-				relationship = ((LinkedHashMap<String,Object>)value).get("relationship");
-				// here relationship can be a string or a LHM with 'type':<relationship>
-			}
-            // check if its type has relationship defined
+//			// here relationship can be a string or a LHM with 'type':<relationship>
+
+			// check if its type has relationship defined
 			if(relationship == null) {
 				ArrayList<Object> parentReqs = ((NodeType)typeDefinition).getAllRequirements();
 				if(parentReqs == null) {
                     ThreadLocalsHolder.getCollector().appendException("ValidationError: parent_req is null");
 				}
 				else {
-					for(String key: req.keySet()) {
-						boolean bFoundRel = false;
+//					for(String key: req.keySet()) {
+//						boolean bFoundRel = false;
 						for(Object rdo: parentReqs) {
 							LinkedHashMap<String,Object> reqDict = (LinkedHashMap<String,Object>)rdo;
-							LinkedHashMap<String,Object> relDict = (LinkedHashMap<String,Object>)reqDict.get(key);
+							LinkedHashMap<String,Object> relDict = (LinkedHashMap<String,Object>)reqDict.get(req.getName());
 							if(relDict != null) {
 								relationship = relDict.get("relationship");
 								//BUG-python??? need to break twice?
-								bFoundRel = true;
+//								bFoundRel = true;
 								break;
 							}
 						}
-						if(bFoundRel) {
-							break;
-						}
-					}
+//						if(bFoundRel) {
+//							break;
+//						}
+//					}
 				}
 			}
 			
@@ -208,8 +198,9 @@ public class NodeTemplate extends EntityTemplate {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void _addRelationshipTemplate(LinkedHashMap<String,Object> requirement, String rtype, NodeTemplate source) {
-		LinkedHashMap<String,Object> req = (LinkedHashMap<String,Object>)CopyUtils.copyLhmOrAl(requirement);
+	private void _addRelationshipTemplate(RequirementAssignment requirement, String rtype, NodeTemplate source) {
+		LinkedHashMap<String,Object> req = new LinkedHashMap<>();
+		req.put("relationship", CopyUtils.copyLhmOrAl(requirement.getRelationship()));
 		req.put("type",rtype);
 		RelationshipTemplate tpl = new RelationshipTemplate(req, rtype, customDef, this, source);
 		relationshipTpl.add(tpl);

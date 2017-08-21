@@ -2,9 +2,9 @@ package org.openecomp.sdc.toscaparser.api;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.elements.*;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
@@ -47,8 +47,8 @@ public abstract class EntityTemplate {
 	protected StatefulEntityType typeDefinition;
 	private ArrayList<Property> _properties;
 	private ArrayList<InterfacesDef> _interfaces; 
-	private ArrayList<Object> _requirements;
-	private ArrayList<Capability> _capabilities;
+	private ArrayList<RequirementAssignment> _requirements;
+	private ArrayList<CapabilityAssignment> _capabilities;
 
 	// dummy constructor for subclasses that don't want super
 	public EntityTemplate() {
@@ -151,17 +151,39 @@ public abstract class EntityTemplate {
     }
     
      @SuppressWarnings("unchecked")
-	public ArrayList<Object> getRequirements() {
+	public RequirementAssignments getRequirements() {
     	if(_requirements == null) {
-    		_requirements = new ArrayList<Object>();
-    		Object ob = ((EntityType)typeDefinition).getValue(REQUIREMENTS,entityTpl,false);
-    		if(ob != null) {
-    			_requirements.addAll((ArrayList<Object>)ob);
-    		}
-    				
+    		_requirements = _createRequirements();
     	}
-    	return _requirements;
+    	return new RequirementAssignments(_requirements);
     }
+
+    private ArrayList<RequirementAssignment> _createRequirements() {
+		ArrayList<RequirementAssignment> reqs = new ArrayList<>();
+		ArrayList<Map<String, Object>> requirements = (ArrayList<Map<String, Object>>)
+				typeDefinition.getValue(REQUIREMENTS,entityTpl,false);
+		if(requirements == null) {
+			requirements = new ArrayList<>();
+		}
+		for (Map<String, Object> req: requirements) {
+			for(String reqName: req.keySet()) {
+				Object reqItem = req.get(reqName);
+				if(reqItem instanceof LinkedHashMap) {
+					Object rel = ((LinkedHashMap<String,Object>)reqItem).get("relationship");
+//					LinkedHashMap relationship = rel instanceof LinkedHashMap ? (LinkedHashMap) rel : null;
+					String nodeName = ((LinkedHashMap<String,Object>)reqItem).get("node").toString();
+					Object capability = ((LinkedHashMap<String,Object>)reqItem).get("capability");
+					String capabilityString = capability != null ? capability.toString() : null;
+
+					reqs.add(new RequirementAssignment(reqName, nodeName, capabilityString, rel));
+				} else if (reqItem instanceof String) { //short notation
+					String nodeName = String.valueOf(reqItem);
+					reqs.add(new RequirementAssignment(reqName, nodeName));
+				}
+			}
+		}
+		return reqs;
+	}
 
     public ArrayList<Property> getPropertiesObjects() {
         // Return properties objects for this template
@@ -192,7 +214,7 @@ public abstract class EntityTemplate {
     	return _interfaces;
     }
     
-    public ArrayList<Capability> getCapabilitiesObjects() {
+    public ArrayList<CapabilityAssignment> getCapabilitiesObjects() {
         // Return capabilities objects for this template
     	if(_capabilities == null) {
     		_capabilities = _createCapabilities();
@@ -201,12 +223,12 @@ public abstract class EntityTemplate {
    	
     }
     
-    public LinkedHashMap<String,Capability> getCapabilities() {
-    	LinkedHashMap<String,Capability> caps = new LinkedHashMap<String,Capability>();
-    	for(Capability cap: getCapabilitiesObjects()) {
+    public CapabilityAssignments getCapabilities() {
+    	LinkedHashMap<String,CapabilityAssignment> caps = new LinkedHashMap<String,CapabilityAssignment>();
+    	for(CapabilityAssignment cap: getCapabilitiesObjects()) {
     		caps.put(cap.getName(),cap);
     	}
-    	return caps;
+    	return new CapabilityAssignments(caps);
     }
 
     public boolean isDerivedFrom(String typeStr) {
@@ -226,8 +248,8 @@ public abstract class EntityTemplate {
     }
     
     @SuppressWarnings("unchecked")
-	private ArrayList<Capability> _createCapabilities() {
-    	ArrayList<Capability> capability = new ArrayList<Capability>();
+	private ArrayList<CapabilityAssignment> _createCapabilities() {
+    	ArrayList<CapabilityAssignment> capability = new ArrayList<CapabilityAssignment>();
 		LinkedHashMap<String,Object> caps = (LinkedHashMap<String,Object>)
 							((EntityType)typeDefinition).getValue(CAPABILITIES,entityTpl,true);
 		if(caps != null) {
@@ -257,7 +279,7 @@ public abstract class EntityTemplate {
 					if(pp != null) {
 						properties.putAll(pp);
 					}
-                    Capability cap = new Capability(name, properties, c);
+                    CapabilityAssignment cap = new CapabilityAssignment(name, properties, c);
                     capability.add(cap);
 				}
 			}
@@ -292,7 +314,7 @@ public abstract class EntityTemplate {
     	for(Map.Entry<String,Object> me: capabilities.entrySet()) {
     		String cap = me.getKey();
 			LinkedHashMap<String,Object> props = (LinkedHashMap<String,Object>)me.getValue();
-    		Capability capability = getCapability(cap);
+    		CapabilityAssignment capability = getCapability(cap);
     		if(capability == null) {
     			continue;
     		}
@@ -485,15 +507,11 @@ public abstract class EntityTemplate {
     	return interfaces;
     }
     
-	public Capability getCapability(String name) {
+	public CapabilityAssignment getCapability(String name) {
         // Provide named capability
     	// :param name: name of capability
         // :return: capability object if found, None otherwise
-    	LinkedHashMap<String,Capability> caps = getCapabilities();
-    	if(caps != null) {
-    		return caps.get(name);
-    	}
-    	return null;
+		return getCapabilities().getCapabilityByName(name);
     }
     
 	// getter
@@ -666,7 +684,7 @@ class EntityTemplate(object):
                     if 'properties' in props and props['properties']:
                         properties.update(props['properties'])
 
-                    cap = Capability(name, properties, c)
+                    cap = CapabilityAssignment(name, properties, c)
                     capability.append(cap)
         return capability
 

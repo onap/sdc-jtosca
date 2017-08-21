@@ -1,10 +1,7 @@
 package org.openecomp.sdc.toscaparser.api;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.*;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.elements.NodeType;
 import org.openecomp.sdc.toscaparser.api.elements.PropertyDef;
 import org.openecomp.sdc.toscaparser.api.parameters.Input;
@@ -217,13 +214,13 @@ public class SubstitutionMappings {
         // The capabilities must be in node template which be mapped.
 		LinkedHashMap<String,Object> tplsCapabilities = 
 				(LinkedHashMap<String,Object>)subMappingDef.get(CAPABILITIES);
-		LinkedHashMap<String,Capability> nodeCapabilities = null;
+		List<CapabilityAssignment> nodeCapabilities = null;
 		if(subMappedNodeTemplate != null) {
-			nodeCapabilities = subMappedNodeTemplate.getCapabilities();
+			nodeCapabilities = subMappedNodeTemplate.getCapabilities().getAll();
 		}
 		if(nodeCapabilities != null) {
-			for(String cap: nodeCapabilities.keySet()) {
-				if(tplsCapabilities != null && tplsCapabilities.get(cap) == null) {
+			for(CapabilityAssignment cap: nodeCapabilities) {
+				if(tplsCapabilities != null && tplsCapabilities.get(cap.getName()) == null) {
 	                ; //pass
 	                // ExceptionCollector.appendException(
 	                //    UnknownFieldError(what='SubstitutionMappings',
@@ -241,15 +238,13 @@ public class SubstitutionMappings {
         // The requirements must be in node template which be mapped.
 		LinkedHashMap<String,Object> tplsRequirements = 
 				(LinkedHashMap<String,Object>)subMappingDef.get(REQUIREMENTS);
-		ArrayList<Object> nodeRequirements = null;
+		List<RequirementAssignment> nodeRequirements = null;
 		if(subMappedNodeTemplate != null) {
-			nodeRequirements = subMappedNodeTemplate.getRequirements();
+			nodeRequirements = subMappedNodeTemplate.getRequirements().getAll();
 		}
 		if(nodeRequirements != null) {
-			for(Object ro: nodeRequirements) {
-				ArrayList<String> al = new ArrayList<String>(
-						((LinkedHashMap<String,Object>)ro).keySet());
-				String cap = al.get(0);
+			for(RequirementAssignment ro: nodeRequirements) {
+				String cap = ro.getName();
 				if(tplsRequirements != null && tplsRequirements.get(cap) == null) {
 	                ; //pass
 	                // ExceptionCollector.appendException(

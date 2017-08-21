@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.openecomp.sdc.toscaparser.api.*;
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.elements.AttributeDef;
 import org.openecomp.sdc.toscaparser.api.elements.CapabilityTypeDef;
 import org.openecomp.sdc.toscaparser.api.elements.DataType;
@@ -164,22 +163,17 @@ public class GetAttribute extends Function {
 		if(nodeTemplate != null) {
 	        LinkedHashMap<String,Object> hostedOnRel = 
 	        		(LinkedHashMap<String,Object>)EntityType.TOSCA_DEF.get(HOSTED_ON);
-			for(Object ro: nodeTemplate.getRequirements()) {
-				if(ro != null && ro instanceof LinkedHashMap) {
-					LinkedHashMap<String,Object> r = (LinkedHashMap<String,Object>)ro;
-					for(String requirement: r.keySet()) {
-						String targetName = (String)r.get(requirement);
-						NodeTemplate targetNode = _findNodeTemplate(targetName);
-						NodeType targetType = (NodeType)targetNode.getTypeDefinition();
-						for(CapabilityTypeDef capability: targetType.getCapabilitiesObjects()) {
+			for(RequirementAssignment r: nodeTemplate.getRequirements().getAll()) {
+				String targetName = r.getNodeTemplateName();
+				NodeTemplate targetNode = _findNodeTemplate(targetName);
+				NodeType targetType = (NodeType)targetNode.getTypeDefinition();
+				for(CapabilityTypeDef capability: targetType.getCapabilitiesObjects()) {
 //							if(((ArrayList<String>)hostedOnRel.get("valid_target_types")).contains(capability.getType())) {
-							if(capability.inheritsFrom((ArrayList<String>)hostedOnRel.get("valid_target_types"))) {
-								if(_attributeExistsInType(targetType)) {
-									return targetNode;
-								}
-								return _findHostContainingAttribute(targetName);
-							}
+					if(capability.inheritsFrom((ArrayList<String>)hostedOnRel.get("valid_target_types"))) {
+						if(_attributeExistsInType(targetType)) {
+							return targetNode;
 						}
+						return _findHostContainingAttribute(targetName);
 					}
 				}
 			}
@@ -246,16 +240,11 @@ public class GetAttribute extends Function {
 
 		NodeTemplate nodeTpl = _findNodeTemplate((String)args.get(0));
 	    // Find attribute in node template's requirements
-		for(Object ro: nodeTpl.getRequirements()) {
-			if(ro != null && ro instanceof LinkedHashMap) {
-				LinkedHashMap<String,Object> r = (LinkedHashMap<String,Object>)ro;
-				for(String req: r.keySet()) {
-					String nodeName = (String)r.get(req);
-					if(req.equals(reqOrCap)) {
-						NodeTemplate nodeTemplate = _findNodeTemplate(nodeName);
-    	                return _getCapabilityAttribute(nodeTemplate,req,attrName);
-					}
-				}
+		for(RequirementAssignment r: nodeTpl.getRequirements().getAll()) {
+			String nodeName = r.getNodeTemplateName();
+			if(r.getName().equals(reqOrCap)) {
+				NodeTemplate nodeTemplate = _findNodeTemplate(nodeName);
+				return _getCapabilityAttribute(nodeTemplate,r.getName(),attrName);
 			}
 		}
 	    // If requirement was not found, look in node template's capabilities
@@ -266,9 +255,9 @@ public class GetAttribute extends Function {
 										  String capabilityName,
 										  String attrName) {
 	    // Gets a node template capability attribute
-	    LinkedHashMap<String,Capability> caps = nodeTemplate.getCapabilities();
-	    if(caps != null && caps.keySet().contains(capabilityName)) {
-	    	Capability cap = caps.get(capabilityName);
+		CapabilityAssignment cap = nodeTemplate.getCapabilities().getCapabilityByName(capabilityName);
+
+	    if(cap != null) {
 	    	AttributeDef attribute = null;
 	    	LinkedHashMap<String,AttributeDef> attrs =
 	    			cap.getDefinition().getAttributesDef();
@@ -283,7 +272,7 @@ public class GetAttribute extends Function {
 	        return attribute;
 	    }
 	    String msg = String.format(
-	    	"Requirement/Capability \"%s\" referenced from node template \"%s\" was not found in node template \"%s\"",
+	    	"Requirement/CapabilityAssignment \"%s\" referenced from node template \"%s\" was not found in node template \"%s\"",
 	    	capabilityName,((NodeTemplate)context).getName(),nodeTemplate.getName());
 	    ThreadLocalsHolder.getCollector().appendException("KeyError: " + msg);
 		return null;									  
@@ -518,7 +507,7 @@ def _get_capability_attribute(self,
                                               'ntpl1': node_template.name,
                                               'ntpl2': self.context.name}))
         return attribute
-    msg = _('Requirement/Capability "{0}" referenced from node template '
+    msg = _('Requirement/CapabilityAssignment "{0}" referenced from node template '
             '"{1}" was not found in node template "{2}".').format(
                 capability_name,
                 self.context.name,
