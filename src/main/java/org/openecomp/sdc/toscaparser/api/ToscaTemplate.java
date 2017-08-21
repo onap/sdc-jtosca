@@ -69,6 +69,7 @@ public class ToscaTemplate extends Object {
 	private String path;
 	private String inputPath;
 	private LinkedHashMap<String,Object> parsedParams;
+	private boolean resolveGetInput;
 	private LinkedHashMap<String,Object> tpl;
     private String version;
     private ArrayList<Object> imports;
@@ -89,11 +90,25 @@ public class ToscaTemplate extends Object {
     private int nestingLoopCounter;
 	private LinkedHashMap<String, LinkedHashMap<String, Object>> metaProperties;
 
-	@SuppressWarnings("unchecked")
 	public ToscaTemplate(String _path,
-			 			 LinkedHashMap<String,Object> _parsedParams,
+						LinkedHashMap<String,Object> _parsedParams,
+						boolean aFile,
+						LinkedHashMap<String,Object> yamlDictTpl) throws JToscaException {
+		init(_path, _parsedParams, aFile, yamlDictTpl, true);
+	}
+
+	public ToscaTemplate(String _path,
+						 LinkedHashMap<String,Object> _parsedParams,
 						 boolean aFile,
-						 LinkedHashMap<String,Object> yamlDictTpl) throws JToscaException {
+						 LinkedHashMap<String,Object> yamlDictTpl, boolean resolveGetInput) throws JToscaException {
+		init(_path, _parsedParams, aFile, yamlDictTpl, resolveGetInput);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void init(String _path,
+					  LinkedHashMap<String, Object> _parsedParams,
+					  boolean aFile,
+					  LinkedHashMap<String, Object> yamlDictTpl, boolean _resolveGetInput) throws JToscaException {
 
 		ThreadLocalsHolder.setCollector(new ExceptionCollector(_path));
 
@@ -116,6 +131,7 @@ public class ToscaTemplate extends Object {
 		csarTempDir = null;
 		nestedToscaTplsWithTopology = new ConcurrentHashMap<>();
 		nestedToscaTemplatesWithTopology = new ArrayList<TopologyTemplate>();
+		resolveGetInput = _resolveGetInput;
 
 		if(_path != null && !_path.isEmpty()) {
 			// save the original input path
@@ -206,7 +222,8 @@ public class ToscaTemplate extends Object {
 				_getAllCustomDefs(imports),
 				relationshipTypes,
 				parsedParams,
-				null);
+				null,
+				resolveGetInput);
 	}
 
 	private ArrayList<Input> _inputs() {
@@ -384,7 +401,8 @@ public class ToscaTemplate extends Object {
 											 _getAllCustomDefs(alim),
 											 relationshipTypes, 
 											 parsedParams,
-											 nt);
+											 nt,
+											 resolveGetInput);
 					if(topologyWithSubMapping.getSubstitutionMappings() != null) {
                         // Record nested topology templates in top level template
                         //nestedToscaTemplatesWithTopology.add(topologyWithSubMapping);

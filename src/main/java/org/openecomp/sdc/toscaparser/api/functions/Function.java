@@ -3,6 +3,7 @@ package org.openecomp.sdc.toscaparser.api.functions;
 import java.util.*;
 
 import org.openecomp.sdc.toscaparser.api.TopologyTemplate;
+import org.openecomp.sdc.toscaparser.api.ToscaTemplate;
 
 public abstract class Function {
 
@@ -77,7 +78,7 @@ public abstract class Function {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Object getFunction(TopologyTemplate ttpl,Object context,Object rawFunctionObj) {
+	public static Object getFunction(TopologyTemplate ttpl,Object context,Object rawFunctionObj, boolean resolveGetInput) {
 	    // Gets a Function instance representing the provided template function.
 
 	    // If the format provided raw_function format is not relevant for template
@@ -98,13 +99,13 @@ public abstract class Function {
         if (rawFunctionObj instanceof LinkedHashMap) { // In map type case
 			LinkedHashMap rawFunction = ((LinkedHashMap) rawFunctionObj);
 			if(rawFunction.size() == 1) { // End point
-				return getFunctionForObjectItem(ttpl, context, rawFunction);
+				return getFunctionForObjectItem(ttpl, context, rawFunction, resolveGetInput);
 			} else {
 			    // iterate over map nested properties in recursion, convert leaves to function,
                 // and collect them in the same hierarchy as the original map.
 				LinkedHashMap rawFunctionObjMap = new LinkedHashMap();
 				for (Object rawFunctionObjItem: rawFunction.entrySet()) {
-					Object itemValue = getFunction(ttpl, context, ((Map.Entry)rawFunctionObjItem).getValue());
+					Object itemValue = getFunction(ttpl, context, ((Map.Entry)rawFunctionObjItem).getValue(), resolveGetInput);
 					rawFunctionObjMap.put(((Map.Entry)rawFunctionObjItem).getKey(), itemValue);
 				}
 				return rawFunctionObjMap;
@@ -114,7 +115,7 @@ public abstract class Function {
             // and collect them in the same hierarchy as the original list.
 			ArrayList<Object> rawFunctionObjList = new ArrayList<>();
 			for (Object rawFunctionObjItem: (ArrayList) rawFunctionObj) {
-				rawFunctionObjList.add(getFunction(ttpl, context, rawFunctionObjItem));
+				rawFunctionObjList.add(getFunction(ttpl, context, rawFunctionObjItem, resolveGetInput));
 			}
 			return rawFunctionObjList;
 		}
@@ -122,7 +123,7 @@ public abstract class Function {
 	    return rawFunctionObj;
 	}
 
-	private static Object getFunctionForObjectItem(TopologyTemplate ttpl, Object context, Object rawFunctionObjItem) {
+	private static Object getFunctionForObjectItem(TopologyTemplate ttpl, Object context, Object rawFunctionObjItem, boolean resolveGetInput) {
 		if(isFunction(rawFunctionObjItem)) {
 			LinkedHashMap<String, Object> rawFunction = (LinkedHashMap<String, Object>) rawFunctionObjItem;
 			String funcName = (new ArrayList<String>(rawFunction.keySet())).get(0);
@@ -137,18 +138,23 @@ public abstract class Function {
 					funcArgs.add(oargs);
 				}
 
-				if (funcType.equals("GetInput")) {
-					return new GetInput(ttpl, context, funcName, funcArgs);
-				} else if (funcType.equals("GetAttribute")) {
-					return new GetAttribute(ttpl, context, funcName, funcArgs);
-				} else if (funcType.equals("GetProperty")) {
-					return new GetProperty(ttpl, context, funcName, funcArgs);
-				} else if (funcType.equals("GetOperationOutput")) {
-					return new GetOperationOutput(ttpl, context, funcName, funcArgs);
-				} else if (funcType.equals("Concat")) {
-					return new Concat(ttpl, context, funcName, funcArgs);
-				} else if (funcType.equals("Token")) {
-					return new Token(ttpl, context, funcName, funcArgs);
+				switch (funcType) {
+					case "GetInput":
+						if (resolveGetInput) {
+							GetInput input = new GetInput(ttpl, context, funcName, funcArgs);
+							return input.result();
+						}
+						return new GetInput(ttpl, context, funcName, funcArgs);
+					case "GetAttribute":
+						return new GetAttribute(ttpl, context, funcName, funcArgs);
+					case "GetProperty":
+						return new GetProperty(ttpl, context, funcName, funcArgs);
+					case "GetOperationOutput":
+						return new GetOperationOutput(ttpl, context, funcName, funcArgs);
+					case "Concat":
+						return new Concat(ttpl, context, funcName, funcArgs);
+					case "Token":
+						return new Token(ttpl, context, funcName, funcArgs);
 				}
 			}
 		}

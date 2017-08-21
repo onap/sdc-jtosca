@@ -48,13 +48,15 @@ public class TopologyTemplate {
     private String description;
     private ToscaGraph graph;
     private SubstitutionMappings substitutionMappings;
+	private boolean resolveGetInput;
 	
 	public TopologyTemplate(
 			LinkedHashMap<String,Object> _template, 
 			LinkedHashMap<String,Object> _customDefs,
 			LinkedHashMap<String,Object> _relTypes,//TYPE
             LinkedHashMap<String, Object> _parsedParams,
-            NodeTemplate  _subMappedNodeTemplate) {
+            NodeTemplate  _subMappedNodeTemplate,
+			boolean _resolveGetInput) {
 
 		tpl = _template;
 		if(tpl != null) {
@@ -63,6 +65,7 @@ public class TopologyTemplate {
 			customDefs = _customDefs;
 			relTypes = _relTypes;
 			parsedParams = _parsedParams;
+			resolveGetInput = _resolveGetInput;
 			_validateField();
 			description = _tplDescription();
 			inputs = _inputs();
@@ -400,14 +403,14 @@ public class TopologyTemplate {
     	if(nodeTemplates != null) {
     		for(NodeTemplate nt: nodeTemplates) {
     			for(Property prop: nt.getPropertiesObjects()) {
-    				prop.setValue(Function.getFunction(this,nt,prop.getValue()));
+    				prop.setValue(Function.getFunction(this,nt,prop.getValue(), resolveGetInput));
     			}
     			for(InterfacesDef ifd: nt.getInterfaces()) {
     				LinkedHashMap<String,Object> ifin = ifd.getInputs();
     				if(ifin != null) {
     					for(Map.Entry<String,Object> me: ifin.entrySet()) {
     						String name = me.getKey();
-    						Object value = Function.getFunction(this,nt,me.getValue());
+    						Object value = Function.getFunction(this,nt,me.getValue(), resolveGetInput);
     						ifd.setInput(name,value);
     					}
     				}
@@ -438,7 +441,7 @@ public class TopologyTemplate {
     								(LinkedHashMap<String,Object>)rel.get("properties");
     						for(String key: relprops.keySet()) {
     							Object value = relprops.get(key);
-    							Object func = Function.getFunction(this,req,value);
+    							Object func = Function.getFunction(this,req,value, resolveGetInput);
     							relprops.put(key,func);
     						}
     					}
@@ -448,7 +451,7 @@ public class TopologyTemplate {
     				for(Capability cap: nt.getCapabilitiesObjects()) {
     					if(cap.getPropertiesObjects() != null) {
     						for(Property prop: cap.getPropertiesObjects()) {
-    							Object propvalue = Function.getFunction(this,nt,prop.getValue());
+    							Object propvalue = Function.getFunction(this,nt,prop.getValue(), resolveGetInput);
     							if(propvalue instanceof GetInput) {
     								propvalue = ((GetInput)propvalue).result();
     								for(String p: cap.getProperties().keySet()) {
@@ -475,7 +478,8 @@ public class TopologyTemplate {
     									Object func = Function.getFunction(
     											this,
     											relTpl,
-    											value);
+    											value,
+												resolveGetInput);
     									iface.setInput(name,func);
     								}
     							}
@@ -486,7 +490,7 @@ public class TopologyTemplate {
     		}
     	}
     	for(Output output: outputs) {
-    		Object func = Function.getFunction(this,outputs,output.getValue());
+    		Object func = Function.getFunction(this,outputs,output.getValue(), resolveGetInput);
     		if(func instanceof GetAttribute) {
     			output.setAttr(Output.VALUE,func);
     		}
@@ -541,6 +545,10 @@ public class TopologyTemplate {
 
 	public LinkedHashMap<String,Object> getParsedParams() {
 		return parsedParams;
+	}
+
+	public boolean getResolveGetInput() {
+		return resolveGetInput;
 	}
 }
 
