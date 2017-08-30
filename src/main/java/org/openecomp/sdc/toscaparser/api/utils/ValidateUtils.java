@@ -33,45 +33,55 @@ public class ValidateUtils {
 	}
 	
 	public static Object validateNumeric(Object value) {
-		if(!(value instanceof Number)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-		            "ValueError: \"%s\" is not a numeric",value.toString()));
+		if(value != null) {
+			if (!(value instanceof Number)) {
+				ThreadLocalsHolder.getCollector().appendException(String.format(
+						"ValueError: \"%s\" is not a numeric", value.toString()));
+			}
 		}
 		return value;
 	}
 
 	public static Object validateInteger(Object value) {
-		if(!(value instanceof Integer)) {
-			// allow "true" and "false"
-			if(value instanceof Boolean) {
-				return (Boolean)value ? 1 : 0;
+		if(value != null) {
+			if (!(value instanceof Integer)) {
+				// allow "true" and "false"
+				if (value instanceof Boolean) {
+					return (Boolean) value ? 1 : 0;
+				}
+				ThreadLocalsHolder.getCollector().appendException(String.format(
+						"ValueError: \"%s\" is not an integer", value.toString()));
 			}
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-	            "ValueError: \"%s\" is not an integer",value.toString()));
 		}
 	    return value;
 	}
 
 	public static Object validateFloat(Object value) {
-		if(!(value instanceof Float || value instanceof Double)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-	            "ValueError: \"%s\" is not a float",value.toString()));
+		if(value != null) {
+			if (!(value instanceof Float || value instanceof Double)) {
+				ThreadLocalsHolder.getCollector().appendException(String.format(
+						"ValueError: \"%s\" is not a float", value.toString()));
+			}
 		}
 	    return value;
 	}
 
 	public static Object validateString(Object value) {
-		if(!(value instanceof String)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-	            "ValueError: \'%s\' is not a string",value.toString()));
+		if(value != null) {
+			if (!(value instanceof String)) {
+				ThreadLocalsHolder.getCollector().appendException(String.format(
+						"ValueError: \'%s\' is not a string", value.toString()));
+			}
 		}
 	    return value;
 	}
 
 	public static Object validateList(Object value) {
-		if(!(value instanceof ArrayList)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-	            "ValueError: \"%s\" is not a list",value.toString()));
+		if(value != null) {
+			if (!(value instanceof ArrayList)) {
+				ThreadLocalsHolder.getCollector().appendException(String.format(
+						"ValueError: \"%s\" is not a list", value.toString()));
+			}
 		}
 	    return value;
 	}
@@ -209,25 +219,29 @@ public class ValidateUtils {
 	}
 	
 	public static Object validateMap(Object ob) {
-		if(!(ob instanceof LinkedHashMap)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-	            "ValueError\"%s\" is not a map.",ob.toString()));
+		if(ob != null) {
+			if (!(ob instanceof LinkedHashMap)) {
+				ThreadLocalsHolder.getCollector().appendException(String.format(
+						"ValueError\"%s\" is not a map.", ob.toString()));
+			}
 		}
 	    return ob;
 	}
 
 	public static Object validateBoolean(Object value) {
-		if(value instanceof Boolean) { 
-			return value;
-		}
-		if(value instanceof String) {  
-			String normalized = ((String)value).toLowerCase();
-			if(normalized.equals("true") || normalized.equals("false")) {
-				return normalized.equals("true");
+		if(value != null) {
+			if (value instanceof Boolean) {
+				return value;
 			}
+			if (value instanceof String) {
+				String normalized = ((String) value).toLowerCase();
+				if (normalized.equals("true") || normalized.equals("false")) {
+					return normalized.equals("true");
+				}
+			}
+			ThreadLocalsHolder.getCollector().appendException(String.format(
+					"ValueError: \"%s\" is not a boolean", value.toString()));
 		}
-		ThreadLocalsHolder.getCollector().appendException(String.format(
-		        "ValueError: \"%s\" is not a boolean",value.toString()));
 	    return value;
 	}
 
@@ -248,11 +262,13 @@ public class ValidateUtils {
 		*/
 		
 		// timestamps are loaded as Date objects by the YAML parser
-		if(!(value instanceof Date)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-		        "ValueError: \"%s\" is not a valid timestamp",
-		        value.toString()));
-			
+		if(value != null) {
+			if (!(value instanceof Date)) {
+				ThreadLocalsHolder.getCollector().appendException(String.format(
+						"ValueError: \"%s\" is not a valid timestamp",
+						value.toString()));
+
+			}
 		}
 		return value;
 	}
