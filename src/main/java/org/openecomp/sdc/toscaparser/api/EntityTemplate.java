@@ -1,12 +1,12 @@
 package org.openecomp.sdc.toscaparser.api;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.elements.*;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public abstract class EntityTemplate {
     // Base class for TOSCA templates
@@ -93,8 +93,8 @@ public abstract class EntityTemplate {
             if(type == null) {
                 //msg = (_('Policy definition of "%(pname)s" must have'
                 //       ' a "type" ''attribute.') % dict(pname=name))
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                		"ValidationError: Policy definition of \"%s\" must have a \"type\" attribute",name));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE140", String.format(
+                		"ValidationError: Policy definition of \"%s\" must have a \"type\" attribute",name))); 
             }
             typeDefinition = new PolicyType(type, customDef);
         }
@@ -335,9 +335,9 @@ public abstract class EntityTemplate {
                         //           '"default_instances" value is not between '
                         //           '"min_instances" and "max_instances".' %
                         //           self.name)
-                        ThreadLocalsHolder.getCollector().appendException(String.format(
+                        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE141", String.format(
                             "ValidationError: \"properties\" of template \"%s\": \"default_instances\" value is not between \"min_instances\" and \"max_instances\"",
-                            name));
+                            name))); 
                     }
                 }
     		}
@@ -366,17 +366,17 @@ public abstract class EntityTemplate {
             }
             // Required properties found without value or a default value
             if(!reqPropsNoValueOrDefault.isEmpty()) {
-                ThreadLocalsHolder.getCollector().appendWarning(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE003", String.format(
                     "MissingRequiredFieldError: properties of template \"%s\" are missing field(s): %s",
-                    name,reqPropsNoValueOrDefault.toString()));
+                    name,reqPropsNoValueOrDefault.toString())));
             }
         }
         else {
             // Required properties in schema, but not in template
             if(!requiredProps.isEmpty()) {
-                ThreadLocalsHolder.getCollector().appendWarning(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE004", String.format(
                         "MissingRequiredFieldError2: properties of template \"%s\" are missing field(s): %s",
-                        name,requiredProps.toString()));
+                        name,requiredProps.toString())));
             }
         }
     }
@@ -384,8 +384,8 @@ public abstract class EntityTemplate {
     @SuppressWarnings("unchecked")
 	private void _validateField(LinkedHashMap<String,Object> template) {
         if(!(template instanceof LinkedHashMap)) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
-            		"MissingRequiredFieldError: Template \"%s\" is missing required field \"%s\"",name,TYPE));
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE142", String.format(
+            		"MissingRequiredFieldError: Template \"%s\" is missing required field \"%s\"",name,TYPE))); 
             return;//???
         }
         boolean bBad = false;
@@ -402,8 +402,8 @@ public abstract class EntityTemplate {
        		bBad = (template.get(TYPE) == null);
         }
         if(bBad) {
-        	ThreadLocalsHolder.getCollector().appendException(String.format(
-            		"MissingRequiredFieldError: Template \"%s\" is missing required field \"%s\"",name,TYPE));
+        	ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE143", String.format(
+            		"MissingRequiredFieldError: Template \"%s\" is missing required field \"%s\"",name,TYPE))); 
         }
     }
     
@@ -417,8 +417,8 @@ public abstract class EntityTemplate {
     			}
     		}
     		if(!bFound) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                        "UnknownFieldError: Section \"%s\" of template \"%s\" contains unknown field \"%s\"",section,name,sname));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE144", String.format(
+                        "UnknownFieldError: Section \"%s\" of template \"%s\" contains unknown field \"%s\"",section,name,sname))); 
     		}
     	}
     	
@@ -585,7 +585,7 @@ class EntityTemplate(object):
             if not type:
                 msg = (_('Policy definition of "%(pname)s" must have'
                        ' a "type" ''attribute.') % dict(pname=name))
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     ValidationError(msg))
 
             self.type_definition = PolicyType(type, custom_def)
@@ -729,7 +729,7 @@ class EntityTemplate(object):
                                    '"default_instances" value is not between '
                                    '"min_instances" and "max_instances".' %
                                    self.name)
-                        ExceptionCollector.appendException(
+                        ValidationIssueCollector.appendException(
                             ValidationError(message=err_msg))
 
     def _common_validate_properties(self, entitytype, properties):
@@ -751,21 +751,21 @@ class EntityTemplate(object):
                     req_props_no_value_or_default.append(r)
             # Required properties found without value or a default value
             if req_props_no_value_or_default:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     MissingRequiredFieldError(
                         what='"properties" of template "%s"' % self.name,
                         required=req_props_no_value_or_default))
         else:
             # Required properties in schema, but not in template
             if required_props:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     MissingRequiredFieldError(
                         what='"properties" of template "%s"' % self.name,
                         required=required_props))
 
     def _validate_field(self, template):
         if not isinstance(template, dict):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 MissingRequiredFieldError(
                     what='Template "%s"' % self.name, required=self.TYPE))
         try:
@@ -777,14 +777,14 @@ class EntityTemplate(object):
             else:
                 template[self.TYPE]
         except KeyError:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 MissingRequiredFieldError(
                     what='Template "%s"' % self.name, required=self.TYPE))
 
     def _common_validate_field(self, schema, allowedlist, section):
         for name in schema:
             if name not in allowedlist:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(
                         what=('"%(section)s" of template "%(nodename)s"'
                               % {'section': section, 'nodename': self.name}),

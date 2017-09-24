@@ -18,10 +18,10 @@ public class JToscaException extends Exception {
 		this.code = code;
 	}
 
-	//JT1001 - Meta file missing
-	//JT1002 - Invalid yaml content
-	//JT1003 - Entry-Definition not defined in meta file
-	//JT1004 - Entry-Definition file missing
-	//JT1005 - General Error
-	//JT1006 - General Error/Path not valid
+	//JE1001 - Meta file missing
+	//JE1002 - Invalid yaml content
+	//JE1003 - Entry-Definition not defined in meta file
+	//JE1004 - Entry-Definition file missing
+	//JE1005 - General Error
+	//JE1006 - General Error/Path not valid
 }

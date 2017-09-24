@@ -1,9 +1,10 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.extensions.ExtTools;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
@@ -71,9 +72,9 @@ public class TypeValidation {
         		}
         	}
         	if(!bFound) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE138", String.format(
                     "UnknownFieldError: Template \"%s\" contains unknown field \"%s\"",
-                    importDef.toString(),name));
+                    importDef.toString(),name))); 
         	}
         }
     }
@@ -89,17 +90,17 @@ public class TypeValidation {
     		}
     	}
     	if(!bFound) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE139", String.format(
                 "InvalidTemplateVersion: version \"%s\" in \"%s\" is not supported\n" +
                 "Allowed versions: [%s]",
-                sVersion,importDef.toString(),allowed));
+                sVersion,importDef.toString(),allowed))); 
     	}    	
     }
 }
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import InvalidTemplateVersion
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.extensions.exttools import ExtTools
@@ -136,14 +137,14 @@ class TypeValidation(object):
 
         for name in custom_type:
             if name not in self.ALLOWED_TYPE_SECTIONS:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
 #                    UnknownFieldError(what='Template ' + (self.import_def),
                     UnknownFieldError(what= (self.import_def),
                                       field=name))
 
     def _validate_type_version(self, version):
         if version not in self.VALID_TEMPLATE_VERSIONS:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidTemplateVersion(
 #                    what=version + ' in ' + self.import_def,
                     what=self.import_def,

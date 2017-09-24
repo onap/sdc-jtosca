@@ -1,8 +1,9 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.LinkedHashMap;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class GroupType extends StatefulEntityType {
@@ -92,9 +93,9 @@ public class GroupType extends StatefulEntityType {
 					}
 				}
 				if(!bFound) {
-                    ThreadLocalsHolder.getCollector().appendException(String.format(
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE120", String.format(
                         "UnknownFieldError: Group Type \"%s\" contains unknown field \"%s\"",
-                        groupType,name));
+                        groupType,name))); 
 				}
 			}
 		}
@@ -104,18 +105,18 @@ public class GroupType extends StatefulEntityType {
 	private void _validateMetadata(LinkedHashMap<String,Object> metadata) {
 		String mtt = (String) metadata.get("type");
 		if(mtt != null && !mtt.equals("map") && !mtt.equals("tosca:map")) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE121", String.format(
                 "InvalidTypeError: \"%s\" defined in group for metadata is invalid",
-                mtt));
+                mtt))); 
 		}
 		for(String entrySchema: metadata.keySet()) {
 			Object estob = metadata.get(entrySchema);
 			if(estob instanceof LinkedHashMap) {
 				String est = (String)((LinkedHashMap<String,Object>)estob).get("type");
 				if(!est.equals("string")) {
-	                ThreadLocalsHolder.getCollector().appendException(String.format(
+	                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE122", String.format(
 	                    "InvalidTypeError: \"%s\" defined in group for metadata \"%s\" is invalid",
-	                    est,entrySchema));
+	                    est,entrySchema))); 
 				}
 			}
 		}
@@ -130,7 +131,7 @@ public class GroupType extends StatefulEntityType {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import InvalidTypeError
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.elements.statefulentitytype import StatefulEntityType
@@ -195,19 +196,19 @@ class GroupType(StatefulEntityType):
         if self.defs:
             for name in self.defs.keys():
                 if name not in self.SECTIONS:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         UnknownFieldError(what='Group Type %s'
                                           % self.grouptype, field=name))
 
     def _validate_metadata(self, meta_data):
         if not meta_data.get('type') in ['map', 'tosca:map']:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidTypeError(what='"%s" defined in group for '
                                  'metadata' % (meta_data.get('type'))))
         for entry_schema, entry_schema_type in meta_data.items():
             if isinstance(entry_schema_type, dict) and not \
                     entry_schema_type.get('type') == 'string':
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     InvalidTypeError(what='"%s" defined in group for '
                                      'metadata "%s"'
                                      % (entry_schema_type.get('type'),

@@ -1,5 +1,7 @@
 package org.openecomp.sdc.toscaparser.api.functions;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -45,8 +47,8 @@ public class GetAttribute extends Function {
 	@Override
 	void validate() {
 		if(args.size() < 2) {
-	        ThreadLocalsHolder.getCollector().appendException(
-			    "ValueError: Illegal arguments for function \"get_attribute\". Expected arguments: \"node-template-name\", \"req-or-cap\" (optional), \"property name.\"");
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE146", 
+			    "ValueError: Illegal arguments for function \"get_attribute\". Expected arguments: \"node-template-name\", \"req-or-cap\" (optional), \"property name.\"")); 
 		    return;
 		}
 		else if(args.size() == 2) {
@@ -76,9 +78,9 @@ public class GetAttribute extends Function {
 	        	for(Object elem: args.subList(index,args.size())) {
 	        		if(valueType.equals("list")) {
                         if(!(elem instanceof Integer)) {
-                            ThreadLocalsHolder.getCollector().appendException(String.format(
+                            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE147", String.format(
                                 "ValueError: Illegal arguments for function \"get_attribute\" \"%s\". Expected positive integer argument",
-                                elem.toString()));
+                                elem.toString()))); 
                         } 
                         Object ob = attr.getSchema().get("entry_schema");
                         valueType = (String)
@@ -98,9 +100,9 @@ public class GetAttribute extends Function {
 	        				}
 	        			}
 	        			if(bFound) {
-	                        ThreadLocalsHolder.getCollector().appendException(String.format(
-	                            "ValueError: 'Illegal arguments for function \"get_attribute\". Unexpected attribute/index value \"%d\"",
-	                            elem));
+	                        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE148", String.format(
+	                            "ValueError: 'Illegal arguments for function \"get_attribute\". Unexpected attribute/index value \"%s\"",
+	                            elem))); 
 	                        return;
 	        			}
 	                    else {  // It is a complex type
@@ -112,9 +114,9 @@ public class GetAttribute extends Function {
 	                            valueType = (String)prop.getSchema().get("type");
 	                        }
 	                        else {
-	                            ThreadLocalsHolder.getCollector().appendException(String.format(
+	                            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE149", String.format(
 	                                "KeyError: Illegal arguments for function \"get_attribute\". Attribute name \"%s\" not found in \"%\"",
-	                                elem,valueType));
+	                                elem,valueType))); 
 	                        }
 	                    }
 	        		}
@@ -146,9 +148,9 @@ public class GetAttribute extends Function {
 		if(nodeTpl != null &&
 			!_attributeExistsInType(nodeTpl.getTypeDefinition()) &&
 			!nodeTpl.getProperties().keySet().contains(getAttributeName())) {
-	        ThreadLocalsHolder.getCollector().appendException(String.format(
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE150", String.format(
 	            "KeyError: Attribute \"%s\" was not found in node template \"%s\"",
-	            getAttributeName(),nodeTpl.getName()));
+	            getAttributeName(),nodeTpl.getName()))); 
 		}
 	    return nodeTpl;
 	}
@@ -187,34 +189,34 @@ public class GetAttribute extends Function {
 	        // Currently this is the only way to tell whether the function
 	        // is used within the outputs section of the TOSCA template.
 	        if(context instanceof ArrayList) {
-	            ThreadLocalsHolder.getCollector().appendException(
-	                "ValueError: \"get_attribute: [ HOST, ... ]\" is not allowed in \"outputs\" section of the TOSCA template");
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE151", 
+	                "ValueError: \"get_attribute: [ HOST, ... ]\" is not allowed in \"outputs\" section of the TOSCA template")); 
 	            return null;
 	        }
 	        NodeTemplate nodeTpl = _findHostContainingAttribute(SELF);
 	        if(nodeTpl == null) {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE152", String.format(
 	                "ValueError: \"get_attribute: [ HOST, ... ]\" was used in " +
 	                "node template \"%s\" but \"%s\" was not found in " +
-	                "the relationship chain",((NodeTemplate)context).getName(),HOSTED_ON));
+	                "the relationship chain",((NodeTemplate)context).getName(),HOSTED_ON))); 
 	            return null;
 	        }
 	        return nodeTpl;
 	    }
 	    if(nodeTemplateName.equals(TARGET)) {
 	    	if(!(((EntityTemplate)context).getTypeDefinition() instanceof RelationshipType)) {
-	            ThreadLocalsHolder.getCollector().appendException(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE153", 
 	                "KeyError: \"TARGET\" keyword can only be used in context " +
-	                           " to \"Relationships\" target node");
+	                           " to \"Relationships\" target node")); 
 	            return null;
 	    	}
 	        return ((RelationshipTemplate)context).getTarget();
 	    }
 	    if(nodeTemplateName.equals(SOURCE)) {
 	    	if(!(((EntityTemplate)context).getTypeDefinition() instanceof RelationshipType)) {
-	            ThreadLocalsHolder.getCollector().appendException(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE154", 
 	                "KeyError: \"SOURCE\" keyword can only be used in context " +
-	                           " to \"Relationships\" source node");
+	                           " to \"Relationships\" source node")); 
 	            return null;
 	    	}
 	        return ((RelationshipTemplate)context).getTarget();
@@ -231,8 +233,8 @@ public class GetAttribute extends Function {
 	            return nt;
 	        }
 	    }
-	    ThreadLocalsHolder.getCollector().appendException(String.format(
-	        "KeyError: Node template \"%s\" was not found",nodeTemplateName));
+	    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE155", String.format(
+	        "KeyError: Node template \"%s\" was not found",nodeTemplateName))); 
     	return null;
     }
 	
@@ -265,16 +267,16 @@ public class GetAttribute extends Function {
 	    		attribute = attrs.get(attrName);
 	    	}
 	        if(attribute == null) {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE156", String.format(
 	                "KeyError: Attribute \"%s\" was not found in capability \"%s\" of node template \"%s\" referenced from node template \"%s\"",
-	                attrName,capabilityName,nodeTemplate.getName(),((NodeTemplate)context).getName()));
+	                attrName,capabilityName,nodeTemplate.getName(),((NodeTemplate)context).getName()))); 
 	        }
 	        return attribute;
 	    }
 	    String msg = String.format(
 	    	"Requirement/CapabilityAssignment \"%s\" referenced from node template \"%s\" was not found in node template \"%s\"",
 	    	capabilityName,((NodeTemplate)context).getName(),nodeTemplate.getName());
-	    ThreadLocalsHolder.getCollector().appendException("KeyError: " + msg);
+	    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE157", "KeyError: " + msg)); 
 		return null;									  
 	}
 
@@ -316,7 +318,7 @@ Examples:
 
 def validate(self):
     if len(self.args) < 2:
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_('Illegal arguments for function "{0}". Expected '
                          'arguments: "node-template-name", "req-or-cap"'
                          '(optional), "property name"'
@@ -344,7 +346,7 @@ def validate(self):
             for elem in self.args[index:]:
                 if value_type == "list":
                     if not isinstance(elem, int):
-                        ExceptionCollector.appendException(
+                        ValidationIssueCollector.appendException(
                             ValueError(_('Illegal arguments for function'
                                          ' "{0}". "{1}" Expected positive'
                                          ' integer argument'
@@ -353,7 +355,7 @@ def validate(self):
                 elif value_type == "map":
                     value_type = attr.schema['entry_schema']['type']
                 elif value_type in Schema.PROPERTY_TYPES:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         ValueError(_('Illegal arguments for function'
                                      ' "{0}". Unexpected attribute/'
                                      'index value "{1}"'
@@ -367,7 +369,7 @@ def validate(self):
                         prop = found[0]
                         value_type = prop.schema['type']
                     else:
-                        ExceptionCollector.appendException(
+                        ValidationIssueCollector.appendException(
                             KeyError(_('Illegal arguments for function'
                                        ' "{0}". Attribute name "{1}" not'
                                        ' found in "{2}"'
@@ -394,7 +396,7 @@ def _find_node_template_containing_attribute(self):
     if node_tpl and \
             not self._attribute_exists_in_type(node_tpl.type_definition) \
             and self.attribute_name not in node_tpl.get_properties():
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             KeyError(_('Attribute "%(att)s" was not found in node '
                        'template "%(ntpl)s".') %
                      {'att': self.attribute_name,
@@ -428,14 +430,14 @@ def _find_node_template(self, node_template_name):
         # Currently this is the only way to tell whether the function
         # is used within the outputs section of the TOSCA template.
         if isinstance(self.context, list):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(_(
                     '"get_attribute: [ HOST, ... ]" is not allowed in '
                     '"outputs" section of the TOSCA template.')))
             return
         node_tpl = self._find_host_containing_attribute()
         if not node_tpl:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(_(
                     '"get_attribute: [ HOST, ... ]" was used in node '
                     'template "{0}" but "{1}" was not found in '
@@ -445,14 +447,14 @@ def _find_node_template(self, node_template_name):
         return node_tpl
     if node_template_name == TARGET:
         if not isinstance(self.context.type_definition, RelationshipType):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 KeyError(_('"TARGET" keyword can only be used in context'
                            ' to "Relationships" target node')))
             return
         return self.context.target
     if node_template_name == SOURCE:
         if not isinstance(self.context.type_definition, RelationshipType):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 KeyError(_('"SOURCE" keyword can only be used in context'
                            ' to "Relationships" source node')))
             return
@@ -464,7 +466,7 @@ def _find_node_template(self, node_template_name):
     for node_template in self.tosca_tpl.nodetemplates:
         if node_template.name == name:
             return node_template
-    ExceptionCollector.appendException(
+    ValidationIssueCollector.appendException(
         KeyError(_(
             'Node template "{0}" was not found.'
             ).format(node_template_name)))
@@ -498,7 +500,7 @@ def _get_capability_attribute(self,
         if attrs and attr_name in attrs.keys():
             attribute = attrs[attr_name]
         if not attribute:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 KeyError(_('Attribute "%(attr)s" was not found in '
                            'capability "%(cap)s" of node template '
                            '"%(ntpl1)s" referenced from node template '
@@ -512,7 +514,7 @@ def _get_capability_attribute(self,
                 capability_name,
                 self.context.name,
                 node_template.name)
-    ExceptionCollector.appendException(KeyError(msg))
+    ValidationIssueCollector.appendException(KeyError(msg))
 
 @property
 def node_template_name(self):

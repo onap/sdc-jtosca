@@ -1,8 +1,9 @@
 package org.openecomp.sdc.toscaparser.api;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.LinkedHashMap;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.openecomp.sdc.toscaparser.api.utils.ValidateUtils;
 
@@ -77,9 +78,9 @@ public class Triggers extends EntityTemplate {
 				}
 			}
 			if(!bFound) {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE249", String.format(
 	                    "UnknownFieldError: Triggers \"%s\" contains unknown field \"%s\"",
-	                    name,key));
+	                    name,key))); 
 			}
 		}
 	}
@@ -94,9 +95,9 @@ public class Triggers extends EntityTemplate {
 				}
 			}
 			if(!bFound) {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE250", String.format(
 	                    "UnknownFieldError: Triggers \"%s\" contains unknown field \"%s\"",
-	                    name,key));
+	                    name,key))); 
 			}
 		}
 	}
@@ -127,7 +128,7 @@ public class Triggers extends EntityTemplate {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.entity_template import EntityTemplate
 
@@ -170,14 +171,14 @@ class Triggers(EntityTemplate):
     def _validate_keys(self):
         for key in self.trigger_tpl.keys():
             if key not in SECTIONS:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(what='Triggers "%s"' % self.name,
                                       field=key))
 
     def _validate_condition(self):
         for key in self.get_condition():
             if key not in CONDITION_KEYNAMES:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(what='Triggers "%s"' % self.name,
                                       field=key))
 */

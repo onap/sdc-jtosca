@@ -1,8 +1,9 @@
 package org.openecomp.sdc.toscaparser.api.elements.constraints;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.Date;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.functions.Function;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
@@ -38,7 +39,7 @@ public class GreaterOrEqual extends Constraint {
 		super(name,type,c);
 		
 		if(!validTypes.contains(constraintValue.getClass().getSimpleName())) {
-	        ThreadLocalsHolder.getCollector().appendException("InvalidSchemaError: The property \"greater_or_equal\" expects comparable values");
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE104", "InvalidSchemaError: The property \"greater_or_equal\" expects comparable values")); 
 		}
 	}
 	

@@ -171,7 +171,7 @@ public abstract class Function {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIsshueCollector
 from toscaparser.common.exception import UnknownInputError
 from toscaparser.dataentity import DataEntity
 from toscaparser.elements.constraints import Schema

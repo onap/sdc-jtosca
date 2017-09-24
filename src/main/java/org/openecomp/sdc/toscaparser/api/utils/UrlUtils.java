@@ -1,11 +1,11 @@
 package org.openecomp.sdc.toscaparser.api.utils;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 
 public class UrlUtils {
 	
@@ -34,16 +34,16 @@ public class UrlUtils {
         //   relative_path: heat-translator
         //   - joined: http://www.githib.com/openstack/heat-translator
 		if(!validateUrl(sUrl)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-					"ValueError: The URL \"%s\" is malformed",sUrl));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE255", String.format(
+					"ValueError: The URL \"%s\" is malformed",sUrl))); 
 		}
 		try {
 			URL base = new URL(sUrl);
 			return (new URL(base,relativePath)).toString();
 		}
 		catch(MalformedURLException e) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-					"ValueError: Joining URL \"%s\" and relative path \"%s\" caused an exception",sUrl,relativePath));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE256", String.format(
+					"ValueError: Joining URL \"%s\" and relative path \"%s\" caused an exception",sUrl,relativePath))); 
 			return sUrl; 
 		}
 	}
@@ -70,7 +70,7 @@ public class UrlUtils {
 
 from six.moves.urllib.parse import urljoin
 from six.moves.urllib.parse import urlparse
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.utils.gettextutils import _
 
 try:
@@ -108,7 +108,7 @@ class UrlUtils(object):
           - joined: http://www.githib.com/openstack/heat-translator
         """
         if not UrlUtils.validate_url(url):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(_('"%s" is not a valid URL.') % url))
         return urljoin(url, relative_path)
 

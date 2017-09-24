@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 
 import org.openecomp.sdc.toscaparser.api.DataEntity;
 import org.openecomp.sdc.toscaparser.api.TopologyTemplate;
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.parameters.Input;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
@@ -25,9 +25,9 @@ public class GetInput extends Function {
 //	            args.toString()));
 //	    }
 		if(args.size() > 2) {
-			ThreadLocalsHolder.getCollector().appendWarning(String.format(
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE009", String.format(
 					"ValueError: Expected max 2 arguments for function \"get_input\" but received \"%s\"",
-					args.size()));
+					args.size())));
 		}
 	    boolean bFound = false;
 	    for(Input inp: toscaTpl.getInputs()) {
@@ -37,8 +37,8 @@ public class GetInput extends Function {
 	    	}
 	    }
 	    if(!bFound) {
-	        ThreadLocalsHolder.getCollector().appendException(String.format(
-	            "UnknownInputError: Unknown input \"%s\"",args.get(0)));
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE158", String.format(
+	            "UnknownInputError: Unknown input \"%s\"",args.get(0)))); 
 	    }
 	}
 
@@ -99,13 +99,13 @@ Example:
 
 def validate(self):
     if len(self.args) != 1:
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_(
                 'Expected one argument for function "get_input" but '
                 'received "%s".') % self.args))
     inputs = [input.name for input in self.tosca_tpl.inputs]
     if self.args[0] not in inputs:
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             UnknownInputError(input_name=self.args[0]))
 
 def result(self):

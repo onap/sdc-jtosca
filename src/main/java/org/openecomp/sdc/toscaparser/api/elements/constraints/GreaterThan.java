@@ -1,8 +1,9 @@
 package org.openecomp.sdc.toscaparser.api.elements.constraints;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.Date;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class GreaterThan extends Constraint {
@@ -35,7 +36,7 @@ public class GreaterThan extends Constraint {
 		super(name,type,c);
 		
 		if(!validTypes.contains(constraintValue.getClass().getSimpleName())) {
-	        ThreadLocalsHolder.getCollector().appendException("InvalidSchemaError: The property \"greater_than\" expects comparable values");
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE105", "InvalidSchemaError: The property \"greater_than\" expects comparable values")); 
 		}
 	}
 	
@@ -83,7 +84,7 @@ class GreaterThan(Constraint):
         super(GreaterThan, self).__init__(property_name, property_type,
                                           constraint)
         if not isinstance(constraint[self.GREATER_THAN], self.valid_types):
-            ExceptionCollector.appendException(
+            ValidationIsshueCollector.appendException(
                 InvalidSchemaError(message=_('The property "greater_than" '
                                              'expects comparable values.')))
 

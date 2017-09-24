@@ -1,6 +1,7 @@
 package org.openecomp.sdc.toscaparser.api.elements.constraints;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class Length extends Constraint {
@@ -23,7 +24,7 @@ public class Length extends Constraint {
 		super(name,type,c);
 		
 		if(!validTypes.contains(constraintValue.getClass().getSimpleName())) {
-	        ThreadLocalsHolder.getCollector().appendException("InvalidSchemaError: The property \"length\" expects an integer");
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE109", "InvalidSchemaError: The property \"length\" expects an integer")); 
 		}
 	}
 	
@@ -60,7 +61,7 @@ public class Length extends Constraint {
 	def __init__(self, property_name, property_type, constraint):
 	    super(Length, self).__init__(property_name, property_type, constraint)
 	    if not isinstance(self.constraint_value, self.valid_types):
-	        ExceptionCollector.appendException(
+	        ValidationIsshueCollector.appendException(
 	            InvalidSchemaError(message=_('The property "length" expects '
 	                                         'an integer.')))
 	

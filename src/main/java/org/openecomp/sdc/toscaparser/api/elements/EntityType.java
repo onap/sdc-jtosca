@@ -203,7 +203,7 @@ public class EntityType {
         // doesn't do anything except emit an exception anyway
         //if not hasattr(self, 'defs'):
         //    defs = None
-        //    ExceptionCollector.appendException(
+        //    ValidationIssueCollector.appendException(
         //        ValidationError(message="defs is " + str(defs)))
         //else:
         //    defs = self.defs       	
@@ -266,7 +266,7 @@ public class EntityType {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import ValidationError
 from toscaparser.extensions.exttools import ExtTools
 import org.openecomp.sdc.toscaparser.api.utils.yamlparser
@@ -384,7 +384,7 @@ class EntityType(object):
         value = None
         if not hasattr(self, 'defs'):
             defs = None
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValidationError(message="defs is " + str(defs)))
         else:
             defs = self.defs

@@ -1,8 +1,9 @@
 package org.openecomp.sdc.toscaparser.api.elements.constraints;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.LinkedHashMap;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class MaxLength extends Constraint {
@@ -26,7 +27,7 @@ public class MaxLength extends Constraint {
 		super(name,type,c);
 		
 		if(!validTypes.contains(constraintValue.getClass().getSimpleName())) {
-	        ThreadLocalsHolder.getCollector().appendException("InvalidSchemaError: The property \"max_length\" expects an integer");
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE112", "InvalidSchemaError: The property \"max_length\" expects an integer")); 
 		}
 	}
 	
@@ -70,7 +71,7 @@ class MaxLength(Constraint):
         super(MaxLength, self).__init__(property_name, property_type,
                                         constraint)
         if not isinstance(self.constraint_value, self.valid_types):
-            ExceptionCollector.appendException(
+            ValidationIsshueCollector.appendException(
                 InvalidSchemaError(message=_('The property "max_length" '
                                              'expects an integer.')))
 

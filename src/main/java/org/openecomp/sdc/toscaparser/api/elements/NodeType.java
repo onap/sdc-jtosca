@@ -1,11 +1,11 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
-import org.openecomp.sdc.toscaparser.api.elements.InterfacesDef;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class NodeType extends StatefulEntityType {
@@ -315,8 +315,8 @@ public class NodeType extends StatefulEntityType {
     				}
     			}
     			if(!bFound) {
-                    ThreadLocalsHolder.getCollector().appendException(String.format(
-                            "UnknownFieldError: Nodetype \"%s\" has unknown field \"%s\"",ntype,key));
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE124", String.format(
+                            "UnknownFieldError: Nodetype \"%s\" has unknown field \"%s\"",ntype,key))); 
     			}
     		}
     	}
@@ -326,7 +326,7 @@ public class NodeType extends StatefulEntityType {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.elements.capabilitytype import CapabilityTypeDef
 import org.openecomp.sdc.toscaparser.api.elements.interfaces as ifaces
@@ -517,7 +517,7 @@ class NodeType(StatefulEntityType):
         if self.defs:
             for key in self.defs.keys():
                 if key not in self.SECTIONS:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         UnknownFieldError(what='Nodetype"%s"' % self.ntype,
                                           field=key))
 */

@@ -3,7 +3,7 @@ package org.openecomp.sdc.toscaparser.api.elements;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class PropertyDef {
@@ -46,8 +46,8 @@ public class PropertyDef {
         	if(schema.get("type") == null) {
         		//msg = (_('Schema definition of "%(pname)s" must have a "type" '
 	            //         'attribute.') % dict(pname=self.name))
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
-	            		"InvalidSchemaError: Schema definition of \"%s\" must have a \"type\" attribute",name));
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE131", String.format(
+	            		"InvalidSchemaError: Schema definition of \"%s\" must have a \"type\" attribute",name))); 
         	}
 	        _loadRequiredAttrFromSchema();
 	        _loadStatusAttrFromSchema();
@@ -84,9 +84,9 @@ public class PropertyDef {
                 //                                                  attr,
                 //                                                  value,
                 //                                                  valid_values)
-				ThreadLocalsHolder.getCollector().appendException(String.format(
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE132", String.format(
 						"Schema definition of \"%s\" has \"required\" attribute with an invalid value",
-						name));
+						name))); 
 			}
 		}
 	}
@@ -117,9 +117,9 @@ public class PropertyDef {
                 //                                                  attr,
                 //                                                  value,
                 //                                                  valid_values)
-				ThreadLocalsHolder.getCollector().appendWarning(String.format(
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE006", String.format(
 						"Schema definition of \"%s\" has \"status\" attribute with an invalid value",
-						name));
+						name)));
 			}
 		}
 	}
@@ -140,7 +140,7 @@ public class PropertyDef {
 }
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import InvalidSchemaError
 from toscaparser.common.exception import TOSCAException
 from toscaparser.utils.gettextutils import _
@@ -176,7 +176,7 @@ class PropertyDef(object):
         except KeyError:
             msg = (_('Schema definition of "%(pname)s" must have a "type" '
                      'attribute.') % dict(pname=self.name))
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidSchemaError(message=msg))
 
         if self.schema:

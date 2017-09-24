@@ -1,11 +1,12 @@
 package org.openecomp.sdc.toscaparser.api.elements.constraints;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 
@@ -71,15 +72,15 @@ public class Schema {
         if(!(_schemaDict instanceof LinkedHashMap)) {
             //msg = (_('Schema definition of "%(pname)s" must be a dict.')
             //       % dict(pname=name))
-            ThreadLocalsHolder.getCollector().appendException(String.format(
-            		"InvalidSchemaError: Schema definition of \"%s\" must be a dict",name));
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE117", String.format(
+            		"InvalidSchemaError: Schema definition of \"%s\" must be a dict",name))); 
         }
 
         if(_schemaDict.get("type") == null) {
             //msg = (_('Schema definition of "%(pname)s" must have a "type" '
             //         'attribute.') % dict(pname=name))
-            ThreadLocalsHolder.getCollector().appendException(String.format(
-            		"InvalidSchemaError: Schema definition of \"%s\" must have a \"type\" attribute",name));
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE118", String.format(
+            		"InvalidSchemaError: Schema definition of \"%s\" must have a \"type\" attribute",name))); 
         }
         
         schema = _schemaDict;
@@ -122,9 +123,9 @@ public class Schema {
 	            			}
 	            			else {
 	            				// error
-	            				ThreadLocalsHolder.getCollector().appendException(String.format(
+	            				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE119", String.format(
 	            					"UnknownFieldError: Constraint type \"%s\" for property \"%s\" is not supported",
-	            					cClass,name));
+	            					cClass,name))); 
 	            			}
 	            			break;
 	            		}
@@ -211,14 +212,14 @@ def __init__(self, name, schema_dict):
     if not isinstance(schema_dict, collections.Mapping):
         msg = (_('Schema definition of "%(pname)s" must be a dict.')
                % dict(pname=name))
-        ExceptionCollector.appendException(InvalidSchemaError(message=msg))
+        ValidationIssueCollector.appendException(InvalidSchemaError(message=msg))
 
     try:
         schema_dict['type']
     except KeyError:
         msg = (_('Schema definition of "%(pname)s" must have a "type" '
                  'attribute.') % dict(pname=name))
-        ExceptionCollector.appendException(InvalidSchemaError(message=msg))
+        ValidationIssueCollector.appendException(InvalidSchemaError(message=msg))
 
     self.schema = schema_dict
     self._len = None

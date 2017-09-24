@@ -1,10 +1,11 @@
 package org.openecomp.sdc.toscaparser.api;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.elements.Metadata;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.openecomp.sdc.toscaparser.api.utils.ValidateUtils;
@@ -70,9 +71,9 @@ public class Group extends EntityTemplate {
     			}
     		}
     		if(!bFound) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE183", String.format(
                         "UnknownFieldError: Groups \"%s\" contains unknown field \"%s\"",
-                        name,key));
+                        name,key))); 
     		}
 		}
 	}
@@ -91,7 +92,7 @@ public class Group extends EntityTemplate {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.entity_template import EntityTemplate
 from toscaparser.utils import validateutils
@@ -131,7 +132,7 @@ class Group(EntityTemplate):
     def _validate_keys(self):
         for key in self.entity_tpl.keys():
             if key not in SECTIONS:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(what='Groups "%s"' % self.name,
                                       field=key))
 */

@@ -1,11 +1,10 @@
 package org.openecomp.sdc.toscaparser.api.functions;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 
-import org.openecomp.sdc.toscaparser.api.NodeTemplate;
+import java.util.ArrayList;
+
 import org.openecomp.sdc.toscaparser.api.TopologyTemplate;
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class Token extends Function {
@@ -42,21 +41,21 @@ public class Token extends Function {
 	@Override
 	void validate() {
         if(args.size() < 3) {
-            ThreadLocalsHolder.getCollector().appendException(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE180", 
                 "ValueError: Invalid arguments for function \"token\". " +
-                "Expected at least three arguments");
+                "Expected at least three arguments")); 
         }
         else {
             if(!(args.get(1) instanceof String) || 
                ((String)args.get(1)).length() != 1) {
-                ThreadLocalsHolder.getCollector().appendException(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE181", 
                     "ValueError: Invalid arguments for function \"token\". " +
-                    "Expected single char value as second argument");
+                    "Expected single char value as second argument")); 
             }
             if(!(args.get(2) instanceof Integer)) {
-                ThreadLocalsHolder.getCollector().appendException(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE182", 
                     "ValueError: Invalid arguments for function \"token\"" +
-                    "Expected integer value as third argument");
+                    "Expected integer value as third argument")); 
         	}
 		}
 	}
@@ -91,18 +90,18 @@ Example:
 
 def validate(self):
     if len(self.args) < 3:
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_('Invalid arguments for function "{0}". Expected '
                          'at least three arguments.').format(TOKEN)))
     else:
         if not isinstance(self.args[1], str) or len(self.args[1]) != 1:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(_('Invalid arguments for function "{0}". '
                              'Expected single char value as second '
                              'argument.').format(TOKEN)))
 
         if not isinstance(self.args[2], int):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(_('Invalid arguments for function "{0}". '
                              'Expected integer value as third '
                              'argument.').format(TOKEN)))

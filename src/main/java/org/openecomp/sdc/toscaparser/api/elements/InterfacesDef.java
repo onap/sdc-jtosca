@@ -1,11 +1,12 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.openecomp.sdc.toscaparser.api.EntityTemplate;
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class InterfacesDef extends StatefulEntityType {
@@ -91,9 +92,9 @@ public class InterfacesDef extends StatefulEntityType {
         				inputs = (LinkedHashMap<String,Object>)me.getValue();
         			}
         			else {
-                        ThreadLocalsHolder.getCollector().appendException(String.format(
+                        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE123", String.format(
                             "UnknownFieldError: \"interfaces\" of template \"%s\" contain unknown field \"%s\"",
-                            nodeTemplate.getName(),me.getKey()));
+                            nodeTemplate.getName(),me.getKey()))); 
         			}
         		}
         	}
@@ -150,7 +151,7 @@ public class InterfacesDef extends StatefulEntityType {
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.elements.statefulentitytype import StatefulEntityType
 
@@ -203,7 +204,7 @@ class InterfacesDef(StatefulEntityType):
                     else:
                         what = ('"interfaces" of template "%s"' %
                                 self.node_template.name)
-                        ExceptionCollector.appendException(
+                        ValidationIssueCollector.appendException(
                             UnknownFieldError(what=what, field=i))
             else:
                 self.implementation = value

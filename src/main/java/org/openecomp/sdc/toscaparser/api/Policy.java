@@ -1,10 +1,11 @@
 package org.openecomp.sdc.toscaparser.api;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.openecomp.sdc.toscaparser.api.utils.ValidateUtils;
 
@@ -101,9 +102,9 @@ public class Policy extends EntityTemplate {
 				}
 			}
 			if(!bFound) {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE219", String.format(
 	                    "UnknownFieldError: Policy \"%s\" contains unknown field \"%s\"",
-	                    name,key));
+	                    name,key))); 
 			}
 		}
 	}
@@ -122,7 +123,7 @@ public class Policy extends EntityTemplate {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.entity_template import EntityTemplate
 from toscaparser.triggers import Triggers
@@ -181,7 +182,7 @@ class Policy(EntityTemplate):
     def _validate_keys(self):
         for key in self.entity_tpl.keys():
             if key not in SECTIONS:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(what='Policy "%s"' % self.name,
                                       field=key))
 */

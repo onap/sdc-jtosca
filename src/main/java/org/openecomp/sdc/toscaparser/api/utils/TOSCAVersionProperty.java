@@ -1,9 +1,9 @@
 package org.openecomp.sdc.toscaparser.api.utils;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 
 public class TOSCAVersionProperty {// test with functions/test_concat.yaml
 	
@@ -35,10 +35,10 @@ public class TOSCAVersionProperty {// test with functions/test_concat.yaml
 		Pattern pattern = Pattern.compile(versionRe);
 		Matcher matcher = pattern.matcher(version);
 		if(!matcher.find()) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE252", String.format(
                 "InvalidTOSCAVersionPropertyException: " +
                 "Value of TOSCA version property \"%s\" is invalid",
-                version));
+                version))); 
             return;
 		}
         minorVersion = matcher.group("gMinorVersion");
@@ -77,10 +77,10 @@ public class TOSCAVersionProperty {// test with functions/test_concat.yaml
 		if((fixVersion == null && value != null) ||
 		   (minorVersion.equals("0") && majorVersion.equals("0") && 
 		      fixVersion.equals("0") &&  value != null)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE253", String.format(
 	                "InvalidTOSCAVersionPropertyException: " +
 	                "Value of TOSCA version property \"%s\" is invalid",
-	                version));
+	                version))); 
 		}
 		return value;
 	}
@@ -92,10 +92,10 @@ public class TOSCAVersionProperty {// test with functions/test_concat.yaml
         // Eg: version = 18.0.0-1 is invalid.
 
     	if(qualifier == null && value != null) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE254", String.format(
       	                "InvalidTOSCAVersionPropertyException: " +
        	                "Value of TOSCA version property \"%s\" is invalid",
-       	                version));
+       	                version))); 
     	}
         return value;
     }
@@ -120,7 +120,7 @@ class TOSCAVersionProperty(object):
         self.version = str(version)
         match = self.VERSION_RE.match(self.version)
         if not match:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidTOSCAVersionPropertyException(what=(self.version)))
             return
         ver = match.groupdict()
@@ -161,7 +161,7 @@ class TOSCAVersionProperty(object):
         if (self.fix_version is None and value) or \
             (self.minor_version == self.major_version ==
              self.fix_version == '0' and value):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidTOSCAVersionPropertyException(what=(self.version)))
         return value
 
@@ -173,7 +173,7 @@ class TOSCAVersionProperty(object):
            Eg: version = 18.0.0-1 is invalid.
         """
         if not self.qualifier and value:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidTOSCAVersionPropertyException(what=(self.version)))
         return value
 

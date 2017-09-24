@@ -1,6 +1,7 @@
 package org.openecomp.sdc.toscaparser.api;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class UnsupportedType {
@@ -27,8 +28,8 @@ public class UnsupportedType {
     public static boolean validateType(String entityType) {
     	for(String ust: unsupportedTypes) {
     		if(ust.equals(entityType)) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                		"UnsupportedTypeError: Entity type \"%s\" is not supported",entityType));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE251", String.format(
+                		"UnsupportedTypeError: Entity type \"%s\" is not supported",entityType))); 
     			return true;
     		}
     	}
@@ -38,7 +39,7 @@ public class UnsupportedType {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import UnsupportedTypeError
 from toscaparser.utils.gettextutils import _
 
@@ -69,7 +70,7 @@ class UnsupportedType(object):
     @staticmethod
     def validate_type(entitytype):
         if entitytype in UnsupportedType.un_supported_types:
-            ExceptionCollector.appendException(UnsupportedTypeError(
+            ValidationIssueCollector.appendException(UnsupportedTypeError(
                                                what=_('%s')
                                                % entitytype))
             return True

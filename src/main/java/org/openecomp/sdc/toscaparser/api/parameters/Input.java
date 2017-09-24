@@ -1,11 +1,12 @@
 package org.openecomp.sdc.toscaparser.api.parameters;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 import org.openecomp.sdc.toscaparser.api.DataEntity;
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.elements.EntityType;
 import org.openecomp.sdc.toscaparser.api.elements.constraints.Constraint;
 import org.openecomp.sdc.toscaparser.api.elements.constraints.Schema;
@@ -95,9 +96,9 @@ public class Input {
     			}
     		}
     		if(!bFound) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE214", String.format(
                 		"UnknownFieldError: Input \"%s\" contains unknown field \"%s\"",
-                		name,key));
+                		name,key))); 
     		}
     	}   		
     }
@@ -118,8 +119,8 @@ public class Input {
 		}
 		
 		if(!bFound) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
-                    "ValueError: Invalid type \"%s\"",inputType));
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE215", String.format(
+                    "ValueError: Invalid type \"%s\"",inputType))); 
 		}
     }
     
@@ -150,7 +151,7 @@ public class Input {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import MissingRequiredFieldError
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.dataentity import DataEntity
@@ -207,13 +208,13 @@ class Input(object):
     def _validate_field(self):
         for name in self.schema.schema:
             if name not in self.INPUTFIELD:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(what='Input "%s"' % self.name,
                                       field=name))
 
     def validate_type(self, input_type):
         if input_type not in Schema.PROPERTY_TYPES:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(_('Invalid type "%s".') % type))
 
     # tODO(anyone) Need to test for any built-in datatype not just network

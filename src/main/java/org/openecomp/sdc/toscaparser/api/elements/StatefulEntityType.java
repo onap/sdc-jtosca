@@ -1,14 +1,12 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.openecomp.sdc.toscaparser.api.UnsupportedType;
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
-import org.openecomp.sdc.toscaparser.api.elements.AttributeDef;
-import org.openecomp.sdc.toscaparser.api.elements.EntityType;
-import org.openecomp.sdc.toscaparser.api.elements.PropertyDef;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 
@@ -49,8 +47,8 @@ public class StatefulEntityType extends EntityType {
             }
             else{
                 defs = null;
-				ThreadLocalsHolder.getCollector().appendException(String.format(
-                    "InvalidTypeError: \"%s\" is not a valid type",entityType));
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE136", String.format(
+                    "InvalidTypeError: \"%s\" is not a valid type",entityType))); 
             }
         }
         type = entityType;
@@ -67,8 +65,8 @@ public class StatefulEntityType extends EntityType {
 				Object to = me.getValue();
 				if(to == null || !(to instanceof LinkedHashMap)) {
 					String s = to == null ? "null" : to.getClass().getSimpleName();
-					ThreadLocalsHolder.getCollector().appendException(String.format(
-							"Unexpected type error: property \"%s\" has type \"%s\" (expected dict)",pdname,s));
+					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE137", String.format(
+							"Unexpected type error: property \"%s\" has type \"%s\" (expected dict)",pdname,s))); 
 					continue;
 				}
 				LinkedHashMap<String,Object> pdschema = (LinkedHashMap<String,Object>)to;
@@ -175,7 +173,7 @@ class StatefulEntityType(EntityType):
                 self.defs = custom_def[entitytype]
             else:
                 self.defs = None
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     InvalidTypeError(what=entitytype))
         self.type = entitytype
 

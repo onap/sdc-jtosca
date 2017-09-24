@@ -1,11 +1,10 @@
-package org.openecomp.sdc.toscaparser.api;
+package org.openecomp.sdc.toscaparser.api; 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.elements.*;
 import org.openecomp.sdc.toscaparser.api.elements.constraints.Constraint;
 import org.openecomp.sdc.toscaparser.api.elements.constraints.Schema;
@@ -50,9 +49,9 @@ public class DataEntity {
         else {
             if(!(value instanceof LinkedHashMap)) {
             	//ERROR under investigation
-                ThreadLocalsHolder.getCollector().appendWarning(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE001", String.format(
                     "TypeMismatchError: \"%s\" is not a map. The type is \"%s\"",
-                    value.toString(),dataType.getType()));
+                    value.toString(),dataType.getType())));
                 
 				if (value instanceof List && ((List) value).size() > 0)  {
 					value = ((List) value).get(0);
@@ -86,9 +85,9 @@ public class DataEntity {
             for(String valueKey: valueDict.keySet()) {
             	//1710 devlop JSON validation
             	if(!("json").equals(dataType.getType()) && !allowedProps.contains(valueKey)) {
-                    ThreadLocalsHolder.getCollector().appendException(String.format(
-                        "UnknownFieldError: Data value of type \"%s\" contains unknown field \"%s\"",
-                        dataType.getType(),valueKey));
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE100", String.format(
+                            "UnknownFieldError: Data value of type \"%s\" contains unknown field \"%s\"",
+                            dataType.getType(),valueKey)));  
             	}
             }
 
@@ -109,9 +108,9 @@ public class DataEntity {
                 }
             }
             if(missingProp.size() > 0) {
-                ThreadLocalsHolder.getCollector().appendWarning(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE003",String.format(
                     "MissingRequiredFieldError: Data value of type \"%s\" is missing required field(s) \"%s\"",
-                    dataType.getType(),missingProp.toString()));
+                    dataType.getType(),missingProp.toString())));
             }
             
             // check every field
@@ -169,9 +168,9 @@ public class DataEntity {
 		}
 		else if (type == null)  {
 			//NOT ANALYZED
-			 ThreadLocalsHolder.getCollector().appendWarning(String.format(
+			 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE002", String.format(
 	                    "MissingType: Type is missing for value \"%s\"",
-	                    value.toString()));
+	                    value.toString())));
 			 return value;
 		}
 		else if(type.equals(Schema.STRING)) {
@@ -277,7 +276,7 @@ public class DataEntity {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import MissingRequiredFieldError
 from toscaparser.common.exception import TypeMismatchError
 from toscaparser.common.exception import UnknownFieldError
@@ -318,7 +317,7 @@ class DataEntity(object):
         # If the datatype has 'properties' definition
         else:
             if not isinstance(self.value, dict):
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     TypeMismatchError(what=self.value,
                                       type=self.datatype.type))
             allowed_props = []
@@ -335,7 +334,7 @@ class DataEntity(object):
             # check allowed field
             for value_key in list(self.value.keys()):
                 if value_key not in allowed_props:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         UnknownFieldError(what=(_('Data value of type "%s"')
                                                 % self.datatype.type),
                                           field=value_key))
@@ -351,7 +350,7 @@ class DataEntity(object):
                 if req_key not in list(self.value.keys()):
                     missingprop.append(req_key)
             if missingprop:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     MissingRequiredFieldError(
                         what=(_('Data value of type "%s"')
                               % self.datatype.type), required=missingprop))

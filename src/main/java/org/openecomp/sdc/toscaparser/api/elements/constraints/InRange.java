@@ -1,8 +1,9 @@
 package org.openecomp.sdc.toscaparser.api.elements.constraints;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.Date;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class InRange extends Constraint {
 		super(name,type,c);
 
 		if(!(constraintValue instanceof ArrayList) || ((ArrayList<Object>)constraintValue).size() != 2) {
-            ThreadLocalsHolder.getCollector().appendException("InvalidSchemaError: The property \"in_range\" expects a list");
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE106", "InvalidSchemaError: The property \"in_range\" expects a list")); 
 			
 		}
 
@@ -54,11 +55,11 @@ public class InRange extends Constraint {
         String msg = "The property \"in_range\" expects comparable values";
         for(Object vo: alcv) {
     		if(!validTypes.contains(vo.getClass().getSimpleName())) {
-    	        ThreadLocalsHolder.getCollector().appendException("InvalidSchemaError: " + msg);
+    	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE107", "InvalidSchemaError: " + msg)); 
     		}
             // The only string we allow for range is the special value 'UNBOUNDED'
             if((vo instanceof String) && !((String)vo).equals(UNBOUNDED)) { 
-				ThreadLocalsHolder.getCollector().appendException("InvalidSchemaError: " + msg);
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE108", "InvalidSchemaError: " + msg)); 
             }
         }
         min = alcv.get(0);
@@ -129,19 +130,19 @@ class InRange(Constraint):
         super(InRange, self).__init__(property_name, property_type, constraint)
         if(not isinstance(self.constraint_value, collections.Sequence) or
            (len(constraint[self.IN_RANGE]) != 2)):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidSchemaError(message=_('The property "in_range" '
                                              'expects a list.')))
 
         msg = _('The property "in_range" expects comparable values.')
         for value in self.constraint_value:
             if not isinstance(value, self.valid_types):
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     InvalidSchemaError(message=msg))
             # The only string we allow for range is the special value
             # 'UNBOUNDED'
             if(isinstance(value, str) and value != self.UNBOUNDED):
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     InvalidSchemaError(message=msg))
 
         self.min = self.constraint_value[0]

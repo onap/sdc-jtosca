@@ -1,10 +1,10 @@
 package org.openecomp.sdc.toscaparser.api.utils;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
-
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 
 public class ValidateUtils {
 	
@@ -35,8 +35,8 @@ public class ValidateUtils {
 	public static Object validateNumeric(Object value) {
 		if(value != null) {
 			if (!(value instanceof Number)) {
-				ThreadLocalsHolder.getCollector().appendException(String.format(
-						"ValueError: \"%s\" is not a numeric", value.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE257", String.format(
+		            "ValueError: \"%s\" is not a numeric",value.toString()))); 
 			}
 		}
 		return value;
@@ -49,8 +49,8 @@ public class ValidateUtils {
 				if (value instanceof Boolean) {
 					return (Boolean) value ? 1 : 0;
 				}
-				ThreadLocalsHolder.getCollector().appendException(String.format(
-						"ValueError: \"%s\" is not an integer", value.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE258", String.format(
+	            "ValueError: \"%s\" is not an integer",value.toString()))); 
 			}
 		}
 	    return value;
@@ -59,8 +59,8 @@ public class ValidateUtils {
 	public static Object validateFloat(Object value) {
 		if(value != null) {
 			if (!(value instanceof Float || value instanceof Double)) {
-				ThreadLocalsHolder.getCollector().appendException(String.format(
-						"ValueError: \"%s\" is not a float", value.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE259", String.format(
+	            "ValueError: \"%s\" is not a float",value.toString()))); 
 			}
 		}
 	    return value;
@@ -69,8 +69,8 @@ public class ValidateUtils {
 	public static Object validateString(Object value) {
 		if(value != null) {
 			if (!(value instanceof String)) {
-				ThreadLocalsHolder.getCollector().appendException(String.format(
-						"ValueError: \'%s\' is not a string", value.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE260", String.format(
+	            "ValueError: \'%s\' is not a string",value.toString()))); 
 			}
 		}
 	    return value;
@@ -79,8 +79,8 @@ public class ValidateUtils {
 	public static Object validateList(Object value) {
 		if(value != null) {
 			if (!(value instanceof ArrayList)) {
-				ThreadLocalsHolder.getCollector().appendException(String.format(
-						"ValueError: \"%s\" is not a list", value.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE261", String.format(
+	            "ValueError: \"%s\" is not a list",value.toString()))); 
 			}
 		}
 	    return value;
@@ -93,8 +93,8 @@ public class ValidateUtils {
 	    validateList(range);
 	    // validate range list has a min and max
 	    if(range instanceof ArrayList && ((ArrayList<Object>)range).size() != 2) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-	            "ValueError: \"%s\" is not a valid range",range.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE262", String.format(
+	            "ValueError: \"%s\" is not a valid range",range.toString()))); 
 	        // too dangerous to continue...
 	        return range;
 	    }
@@ -106,8 +106,8 @@ public class ValidateUtils {
 	    
 	    if(!(r0 instanceof Integer) && !(r0 instanceof Float) ||
 	       !(r1 instanceof Integer) && !(r1 instanceof Float)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-		            "ValueError: \"%s\" is not a valid range",range.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE263", String.format(
+		            "ValueError: \"%s\" is not a valid range",range.toString()))); 
 		        // too dangerous to continue...
 	        return range;
 	    }
@@ -131,8 +131,8 @@ public class ValidateUtils {
 	    if(!minTest && !maxTest) {
 	        // Note: min == max is allowed
 	        if(min > max) {
-				ThreadLocalsHolder.getCollector().appendException(String.format(
-	                "ValueError:\"%s\" is not a valid range",range.toString()));
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE264", String.format(
+	                "ValueError:\"%s\" is not a valid range",range.toString()))); 
 	        }
 	    }
 	    return range;
@@ -142,8 +142,8 @@ public class ValidateUtils {
 	public static Object validateValueInRange(Object value,Object range,String propName) {
 		// verify all 3 are numeric and convert to Floats
 		if(!(value instanceof Integer || value instanceof Float)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-	                "ValueError: validateInRange: \"%s\" is not a number",range.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE265", String.format(
+	                "ValueError: validateInRange: \"%s\" is not a number",range.toString()))); 
             return value;
 	    }
 		Float fval = value instanceof Integer ? ((Integer)value).floatValue() : (Float)value;
@@ -154,8 +154,8 @@ public class ValidateUtils {
 	    // better safe than sorry...
 	    // validate that range list has a min and max
 	    if(range instanceof ArrayList && ((ArrayList<Object>)range).size() != 2) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-	            "ValueError: \"%s\" is not a valid range",range.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE266", String.format(
+	            "ValueError: \"%s\" is not a valid range",range.toString()))); 
 	        // too dangerous to continue...
 	        return value;
 	    }
@@ -167,8 +167,8 @@ public class ValidateUtils {
 	    
 	    if(!(r0 instanceof Integer) && !(r0 instanceof Float) ||
 	       !(r1 instanceof Integer) && !(r1 instanceof Float)) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-		            "ValueError: \"%s\" is not a valid range",range.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE267", String.format(
+		            "ValueError: \"%s\" is not a valid range",range.toString()))); 
 		        // too dangerous to continue...
 	        return value;
 	    }
@@ -192,8 +192,8 @@ public class ValidateUtils {
 	    if(!minTest && !maxTest) {
 	        // Note: min == max is allowed
 	        if(min > max) {
-				ThreadLocalsHolder.getCollector().appendException(String.format(
-	                "ValueError:\"%s\" is not a valid range",range.toString()));
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE268", String.format(
+	                "ValueError:\"%s\" is not a valid range",range.toString()))); 
 	        }
 	    }
 	    // finally...
@@ -211,9 +211,9 @@ public class ValidateUtils {
 	        }
 	    }
 	    if(bError) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE269", String.format(
 	                "RangeValueError: Property \"%s\", \"%s\" not in range [\"%s\" - \"%s\"",
-	                propName,value.toString(),r0.toString(),r1.toString()));
+	                propName,value.toString(),r0.toString(),r1.toString()))); 
 	    }
 	    return value;
 	}
@@ -221,8 +221,8 @@ public class ValidateUtils {
 	public static Object validateMap(Object ob) {
 		if(ob != null) {
 			if (!(ob instanceof LinkedHashMap)) {
-				ThreadLocalsHolder.getCollector().appendException(String.format(
-						"ValueError\"%s\" is not a map.", ob.toString()));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE270", String.format(
+	            "ValueError\"%s\" is not a map.",ob.toString()))); 
 			}
 		}
 	    return ob;
@@ -239,8 +239,8 @@ public class ValidateUtils {
 					return normalized.equals("true");
 				}
 			}
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-					"ValueError: \"%s\" is not a boolean", value.toString()));
+		ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE271", String.format(
+		        "ValueError: \"%s\" is not a boolean",value.toString()))); 
 		}
 	    return value;
 	}
@@ -256,7 +256,7 @@ public class ValidateUtils {
 	    except Exception as e:
 	        original_err_msg = str(e)
 	        log.error(original_err_msg)
-	        ExceptionCollector.appendException(
+	        ValidationIssueCollector.appendException(
 	            ValueError(_('"%(val)s" is not a valid timestamp. "%(msg)s"') %
 	                       {'val': value, 'msg': original_err_msg}))
 		*/
@@ -264,9 +264,9 @@ public class ValidateUtils {
 		// timestamps are loaded as Date objects by the YAML parser
 		if(value != null) {
 			if (!(value instanceof Date)) {
-				ThreadLocalsHolder.getCollector().appendException(String.format(
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE272", String.format(
 						"ValueError: \"%s\" is not a valid timestamp",
-						value.toString()));
+		        value.toString()))); 
 
 			}
 		}
@@ -278,7 +278,7 @@ public class ValidateUtils {
 /*python
 
 from toscaparser.elements import constraints
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import InvalidTOSCAVersionPropertyException
 from toscaparser.common.exception import RangeValueError
 from toscaparser.utils.gettextutils import _
@@ -301,7 +301,7 @@ def str_to_num(value):
 
 def validate_numeric(value):
     if not isinstance(value, numbers.Number):
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_('"%s" is not a numeric.') % value))
     return value
 
@@ -311,28 +311,28 @@ def validate_integer(value):
         try:
             value = int(value)
         except Exception:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(_('"%s" is not an integer.') % value))
     return value
 
 
 def validate_float(value):
     if not isinstance(value, float):
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_('"%s" is not a float.') % value))
     return value
 
 
 def validate_string(value):
     if not isinstance(value, six.string_types):
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_('"%s" is not a string.') % value))
     return value
 
 
 def validate_list(value):
     if not isinstance(value, list):
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_('"%s" is not a list.') % value))
     return value
 
@@ -342,7 +342,7 @@ def validate_range(range):
     validate_list(range)
     # validate range list has a min and max
     if len(range) != 2:
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_('"%s" is not a valid range.') % range))
     # validate min and max are numerics or the keyword UNBOUNDED
     min_test = max_test = False
@@ -358,7 +358,7 @@ def validate_range(range):
     if not min_test and not max_test:
         # Note: min == max is allowed
         if min > max:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(_('"%s" is not a valid range.') % range))
 
     return range
@@ -371,7 +371,7 @@ def validate_value_in_range(value, range, prop_name):
     # Note: value is valid if equal to min
     if range[0] != RANGE_UNBOUNDED:
         if value < range[0]:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 RangeValueError(pname=prop_name,
                                 pvalue=value,
                                 vmin=range[0],
@@ -379,7 +379,7 @@ def validate_value_in_range(value, range, prop_name):
     # Note: value is valid if equal to max
     if range[1] != RANGE_UNBOUNDED:
         if value > range[1]:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 RangeValueError(pname=prop_name,
                                 pvalue=value,
                                 vmin=range[0],
@@ -389,7 +389,7 @@ def validate_value_in_range(value, range, prop_name):
 
 def validate_map(value):
     if not isinstance(value, collections.Mapping):
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_('"%s" is not a map.') % value))
     return value
 
@@ -403,7 +403,7 @@ def validate_boolean(value):
         if normalised in ['true', 'false']:
             return normalised == 'true'
 
-    ExceptionCollector.appendException(
+    ValidationIssueCollector.appendException(
         ValueError(_('"%s" is not a boolean.') % value))
 
 
@@ -417,7 +417,7 @@ def validate_timestamp(value):
     except Exception as e:
         original_err_msg = str(e)
         log.error(original_err_msg)
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_('"%(val)s" is not a valid timestamp. "%(msg)s"') %
                        {'val': value, 'msg': original_err_msg}))
     return

@@ -3,7 +3,7 @@ package org.openecomp.sdc.toscaparser.api.elements.constraints;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.elements.ScalarUnit;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
@@ -35,8 +35,8 @@ public abstract class Constraint {
 
         if(!(constraint instanceof LinkedHashMap) || 
         		((LinkedHashMap<String,Object>)constraint).size() != 1) {
-                 ThreadLocalsHolder.getCollector().appendException(
-                     "InvalidSchemaError: Invalid constraint schema " + constraint.toString());
+                 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE101", 
+                     "InvalidSchemaError: Invalid constraint schema " + constraint.toString())); 
         }
         
         if(constraintClass.equals(EQUAL)) {
@@ -73,8 +73,8 @@ public abstract class Constraint {
         	return new Pattern(propname,proptype,constraint);
         }
         else {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
-            		"InvalidSchemaError: Invalid property \"%s\"",constraintClass));
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE102", String.format(
+            		"InvalidSchemaError: Invalid property \"%s\"",constraintClass))); 
             return null;
         }
 	}
@@ -117,9 +117,9 @@ public abstract class Constraint {
         	}
         }
         if(!bFound) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE103", String.format(
             	"InvalidSchemaError: Property \"%s\" is not valid for data type \"%s\"",
-            	constraintKey,propertyType));
+            	constraintKey,propertyType))); 
         }
 	}
 
@@ -153,7 +153,7 @@ public abstract class Constraint {
         	value = ScalarUnit.getScalarunitValue(propertyType,value,null);
         }
         if(!_isValid(value)) {
-            ThreadLocalsHolder.getCollector().appendWarning("ValidationError: " + _errMsg(value));
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE008", "ValidationError: " + _errMsg(value)));
         }
 	}
 
@@ -183,14 +183,14 @@ class Constraint(object):
 
         if(not isinstance(constraint, collections.Mapping) or
            len(constraint) != 1):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidSchemaError(message=_('Invalid constraint schema.')))
 
         for type in constraint.keys():
             ConstraintClass = get_constraint_class(type)
             if not ConstraintClass:
                 msg = _('Invalid property "%s".') % type
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     InvalidSchemaError(message=msg))
 
         return ConstraintClass(property_name, property_type, constraint)
@@ -208,7 +208,7 @@ class Constraint(object):
                     '"%(dtype)s".') % dict(
                         ctype=self.constraint_key,
                         dtype=property_type)
-            ExceptionCollector.appendException(InvalidSchemaError(message=msg))
+            ValidationIssueCollector.appendException(InvalidSchemaError(message=msg))
 
     def _get_scalarunit_constraint_value(self):
         if self.property_type in scalarunit.ScalarUnit.SCALAR_UNIT_TYPES:
@@ -230,7 +230,7 @@ class Constraint(object):
             value = scalarunit.get_scalarunit_value(self.property_type, value)
         if not self._is_valid(value):
             err_msg = self._err_msg(value)
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValidationError(message=err_msg))
 
 

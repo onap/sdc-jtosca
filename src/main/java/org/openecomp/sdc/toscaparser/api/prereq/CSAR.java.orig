@@ -18,7 +18,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.openecomp.sdc.toscaparser.api.ImportsLoader;
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
+import org.openecomp.sdc.toscaparser.api.common.ValidationIssueCollector;
 import org.openecomp.sdc.toscaparser.api.elements.Metadata;
 import org.openecomp.sdc.toscaparser.api.utils.UrlUtils;
 import org.slf4j.Logger;

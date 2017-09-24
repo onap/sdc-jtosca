@@ -1,9 +1,10 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.TOSCAVersionProperty;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
@@ -135,9 +136,9 @@ public class PolicyType extends StatefulEntityType {
 				}
 			}
 			if(!bFound) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE125", String.format(
                     "UnknownFieldError: Policy \"%s\" contains unknown field \"%s\"",
-                    type,key));
+                    type,key))); 
 			}
 		}
 	}
@@ -146,9 +147,9 @@ public class PolicyType extends StatefulEntityType {
 								  LinkedHashMap<String,Object> _customDef) {
 		for(String nodetype: _targetsList) {
 			if(_customDef.get(nodetype) == null) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE126", String.format(
                     "InvalidTypeError: \"%s\" defined in targets for policy \"%s\"",
-                    nodetype,type));
+                    nodetype,type))); 
 				
 			}
 		}
@@ -157,9 +158,9 @@ public class PolicyType extends StatefulEntityType {
 	private void _validateMetadata(LinkedHashMap<String,Object> _metaData) {
 		String mtype = (String)_metaData.get("type");
 		if(mtype != null && !mtype.equals("map") && !mtype.equals("tosca:map")) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE127", String.format(
                 "InvalidTypeError: \"%s\" defined in policy for metadata",
-                mtype));
+                mtype))); 
 		}
 		for(String entrySchema: metaData.keySet()) {
 			Object estob = metaData.get(entrySchema);
@@ -167,9 +168,9 @@ public class PolicyType extends StatefulEntityType {
 				String est = (String)
 						((LinkedHashMap<String,Object>)estob).get("type");
 				if(!est.equals("string")) {
-	                ThreadLocalsHolder.getCollector().appendException(String.format(
+	                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE128", String.format(
 	                    "InvalidTypeError: \"%s\" defined in policy for metadata \"%s\"",
-	                    est,entrySchema));
+	                    est,entrySchema))); 
 				}
 			}
 		}
@@ -179,7 +180,7 @@ public class PolicyType extends StatefulEntityType {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import InvalidTypeError
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.elements.statefulentitytype import StatefulEntityType
@@ -262,27 +263,27 @@ class PolicyType(StatefulEntityType):
     def _validate_keys(self):
         for key in self.defs.keys():
             if key not in self.SECTIONS:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(what='Policy "%s"' % self.type,
                                       field=key))
 
     def _validate_targets(self, targets_list, custom_def):
         for nodetype in targets_list:
             if nodetype not in custom_def:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     InvalidTypeError(what='"%s" defined in targets for '
                                      'policy "%s"' % (nodetype, self.type)))
 
     def _validate_metadata(self, meta_data):
         if not meta_data.get('type') in ['map', 'tosca:map']:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidTypeError(what='"%s" defined in policy for '
                                  'metadata' % (meta_data.get('type'))))
 
         for entry_schema, entry_schema_type in meta_data.items():
             if isinstance(entry_schema_type, dict) and not \
                     entry_schema_type.get('type') == 'string':
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     InvalidTypeError(what='"%s" defined in policy for '
                                      'metadata "%s"'
                                      % (entry_schema_type.get('type'),

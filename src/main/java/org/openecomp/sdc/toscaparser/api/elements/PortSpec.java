@@ -1,9 +1,10 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.LinkedHashMap;
 
 import org.openecomp.sdc.toscaparser.api.DataEntity;
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.openecomp.sdc.toscaparser.api.utils.ValidateUtils;
 
@@ -53,9 +54,9 @@ public class PortSpec {
             // verify one of the specified values is set
             if(source == null && sourceRange == null && 
                     target == null && targetRange == null) { 
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE129", String.format(
                     "InvalidTypeAdditionalRequirementsError: Additional requirements for type \"%s\" not met",
-                    TYPE_URI));
+                    TYPE_URI))); 
             }
             // Validate source value is in specified range
             if(source != null &&  sourceRange != null) {
@@ -75,9 +76,9 @@ public class PortSpec {
             }
         }
         catch(Exception e) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE130", String.format(
                 "ValueError: \"%s\" do not meet requirements for type \"%s\"", 
-                _properties.toString(),SHORTNAME));
+                _properties.toString(),SHORTNAME))); 
         }
  	}
 
@@ -85,7 +86,7 @@ public class PortSpec {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import InvalidTypeAdditionalRequirementsError
 from toscaparser.utils.gettextutils import _
 import org.openecomp.sdc.toscaparser.api.utils.validateutils as validateutils
@@ -132,7 +133,7 @@ class PortSpec(object):
             # verify one of the specified values is set
             if source is None and source_range is None and \
                     target is None and target_range is None:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     InvalidTypeAdditionalRequirementsError(
                         type=PortSpec.TYPE_URI))
             # Validate source value is in specified range
@@ -155,6 +156,6 @@ class PortSpec(object):
             msg = _('"%(value)s" do not meet requirements '
                     'for type "%(type)s".') \
                 % {'value': properties, 'type': PortSpec.SHORTNAME}
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(msg))
 */

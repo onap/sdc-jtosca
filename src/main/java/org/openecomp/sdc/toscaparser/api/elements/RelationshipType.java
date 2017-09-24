@@ -1,10 +1,9 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.LinkedHashMap;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
-import org.openecomp.sdc.toscaparser.api.elements.EntityType;
-import org.openecomp.sdc.toscaparser.api.elements.StatefulEntityType;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class RelationshipType extends StatefulEntityType {
@@ -54,8 +53,8 @@ public class RelationshipType extends StatefulEntityType {
         		}
         	}
         	if(!bFound) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                        "UnknownFieldError: Relationshiptype \"%s\" has unknown field \"%s\"",type,key));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE133", String.format(
+                        "UnknownFieldError: Relationshiptype \"%s\" has unknown field \"%s\"",type,key))); 
         	}
         }
 	}
@@ -63,7 +62,7 @@ public class RelationshipType extends StatefulEntityType {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.elements.statefulentitytype import StatefulEntityType
 
@@ -97,7 +96,7 @@ class RelationshipType(StatefulEntityType):
     def _validate_keys(self):
         for key in self.defs.keys():
             if key not in self.SECTIONS:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(what='Relationshiptype "%s"' % self.type,
                                       field=key))
 */

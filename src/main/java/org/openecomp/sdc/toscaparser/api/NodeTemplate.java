@@ -1,5 +1,7 @@
 package org.openecomp.sdc.toscaparser.api;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -86,14 +88,14 @@ public class NodeTemplate extends EntityTemplate {
 				}
 			}
 			if(bFound || customDef.get(node) != null) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE205", String.format(
                 		"NotImplementedError: Lookup by TOSCA types is not supported. Requirement for \"%s\" can not be full-filled",
-                		getName()));
+                		getName()))); 
                 return null;
 			}
 			if(templates.get(node) == null) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                        "KeyError: Node template \"%s\" was not found",node));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE206", String.format(
+                        "KeyError: Node template \"%s\" was not found",node))); 
                     return null;
 			}
 			NodeTemplate relatedTpl = new NodeTemplate(node,templates,customDef,null,null);
@@ -105,7 +107,7 @@ public class NodeTemplate extends EntityTemplate {
 			if(relationship == null) {
 				ArrayList<Object> parentReqs = ((NodeType)typeDefinition).getAllRequirements();
 				if(parentReqs == null) {
-                    ThreadLocalsHolder.getCollector().appendException("ValidationError: parent_req is null");
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE207", "ValidationError: parent_req is null")); 
 				}
 				else {
 //					for(String key: req.keySet()) {
@@ -165,9 +167,9 @@ public class NodeTemplate extends EntityTemplate {
             	   	   		}
             	   	   	}
             	   	   	else {
-            	   	   			ThreadLocalsHolder.getCollector().appendException(String.format(
+            	   	   			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE208", String.format(
             	   	   					"MissingRequiredFieldError: \"relationship\" used in template \"%s\" is missing required field \"type\"",
-            	   	   					relatedTpl.getName()));
+            	   	   					relatedTpl.getName()))); 
             		   	}
             	   }
             	   for(RelationshipType rtype: ((NodeType)typeDefinition).getRelationship().keySet()) {
@@ -275,8 +277,8 @@ public class NodeTemplate extends EntityTemplate {
 		ArrayList<Object> requires = (ArrayList<Object>)((NodeType)typeDefinition).getValue(REQUIREMENTS, entityTpl, false);
 		if(requires != null) {
 			if(!(requires instanceof ArrayList)) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                        "TypeMismatchError: \"requirements\" of template \"%s\" are not of type \"list\"",name));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE209", String.format(
+                        "TypeMismatchError: \"requirements\" of template \"%s\" are not of type \"list\"",name))); 
 			}
 			else {
                 for(Object ro: requires) {
@@ -320,8 +322,8 @@ public class NodeTemplate extends EntityTemplate {
         if(occurrences.size() != 2 || 
            !(0 <= (int)occurrences.get(0)  && (int)occurrences.get(0) <= (int)occurrences.get(1)) ||
            (int)occurrences.get(1) == 0) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
-                "InvalidPropertyValueError: property has invalid value %s",occurrences.toString()));
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE210", String.format(
+                "InvalidPropertyValueError: property has invalid value %s",occurrences.toString()))); 
         }
 	}
 	
@@ -335,8 +337,8 @@ public class NodeTemplate extends EntityTemplate {
 				}
 			}
 			if(!bFound) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                        "UnknownFieldError: \"requirements\" of template \"%s\" contains unknown field \"%s\"",name,key));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE211", String.format(
+                        "UnknownFieldError: \"requirements\" of template \"%s\" contains unknown field \"%s\"",name,key))); 
 			}
 		}
 	}
@@ -369,8 +371,8 @@ public class NodeTemplate extends EntityTemplate {
 					_commonValidateField(value,_collectCustomIfaceOperations(iname),"interfaces");
 				}
 				else {
-                    ThreadLocalsHolder.getCollector().appendException(String.format(
-                        "UnknownFieldError: \"interfaces\" of template \"%s\" contains unknown field %s",name,iname));
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE212", String.format(
+                        "UnknownFieldError: \"interfaces\" of template \"%s\" contains unknown field %s",name,iname))); 
 				}
 			}
 		}
@@ -421,8 +423,8 @@ public class NodeTemplate extends EntityTemplate {
 				
 			}
 			if(!bFound) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-	                    "UnknownFieldError: Node template \"%s\" has unknown field \"%s\"",name,ntname));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE213", String.format(
+	                    "UnknownFieldError: Node template \"%s\" has unknown field \"%s\"",name,ntname))); 
 			}
 		}
 	}
@@ -455,7 +457,7 @@ public class NodeTemplate extends EntityTemplate {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import InvalidPropertyValueError
 from toscaparser.common.exception import MissingRequiredFieldError
 from toscaparser.common.exception import TypeMismatchError
@@ -524,11 +526,11 @@ class NodeTemplate(EntityTemplate):
                     'Requirement for "%s" can not be full-filled.') % self.name
             if (node in list(self.type_definition.TOSCA_DEF.keys())
                or node in self.custom_def):
-                ExceptionCollector.appendException(NotImplementedError(msg))
+                ValidationIssueCollector.appendException(NotImplementedError(msg))
                 return
 
             if node not in self.templates:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     KeyError(_('Node template "%s" was not found.') % node))
                 return
 
@@ -539,7 +541,7 @@ class NodeTemplate(EntityTemplate):
             if not relationship:
                 parent_reqs = self.type_definition.get_all_requirements()
                 if parent_reqs is None:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         ValidationError(message='parent_req is ' +
                                         str(parent_reqs)))
                 else:
@@ -574,7 +576,7 @@ class NodeTemplate(EntityTemplate):
                             elif not relationship.startswith(rel_prfx):
                                 relationship = rel_prfx + relationship
                         else:
-                            ExceptionCollector.appendException(
+                            ValidationIssueCollector.appendException(
                                 MissingRequiredFieldError(
                                     what=_('"relationship" used in template '
                                            '"%s"') % related_tpl.name,
@@ -645,7 +647,7 @@ class NodeTemplate(EntityTemplate):
                                                   self.entity_tpl)
         if requires:
             if not isinstance(requires, list):
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     TypeMismatchError(
                         what='"requirements" of template "%s"' % self.name,
                         type='list'))
@@ -675,13 +677,13 @@ class NodeTemplate(EntityTemplate):
             DataEntity.validate_datatype('integer', value)
         if len(occurrences) != 2 or not (0 <= occurrences[0] <= occurrences[1]) \
                 or occurrences[1] == 0:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidPropertyValueError(what=(occurrences)))
 
     def _validate_requirements_keys(self, requirement):
         for key in requirement.keys():
             if key not in self.REQUIREMENTS_SECTION:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(
                         what='"requirements" of template "%s"' % self.name,
                         field=key))
@@ -707,7 +709,7 @@ class NodeTemplate(EntityTemplate):
                         self._collect_custom_iface_operations(name),
                         'interfaces')
                 else:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         UnknownFieldError(
                             what='"interfaces" of template "%s"' %
                             self.name, field=name))
@@ -730,6 +732,6 @@ class NodeTemplate(EntityTemplate):
     def _validate_fields(self, nodetemplate):
         for name in nodetemplate.keys():
             if name not in self.SECTIONS and name not in self.SPECIAL_SECTIONS:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(what='Node template "%s"' % self.name,
                                       field=name))*/

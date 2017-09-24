@@ -1,5 +1,7 @@
 package org.openecomp.sdc.toscaparser.api.functions;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -46,8 +48,8 @@ public class GetProperty extends Function {
 	@Override
 	void validate() { 
 		if(args.size() < 2) {
-	        ThreadLocalsHolder.getCollector().appendException(
-		        "ValueError: Illegal arguments for function \"get_property\". Expected arguments: \"node-template-name\", \"req-or-cap\" (optional), \"property name.\"");
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE167", 
+		        "ValueError: Illegal arguments for function \"get_property\". Expected arguments: \"node-template-name\", \"req-or-cap\" (optional), \"property name.\"")); 
 		        return;
 		}
 	    if(args.size() == 2) {
@@ -129,16 +131,16 @@ public class GetProperty extends Function {
 	            property = ((Property)props.get(propertyName)).getValue();
 	        }
 	        if(property == null && throwErrors) {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE168", String.format(
 	                "KeyError: Property \"%s\" was not found in capability \"%s\" of node template \"%s\" referenced from node template \"%s\"",
-	                propertyName,capabilityName,nodeTemplate.getName(),((NodeTemplate)context).getName()));
+	                propertyName,capabilityName,nodeTemplate.getName(),((NodeTemplate)context).getName()))); 
 	        }
     		return property;
 		}
 		if(throwErrors) {
-		    ThreadLocalsHolder.getCollector().appendException(String.format(
+		    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE169", String.format(
 		    	"KeyError: Requirement/CapabilityAssignment \"%s\" referenced from node template \"%s\" was not found in node template \"%s\"",
-		    	capabilityName,((NodeTemplate)context).getName(),nodeTemplate.getName()));
+		    	capabilityName,((NodeTemplate)context).getName(),nodeTemplate.getName()))); 
 		}
 		
 		return null;
@@ -152,9 +154,9 @@ public class GetProperty extends Function {
         LinkedHashMap<String,Property> props = nodeTpl.getProperties();
 		Property found = props.get(propertyName);
 		if(found == null) {
-	        ThreadLocalsHolder.getCollector().appendException(String.format(
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE170", String.format(
 		        "KeyError: Property \"%s\" was not found in node template \"%s\"",
-		        propertyName,nodeTpl.getName()));
+		        propertyName,nodeTpl.getName()))); 
 		}
 		return found;
 	}
@@ -167,25 +169,25 @@ public class GetProperty extends Function {
 	    if(nodeTemplateName.equals(HOST)) {
 	        NodeTemplate node = _findHostContainingProperty(null);
 	        if(node == null) {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE171", String.format(
 		            "KeyError: Property \"%s\" was not found in capability \"%s\" of node template \"%s\" referenced from node template \"%s\"",
-		            (String)args.get(2),(String)args.get(1),((NodeTemplate)context).getName()));
+		            (String)args.get(2),(String)args.get(1),((NodeTemplate)context).getName()))); 
 	            return null;
 	        }
 	        return node;
 	    }
 	    if(nodeTemplateName.equals(TARGET)) {
 	    	if(!(((RelationshipTemplate)context).getTypeDefinition() instanceof RelationshipType)) {
-	            ThreadLocalsHolder.getCollector().appendException(
-		            "KeyError: \"TARGET\" keyword can only be used in context to \"Relationships\" target node");
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE172", 
+		            "KeyError: \"TARGET\" keyword can only be used in context to \"Relationships\" target node")); 
 	            return null;
 	    	}
 	    	return ((RelationshipTemplate)context).getTarget();
 	    }
 	    if(nodeTemplateName.equals(SOURCE)) {
 	    	if(!(((RelationshipTemplate)context).getTypeDefinition() instanceof RelationshipType)) {
-	            ThreadLocalsHolder.getCollector().appendException(
-		            "KeyError: \"SOURCE\" keyword can only be used in context to \"Relationships\" target node");
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE173", 
+		            "KeyError: \"SOURCE\" keyword can only be used in context to \"Relationships\" target node")); 
 	            return null;
 	    	}
 	    	return ((RelationshipTemplate)context).getSource();
@@ -198,9 +200,9 @@ public class GetProperty extends Function {
 	            return nodeTemplate;
 	        }
 	    }
-	    ThreadLocalsHolder.getCollector().appendException(String.format(
+	    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE174", String.format(
 	        "KeyError: Node template \"%s\" was not found. Referenced from Node Template \"%s\"", 
-	        nodeTemplateName,((NodeTemplate)context).getName()));
+	        nodeTemplateName,((NodeTemplate)context).getName()))); 
 	    
 	    return null;
 	}
@@ -212,16 +214,16 @@ public class GetProperty extends Function {
 				return ((ArrayList)value).get(index);
 			}
 			else {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE175", String.format(
 		            "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must have an element with index %d",
-		            args.get(2),args.get(1),((NodeTemplate)context).getName(),index));
+		            args.get(2),args.get(1),((NodeTemplate)context).getName(),index))); 
 
 			}
 		}
 		else {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE176", String.format(
 		            "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must be a list",
-		            args.get(2),args.get(1),((NodeTemplate)context).getName()));
+		            args.get(2),args.get(1),((NodeTemplate)context).getName()))); 
 		}
 		return null;
 	}
@@ -234,15 +236,15 @@ public class GetProperty extends Function {
 	            return ov;
 	    	}
 	        else {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE177", String.format(
 	                "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must have an attribute named \"%s\"",
-		            args.get(2),args.get(1),((NodeTemplate)context).getName(),attribute));
+		            args.get(2),args.get(1),((NodeTemplate)context).getName(),attribute))); 
 	        }
 	    }
 	    else {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE178", String.format(
 	                "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must be a dict",
-		            args.get(2),args.get(1),((NodeTemplate)context).getName()));
+		            args.get(2),args.get(1),((NodeTemplate)context).getName()))); 
 	    }
 	    return null;
 	}
@@ -379,7 +381,7 @@ Examples:
 
 def validate(self):
     if len(self.args) < 2:
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             ValueError(_(
                 'Expected arguments: "node-template-name", "req-or-cap" '
                 '(optional), "property name".')))
@@ -446,7 +448,7 @@ def _get_capability_property(self,
         if props and property_name in props.keys():
             property = props[property_name].value
         if not property:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 KeyError(_('Property "%(prop)s" was not found in '
                            'capability "%(cap)s" of node template '
                            '"%(ntpl1)s" referenced from node template '
@@ -460,7 +462,7 @@ def _get_capability_property(self,
                 capability_name,
                 self.context.name,
                 node_template.name)
-    ExceptionCollector.appendException(KeyError(msg))
+    ValidationIssueCollector.appendException(KeyError(msg))
 
 def _find_property(self, property_name):
     node_tpl = self._find_node_template(self.args[0])
@@ -469,7 +471,7 @@ def _find_property(self, property_name):
     props = node_tpl.get_properties()
     found = [props[property_name]] if property_name in props else []
     if len(found) == 0:
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             KeyError(_('Property "%(prop)s" was not found in node '
                        'template "%(ntpl)s".') %
                      {'prop': property_name,
@@ -485,14 +487,14 @@ def _find_node_template(self, node_template_name):
         return self._find_host_containing_property()
     if node_template_name == TARGET:
         if not isinstance(self.context.type_definition, RelationshipType):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 KeyError(_('"TARGET" keyword can only be used in context'
                            ' to "Relationships" target node')))
             return
         return self.context.target
     if node_template_name == SOURCE:
         if not isinstance(self.context.type_definition, RelationshipType):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 KeyError(_('"SOURCE" keyword can only be used in context'
                            ' to "Relationships" source node')))
             return
@@ -502,7 +504,7 @@ def _find_node_template(self, node_template_name):
     for node_template in self.tosca_tpl.nodetemplates:
         if node_template.name == node_template_name:
             return node_template
-    ExceptionCollector.appendException(
+    ValidationIssueCollector.appendException(
         KeyError(_(
             'Node template "{0}" was not found.'
             ).format(node_template_name)))
@@ -512,7 +514,7 @@ def _get_index_value(self, value, index):
         if index < len(value):
             return value[index]
         else:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 KeyError(_(
                     "Property '{0}' found in capability '{1}'"
                     " referenced from node template {2}"
@@ -522,7 +524,7 @@ def _get_index_value(self, value, index):
                            self.context.name,
                            index)))
     else:
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             KeyError(_(
                 "Property '{0}' found in capability '{1}'"
                 " referenced from node template {2}"
@@ -535,7 +537,7 @@ def _get_attribute_value(self, value, attibute):
         if attibute in value:
             return value[attibute]
         else:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 KeyError(_(
                     "Property '{0}' found in capability '{1}'"
                     " referenced from node template {2}"
@@ -545,7 +547,7 @@ def _get_attribute_value(self, value, attibute):
                            self.context.name,
                            attibute)))
     else:
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             KeyError(_(
                 "Property '{0}' found in capability '{1}'"
                 " referenced from node template {2}"

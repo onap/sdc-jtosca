@@ -1,20 +1,20 @@
 package org.openecomp.sdc.toscaparser.api.utils;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
+import org.openecomp.sdc.toscaparser.api.common.ValidationIssueCollector;
 
 public class ThreadLocalsHolder {
 
-    private static final ThreadLocal<ExceptionCollector> exceptionCollectorThreadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<ValidationIssueCollector> exceptionCollectorThreadLocal = new ThreadLocal<>();
 
     private ThreadLocalsHolder(){}
 
-    public static ExceptionCollector getCollector() {
+    public static ValidationIssueCollector getCollector() {
         return exceptionCollectorThreadLocal.get();
     }
 
-    public static void setCollector(ExceptionCollector exceptionCollector) {
+    public static void setCollector(ValidationIssueCollector validationIssueCollector) {
         cleanup();
-        exceptionCollectorThreadLocal.set(exceptionCollector);
+        exceptionCollectorThreadLocal.set(validationIssueCollector);
     }
 
     public static void cleanup(){

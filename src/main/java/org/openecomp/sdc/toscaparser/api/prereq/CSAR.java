@@ -1,5 +1,7 @@
 package org.openecomp.sdc.toscaparser.api.prereq;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,7 +63,7 @@ public class CSAR {
 		if(isFile) {
 			File f = new File(path);
 			if (!f.isFile()) {
-				ThreadLocalsHolder.getCollector().appendException(String.format("\"%s\" is not a file", path));
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE220", String.format("\"%s\" is not a file", path))); 
 				return false;
 			} 
 			else {
@@ -70,7 +72,7 @@ public class CSAR {
 		}
 		else {
 			if(!UrlUtils.validateUrl(path)) {
-				ThreadLocalsHolder.getCollector().appendException(String.format("ImportError: \"%s\" does not exist",path));
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE221", String.format("ImportError: \"%s\" does not exist",path))); 
 				return false;
 			}
 			// get it to a local file
@@ -82,7 +84,7 @@ public class CSAR {
 			    Files.copy(in,ptf,StandardCopyOption.REPLACE_EXISTING);
 			}
 			catch(Exception e) {
-				ThreadLocalsHolder.getCollector().appendException("ImportError: failed to load CSAR from " + path);
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE222", "ImportError: failed to load CSAR from " + path)); 
 				return false;
 			}
 			
@@ -199,7 +201,7 @@ public class CSAR {
 			//ThreadLocalsHolder.getCollector().appendCriticalException(e.getMessage());
 			throw e;
 		} catch (Exception e) {
-			ThreadLocalsHolder.getCollector().appendException("ValidationError: " + e.getMessage());
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE223", "ValidationError: " + e.getMessage())); 
 			errorCaught = true;
 		}
 
@@ -281,10 +283,10 @@ public class CSAR {
 		        return (LinkedHashMap<String,Object>)data;
 			}
 			catch(Exception e) {
-				ThreadLocalsHolder.getCollector().appendException(String.format(
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE224", String.format(
 						"The file \"%s\" in the CSAR \"%s\" does not " +
 		                "contain valid TOSCA YAML content",
-		                mainTemplate,csar));
+		                mainTemplate,csar))); 
 			}
     	}
     	return null;
@@ -361,9 +363,9 @@ public class CSAR {
                         			}
                         		}
                         		else {
-                                    ThreadLocalsHolder.getCollector().appendException(String.format(
+                                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE225", String.format(
                                         "ValueError: Unexpected artifact definition for \"%s\"",
-                                        artifactKey));
+                                        artifactKey))); 
                                         errorCaught = true;
                         		}
                         	}
@@ -429,12 +431,12 @@ public class CSAR {
                     return;
                 }
                 else {
-                    ThreadLocalsHolder.getCollector().appendException(msg);
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE226", msg)); 
                     errorCaught = true;
                 }
             }
             catch (Exception e) {
-				ThreadLocalsHolder.getCollector().appendException(msg);
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE227", msg)); 
             }
         }
 
@@ -446,8 +448,8 @@ public class CSAR {
     	}
     	
 		if(raiseExc) {
-			ThreadLocalsHolder.getCollector().appendException(String.format(
-				"ValueError: The resource \"%s\" does not exist",resourceFile));
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE228", String.format(
+				"ValueError: The resource \"%s\" does not exist",resourceFile))); 
 		}
 		errorCaught = true;
 	}
@@ -511,7 +513,7 @@ public class CSAR {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import URLException
 from toscaparser.common.exception import ValidationError
 from toscaparser.imports import ImportsLoader
@@ -543,14 +545,14 @@ class CSAR(object):
         missing_err_msg = (_('"%s" does not exist.') % self.path)
         if self.a_file:
             if not os.path.isfile(self.path):
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     ValidationError(message=missing_err_msg))
                 return False
             else:
                 self.csar = self.path
         else:  # a URL
             if not UrlUtils.validate_url(self.path):
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     ValidationError(message=missing_err_msg))
                 return False
             else:
@@ -560,7 +562,7 @@ class CSAR(object):
         # validate that it is a valid zip file
         if not zipfile.is_zipfile(self.csar):
             err_msg = (_('"%s" is not a valid zip file.') % self.path)
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValidationError(message=err_msg))
             return False
 
@@ -571,7 +573,7 @@ class CSAR(object):
             err_msg = (_('"%s" is not a valid CSAR as it does not contain the '
                          'required file "TOSCA.meta" in the folder '
                          '"TOSCA-Metadata".') % self.path)
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValidationError(message=err_msg))
             return False
 
@@ -585,11 +587,11 @@ class CSAR(object):
             if type(meta) is dict:
                 self.metadata = meta
             else:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     ValidationError(message=invalid_yaml_err_msg))
                 return False
         except yaml.YAMLError:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValidationError(message=invalid_yaml_err_msg))
             return False
 
@@ -598,7 +600,7 @@ class CSAR(object):
                          '"Entry-Definitions" in '
                          '"TOSCA-Metadata/TOSCA.meta".')
                        % self.path)
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValidationError(message=err_msg))
             return False
 
@@ -608,7 +610,7 @@ class CSAR(object):
         if entry and entry not in filelist:
             err_msg = (_('The "Entry-Definitions" file defined in the '
                          'CSAR "%s" does not exist.') % self.path)
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValidationError(message=err_msg))
             return False
 
@@ -654,11 +656,11 @@ class CSAR(object):
             try:
                 tosca_yaml = yaml.load(data)
                 if type(tosca_yaml) is not dict:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         ValidationError(message=invalid_tosca_yaml_err_msg))
                 return tosca_yaml
             except Exception:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     ValidationError(message=invalid_tosca_yaml_err_msg))
 
     def get_description(self):
@@ -718,7 +720,7 @@ class CSAR(object):
                                             main_tpl_file,
                                             artifact['file'])
                                 else:
-                                    ExceptionCollector.appendException(
+                                    ValidationIssueCollector.appendException(
                                         ValueError(_('Unexpected artifact '
                                                      'definition for "%s".')
                                                    % artifact_key))
@@ -759,11 +761,11 @@ class CSAR(object):
                 if UrlUtils.url_accessible(resource_file):
                     return
                 else:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         URLException(what=msg))
                     self.error_caught = True
             except Exception:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     URLException(what=msg))
                 self.error_caught = True
 
@@ -773,7 +775,7 @@ class CSAR(object):
             return
 
         if raise_exc:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(_('The resource "%s" does not exist.')
                            % resource_file))
             self.error_caught = True

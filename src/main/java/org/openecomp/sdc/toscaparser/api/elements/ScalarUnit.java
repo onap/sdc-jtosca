@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.openecomp.sdc.toscaparser.api.utils.ValidateUtils;
 import org.slf4j.Logger;
@@ -52,9 +52,9 @@ public abstract class ScalarUnit {
 					return key;
 				}
 			}
-            ThreadLocalsHolder.getCollector().appendWarning(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE007",  String.format(
             	"'The unit \"%s\" is not valid. Valid units are \n%s",
-                inputUnit,SCALAR_UNIT_DICT.keySet().toString()));
+                inputUnit,SCALAR_UNIT_DICT.keySet().toString())));
             return inputUnit;
 		}
 	}
@@ -68,8 +68,8 @@ public abstract class ScalarUnit {
 			value = matcher.group(1) + " " + scalarUnit;
 		}
 		else {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
-                "ValueError: \"%s\" is not a valid scalar-unit",value.toString()));
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE134", String.format(
+                "ValueError: \"%s\" is not a valid scalar-unit",value.toString()))); 
 		}
 		return value;
 	}
@@ -136,8 +136,8 @@ public abstract class ScalarUnit {
 		if(type.equals(SCALAR_UNIT_FREQUENCY)) {
 			return (new ScalarUnitFrequency(value)).getNumFromScalarUnit(unit);
 		}
-        ThreadLocalsHolder.getCollector().appendException(String.format(
-	            "TypeError: \"%s\" is not a valid scalar-unit type",type));
+        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE135", String.format(
+	            "TypeError: \"%s\" is not a valid scalar-unit type",type))); 
         return 0.0;
 	}
 	
@@ -145,7 +145,7 @@ public abstract class ScalarUnit {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.utils.gettextutils import _
 from toscaparser.utils import validateutils
 
@@ -184,7 +184,7 @@ class ScalarUnit(object):
                      '"%(valid_units)s".') %
                    {'unit': input_unit,
                     'valid_units': sorted(self.SCALAR_UNIT_DICT.keys())})
-            ExceptionCollector.appendException(ValueError(msg))
+            ValidationIssueCollector.appendException(ValueError(msg))
 
     def validate_scalar_unit(self):
         regex = re.compile('([0-9.]+)\s*(\w+)')
@@ -196,7 +196,7 @@ class ScalarUnit(object):
             return self.value
 
         except Exception:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ValueError(_('"%s" is not a valid scalar-unit.')
                            % self.value))
 
@@ -257,6 +257,6 @@ def get_scalarunit_value(type, value, unit=None):
         return (ScalarUnit_Class(value).
                 get_num_from_scalar_unit(unit))
     else:
-        ExceptionCollector.appendException(
+        ValidationIssueCollector.appendException(
             TypeError(_('"%s" is not a valid scalar-unit type.') % type))
 */

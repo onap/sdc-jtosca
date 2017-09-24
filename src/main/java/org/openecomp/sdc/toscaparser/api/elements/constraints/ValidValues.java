@@ -62,7 +62,7 @@ def __init__(self, property_name, property_type, constraint):
     super(ValidValues, self).__init__(property_name, property_type,
                                       constraint)
     if not isinstance(self.constraint_value, collections.Sequence):
-        ExceptionCollector.appendException(
+        ValidationIsshueCollector.appendException(
             InvalidSchemaError(message=_('The property "valid_values" '
                                          'expects a list.')))
 

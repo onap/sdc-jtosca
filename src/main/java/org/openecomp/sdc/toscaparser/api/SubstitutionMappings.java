@@ -1,12 +1,16 @@
 package org.openecomp.sdc.toscaparser.api;
 
-import java.util.*;
-
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.elements.NodeType;
 import org.openecomp.sdc.toscaparser.api.elements.PropertyDef;
 import org.openecomp.sdc.toscaparser.api.parameters.Input;
 import org.openecomp.sdc.toscaparser.api.parameters.Output;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 
 public class SubstitutionMappings {
@@ -126,9 +130,9 @@ public class SubstitutionMappings {
 				}
 			}
 			if(!bFound) {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE232", String.format(
 	                "UnknownFieldError: SubstitutionMappings contain unknown field \"%s\"",
-	                key));
+	                key))); 
 			}
 		}
 	}
@@ -137,14 +141,14 @@ public class SubstitutionMappings {
         // validate the node_type of substitution mappings
         String nodeType = (String)subMappingDef.get(NODE_TYPE);
         if(nodeType == null) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE233", String.format(
                 "MissingRequiredFieldError: SubstitutionMappings used in topology_template is missing required field \"%s\"",
-                NODE_TYPE));
+                NODE_TYPE))); 
         }
         Object nodeTypeDef = customDefs.get(nodeType);
         if(nodeTypeDef == null) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
-                "InvalidNodeTypeError: \"%s\" is invalid",nodeType));
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE234", String.format(
+                "InvalidNodeTypeError: \"%s\" is invalid",nodeType))); 
         }
 	}
 
@@ -170,9 +174,9 @@ public class SubstitutionMappings {
         for(String property: requiredProperties) {
             // Check property which is 'required' and has no 'default' value
             if(!allInputs.contains(property)) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE235", String.format(
                     "MissingRequiredInputError: SubstitutionMappings with node_type \"%s\" is missing required input \"%s\"",
-                    getNodeType(),property));
+                    getNodeType(),property))); 
             }
         }
         // If the optional properties of node type need to be customized by
@@ -188,9 +192,9 @@ public class SubstitutionMappings {
          diffset.removeAll(allInputs);
          for(String parameter: diffset) {
         	 if(allProperties.contains(parameter)) {
-                 ThreadLocalsHolder.getCollector().appendException(String.format(
+                 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE236", String.format(
                      "MissingRequiredInputError: SubstitutionMappings with node_type \"%s\" is missing required input \"%s\"",
-                     getNodeType(),parameter));
+                     getNodeType(),parameter))); 
         	 }
          }
 	    // Additional inputs are not in the properties of node type must
@@ -201,9 +205,9 @@ public class SubstitutionMappings {
 	    	diffset = allInputs;
 	    	diffset.removeAll(allProperties);
 	    	if(diffset.contains(inp.getName()) && inp.getDefault() == null) {
-	            ThreadLocalsHolder.getCollector().appendException(String.format(
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE237", String.format(
 	                     "MissingRequiredInputError: SubstitutionMappings with node_type \"%s\" is missing rquired input \"%s\"",
-	                     getNodeType(),inp.getName()));
+	                     getNodeType(),inp.getName()))); 
 	    	}
 	    }
 	}
@@ -222,7 +226,7 @@ public class SubstitutionMappings {
 			for(CapabilityAssignment cap: nodeCapabilities) {
 				if(tplsCapabilities != null && tplsCapabilities.get(cap.getName()) == null) {
 	                ; //pass
-	                // ExceptionCollector.appendException(
+	                // ValidationIssueCollector.appendException(
 	                //    UnknownFieldError(what='SubstitutionMappings',
 	                //                      field=cap))
 				}
@@ -247,7 +251,7 @@ public class SubstitutionMappings {
 				String cap = ro.getName();
 				if(tplsRequirements != null && tplsRequirements.get(cap) == null) {
 	                ; //pass
-	                // ExceptionCollector.appendException(
+	                // ValidationIssueCollector.appendException(
 	                //    UnknownFieldError(what='SubstitutionMappings',
 	                //                      field=cap))
 				}
@@ -272,9 +276,9 @@ public class SubstitutionMappings {
         for(Output output: outputs) {
         	Object ado = getNodeDefinition().getAttributesDef();
         	if(ado != null && ((LinkedHashMap<String,Object>)ado).get(output.getName()) == null) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE238", String.format(
                     "UnknownOutputError: Unknown output \"%s\" in SubstitutionMappings with node_type \"%s\"",
-                    output.getName(),getNodeType()));
+                    output.getName(),getNodeType()))); 
         	}
         }
  	}
@@ -313,7 +317,7 @@ public class SubstitutionMappings {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import InvalidNodeTypeError
 from toscaparser.common.exception import MissingDefaultValueError
 from toscaparser.common.exception import MissingRequiredFieldError
@@ -392,7 +396,7 @@ class SubstitutionMappings(object):
         """validate the keys of substitution mappings."""
         for key in self.sub_mapping_def.keys():
             if key not in self.SECTIONS:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(what=_('SubstitutionMappings'),
                                       field=key))
 
@@ -400,14 +404,14 @@ class SubstitutionMappings(object):
         """validate the node_type of substitution mappings."""
         node_type = self.sub_mapping_def.get(self.NODE_TYPE)
         if not node_type:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 MissingRequiredFieldError(
                     what=_('SubstitutionMappings used in topology_template'),
                     required=self.NODE_TYPE))
 
         node_type_def = self.custom_defs.get(node_type)
         if not node_type_def:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 InvalidNodeTypeError(what=node_type))
 
     def _validate_inputs(self):
@@ -428,7 +432,7 @@ class SubstitutionMappings(object):
         for property in required_properties:
             # Check property which is 'required' and has no 'default' value
             if property not in all_inputs:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     MissingRequiredInputError(
                         what=_('SubstitutionMappings with node_type ')
                         + self.node_type,
@@ -443,7 +447,7 @@ class SubstitutionMappings(object):
         all_properties = set(self.node_definition.get_properties_def())
         for parameter in customized_parameters - all_inputs:
             if parameter in all_properties:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     MissingRequiredInputError(
                         what=_('SubstitutionMappings with node_type ')
                         + self.node_type,
@@ -456,7 +460,7 @@ class SubstitutionMappings(object):
         for input in self.inputs:
             if input.name in all_inputs - all_properties \
                and input.default is None:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     MissingDefaultValueError(
                         what=_('SubstitutionMappings with node_type ')
                         + self.node_type,
@@ -473,7 +477,7 @@ class SubstitutionMappings(object):
             if (tpls_capabilities and
                     cap not in list(tpls_capabilities.keys())):
                 pass
-                # ExceptionCollector.appendException(
+                # ValidationIssueCollector.appendException(
                 #    UnknownFieldError(what='SubstitutionMappings',
                 #                      field=cap))
 
@@ -488,7 +492,7 @@ class SubstitutionMappings(object):
             if (tpls_requirements and
                     req not in list(tpls_requirements.keys())):
                 pass
-                # ExceptionCollector.appendException(
+                # ValidationIssueCollector.appendException(
                 #    UnknownFieldError(what='SubstitutionMappings',
                 #                      field=req))
 
@@ -508,7 +512,7 @@ class SubstitutionMappings(object):
         # has properties, the specification will be amended?
         for output in self.outputs:
             if output.name not in self.node_definition.get_attributes_def():
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownOutputError(
                         where=_('SubstitutionMappings with node_type ')
                         + self.node_type,

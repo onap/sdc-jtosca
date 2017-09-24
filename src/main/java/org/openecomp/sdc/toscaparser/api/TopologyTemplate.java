@@ -1,7 +1,6 @@
 package org.openecomp.sdc.toscaparser.api;
 
-import java.util.*;
-
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.elements.InterfacesDef;
 import org.openecomp.sdc.toscaparser.api.elements.NodeType;
 import org.openecomp.sdc.toscaparser.api.elements.RelationshipType;
@@ -11,6 +10,11 @@ import org.openecomp.sdc.toscaparser.api.functions.GetInput;
 import org.openecomp.sdc.toscaparser.api.parameters.Input;
 import org.openecomp.sdc.toscaparser.api.parameters.Output;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class TopologyTemplate {
 
@@ -232,9 +236,9 @@ public class TopologyTemplate {
                 DataEntity.validateDatatype("list", memberNames,null,null,null);
 				if(memberNames.size() < 1 || 
 				       (new HashSet<String>(memberNames)).size() != memberNames.size()) {
-                    ThreadLocalsHolder.getCollector().appendWarning(String.format(
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE005",String.format(
                             "InvalidGroupTargetException: Member nodes \"%s\" should be >= 1 and not repeated",
-                            memberNames.toString()));
+                            memberNames.toString())));
 				}
 				else {
 					memberNodes = _getGroupMembers(memberNames);
@@ -281,8 +285,8 @@ public class TopologyTemplate {
 		}
 		for(String member: members) {
 			if(!nodeNames.contains(member)) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                        "InvalidGroupTargetException: Target member \"%s\" is not found in \"nodeTemplates\"",member));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE239", String.format(
+                        "InvalidGroupTargetException: Target member \"%s\" is not found in \"nodeTemplates\"",member))); 
 			}
 		}
 	}
@@ -383,8 +387,8 @@ public class TopologyTemplate {
     			}
     		}
     		if(!bFound) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                		"UnknownFieldError: TopologyTemplate contains unknown field \"%s\"",name));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE240", String.format(
+                		"UnknownFieldError: TopologyTemplate contains unknown field \"%s\"",name))); 
     		}
     	}
     }
@@ -697,7 +701,7 @@ class TopologyTemplate(object):
                 DataEntity.validate_datatype('list', member_names)
                 if len(member_names) < 1 or \
                         len(member_names) != len(set(member_names)):
-                    exception.ExceptionCollector.appendException(
+                    exception.ValidationIssueCollector.appendException(
                         exception.InvalidGroupTargetException(
                             message=_('Member nodes "%s" should be >= 1 '
                                       'and not repeated') % member_names))
@@ -732,7 +736,7 @@ class TopologyTemplate(object):
             node_names.append(node.name)
         for member in members:
             if member not in node_names:
-                exception.ExceptionCollector.appendException(
+                exception.ValidationIssueCollector.appendException(
                     exception.InvalidGroupTargetException(
                         message=_('Target member "%s" is not found in '
                                   'node_templates') % member))
@@ -780,7 +784,7 @@ class TopologyTemplate(object):
     def _validate_field(self):
         for name in self.tpl:
             if name not in SECTIONS:
-                exception.ExceptionCollector.appendException(
+                exception.ValidationIssueCollector.appendException(
                     exception.UnknownFieldError(what='Template', field=name))
 
     def _process_intrinsic_functions(self):

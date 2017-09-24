@@ -1,9 +1,10 @@
 package org.openecomp.sdc.toscaparser.api.elements.constraints;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.regex.Matcher;
 import java.util.regex.PatternSyntaxException;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class Pattern extends Constraint {
@@ -24,7 +25,7 @@ public class Pattern extends Constraint {
 		super(name,type,c);
 		
 		if(!validTypes.contains(constraintValue.getClass().getSimpleName())) {
-	        ThreadLocalsHolder.getCollector().appendException("InvalidSchemaError: The property \"pattern\" expects a string");
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE114", "InvalidSchemaError: The property \"pattern\" expects a string")); 
 		}
 	}
 
@@ -32,8 +33,8 @@ public class Pattern extends Constraint {
 	protected boolean _isValid(Object value) {
 		try {
 			if(!(value instanceof String)) {
-		        ThreadLocalsHolder.getCollector().appendException(String.format("ValueError: Input value \"%s\" to \"pattern\" property \"%s\" must be a string",
-		        		value.toString(),propertyName));
+		        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE115", String.format("ValueError: Input value \"%s\" to \"pattern\" property \"%s\" must be a string",
+		        		value.toString(),propertyName))); 
 				return false;
 			}
 			String strp = constraintValue.toString();
@@ -46,8 +47,8 @@ public class Pattern extends Constraint {
 			return false;
 		}
 		catch(PatternSyntaxException pse) {
-	        ThreadLocalsHolder.getCollector().appendException(String.format("ValueError: Invalid regex \"%s\" in \"pattern\" property \"%s\"",
-	        		constraintValue.toString(),propertyName));
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE116", String.format("ValueError: Invalid regex \"%s\" in \"pattern\" property \"%s\"",
+	        		constraintValue.toString(),propertyName))); 
 	        return false;
 		}
 	}
@@ -78,7 +79,7 @@ class Pattern(Constraint):
     def __init__(self, property_name, property_type, constraint):
         super(Pattern, self).__init__(property_name, property_type, constraint)
         if not isinstance(self.constraint_value, self.valid_types):
-            ExceptionCollector.appendException(
+            ValidationIsshueCollector.appendException(
                 InvalidSchemaError(message=_('The property "pattern" '
                                              'expects a string.')))
         self.match = re.compile(self.constraint_value).match

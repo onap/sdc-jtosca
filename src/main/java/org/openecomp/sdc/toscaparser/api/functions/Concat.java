@@ -1,9 +1,10 @@
 package org.openecomp.sdc.toscaparser.api.functions;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.ArrayList;
 
 import org.openecomp.sdc.toscaparser.api.TopologyTemplate;
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class Concat extends Function {
@@ -37,9 +38,9 @@ public class Concat extends Function {
 	@Override
 	void validate() {
 		if(args.size() < 1) {
-	        ThreadLocalsHolder.getCollector().appendException(
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE145", 
 	            "ValueError: Invalid arguments for function \"concat\". " +
-	            "Expected at least one argument");
+	            "Expected at least one argument")); 
 		}
 	}
 
@@ -68,7 +69,7 @@ Example:
 
 def validate(self):
     if len(self.args) < 1:
-        ExceptionCollector.appendException(
+        ValidationIsshueCollector.appendException(
             ValueError(_('Invalid arguments for function "{0}". Expected '
                          'at least one arguments.').format(CONCAT)))
 

@@ -1,8 +1,9 @@
 package org.openecomp.sdc.toscaparser.api.parameters;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.LinkedHashMap;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class Output {
@@ -34,15 +35,15 @@ public class Output {
 	private void _validateField() {
 		if(!(attrs instanceof LinkedHashMap)) {
 			//TODO wrong error message...
-            ThreadLocalsHolder.getCollector().appendException(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE216", String.format(
                     "ValidationError: Output \"%s\" has wrong type. Expecting a dict",
-                    name));
+                    name))); 
 		}
 		
 		if(getValue() == null) {
-            ThreadLocalsHolder.getCollector().appendException(String.format(
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE217", String.format(
                     "MissingRequiredFieldError: Output \"%s\" is missing required \"%s\"",
-                    name,VALUE));
+                    name,VALUE))); 
 		}
         for(String key: attrs.keySet()) {
     		boolean bFound = false;
@@ -53,9 +54,9 @@ public class Output {
     			}
     		}
     		if(!bFound) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE218", String.format(
                     "UnknownFieldError: Output \"%s\" contains unknown field \"%s\"",
-                    name,key));
+                    name,key))); 
             }
         }
 	}
@@ -94,16 +95,16 @@ class Output(object):
 
     def _validate_field(self):
         if not isinstance(self.attrs, dict):
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 MissingRequiredFieldError(what='Output "%s"' % self.name,
                                           required=self.VALUE))
         if self.value is None:
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 MissingRequiredFieldError(what='Output "%s"' % self.name,
                                           required=self.VALUE))
         for name in self.attrs:
             if name not in self.OUTPUTFIELD:
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(what='Output "%s"' % self.name,
                                       field=name))
 */

@@ -1,8 +1,9 @@
 package org.openecomp.sdc.toscaparser.api;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import java.util.LinkedHashMap;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.openecomp.sdc.toscaparser.api.utils.UrlUtils;
 
@@ -24,9 +25,9 @@ public class Repository {
 		if(reposit instanceof LinkedHashMap) {
 			url = (String)((LinkedHashMap<String,Object>)reposit).get("url");
             if(url == null) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE229", String.format(
                     "MissingRequiredFieldError: Repository \"%s\" is missing required field \"url\"",
-                    name));
+                    name))); 
             }
 		}
         loadAndValidate(name,reposit);
@@ -45,9 +46,9 @@ public class Repository {
 					}
 				}
 				if(!bFound) {
-                    ThreadLocalsHolder.getCollector().appendException(String.format(
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE230", String.format(
                         "UnknownFieldError: repositories \"%s\" contains unknown field \"%s\"",
-                        keyname,key));
+                        keyname,key))); 
 				}
 			}
 			
@@ -55,8 +56,8 @@ public class Repository {
 	        if(repositUrl != null) {
 	            boolean urlVal = UrlUtils.validateUrl(repositUrl);
 	            if(!urlVal) {
-	                ThreadLocalsHolder.getCollector().appendException(String.format(
-	                    "URLException: repsositories \"%s\" Invalid Url",keyname));
+	                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE231", String.format(
+	                    "URLException: repsositories \"%s\" Invalid Url",keyname))); 
 	            }
 	        }
 		}
@@ -74,7 +75,7 @@ public class Repository {
 
 /*python
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import MissingRequiredFieldError
 from toscaparser.common.exception import UnknownFieldError
 from toscaparser.common.exception import URLException
@@ -91,7 +92,7 @@ class Repository(object):
         self.reposit = values
         if isinstance(self.reposit, dict):
             if 'url' not in self.reposit.keys():
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     MissingRequiredFieldError(what=_('Repository "%s"')
                                               % self.name, required='url'))
             self.url = self.reposit['url']
@@ -102,7 +103,7 @@ class Repository(object):
         if isinstance(reposit_def, dict):
             for key in reposit_def.keys():
                 if key not in SECTIONS:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         UnknownFieldError(what=_('repositories "%s"')
                                           % self.keyname, field=key))
 
@@ -111,7 +112,7 @@ class Repository(object):
                 url_val = toscaparser.utils.urlutils.UrlUtils.\
                     validate_url(reposit_url)
                 if url_val is not True:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         URLException(what=_('repsositories "%s" Invalid Url')
                                      % self.keyname))
 */

@@ -1,6 +1,7 @@
 package org.openecomp.sdc.toscaparser.api;
 
-import org.openecomp.sdc.toscaparser.api.common.ExceptionCollector;
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+
 import org.openecomp.sdc.toscaparser.api.elements.TypeValidation;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.openecomp.sdc.toscaparser.api.utils.UrlUtils;
@@ -42,7 +43,7 @@ public class ImportsLoader {
 	        if((_path == null || _path.isEmpty()) && tpl == null) {
 	            //msg = _('Input tosca template is not provided.')
 	            //log.warning(msg)
-	            ThreadLocalsHolder.getCollector().appendException("ValidationError: Input tosca template is not provided");
+	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE184", "ValidationError: Input tosca template is not provided")); 
 	        }
 	        
 	        this.path = _path;
@@ -78,8 +79,8 @@ public class ImportsLoader {
     	if(importslist == null) {
             //msg = _('"imports" keyname is defined without including templates.')
             //log.error(msg)
-            ThreadLocalsHolder.getCollector().appendException(
-            		"ValidationError: \"imports\" keyname is defined without including templates");
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE185", 
+            		"ValidationError: \"imports\" keyname is defined without including templates")); 
             return;
     	}
     	
@@ -93,8 +94,8 @@ public class ImportsLoader {
     				if(importNames.contains(importName)) {
                         //msg = (_('Duplicate import name "%s" was found.') % import_name)
                         //log.error(msg)
-                        ThreadLocalsHolder.getCollector().appendException(String.format(
-                        		"ValidationError: Duplicate import name \"%s\" was found",importName));
+                        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE186", String.format(
+                        		"ValidationError: Duplicate import name \"%s\" was found",importName))); 
     				}
     				importNames.add(importName); //???
 
@@ -169,8 +170,8 @@ public class ImportsLoader {
     private void _validateImportKeys(String importName, LinkedHashMap<String,Object> importUri) {
     	if(importUri.get(FILE) == null) {
             //log.warning(_('Missing keyname "file" in import "%(name)s".') % {'name': import_name})
-    		ThreadLocalsHolder.getCollector().appendException(String.format(
-    				"MissingRequiredFieldError: Import of template \"%s\" is missing field %s",importName,FILE));
+    		ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE187", String.format(
+    				"MissingRequiredFieldError: Import of template \"%s\" is missing field %s",importName,FILE))); 
     	}
     	for(String key: importUri.keySet()) {
     		boolean bFound = false;
@@ -184,8 +185,8 @@ public class ImportsLoader {
                 //log.warning(_('Unknown keyname "%(key)s" error in '
                 //        'imported definition "%(def)s".')
                 //      % {'key': key, 'def': import_name})
-    			ThreadLocalsHolder.getCollector().appendException(String.format(
-    					"UnknownFieldError: Import of template \"%s\" has unknown fiels %s",importName,key));
+    			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE188", String.format(
+    					"UnknownFieldError: Import of template \"%s\" has unknown fiels %s",importName,key))); 
     		}
     	}
     }
@@ -221,9 +222,9 @@ public class ImportsLoader {
             repository = (String)((LinkedHashMap<String,Object>)importUriDef).get(REPOSITORY);
             if(repository != null) {
             	if(!repositories.keySet().contains(repository)) {
-                    ThreadLocalsHolder.getCollector().appendException(String.format(
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE189", String.format(
                     		"InvalidPropertyValueError: Repository \"%s\" not found in \"%s\"",
-                    		repository,repositories.keySet().toString()));
+                    		repository,repositories.keySet().toString()))); 
             	}
             }
         }
@@ -238,8 +239,8 @@ public class ImportsLoader {
 	        //         'definition "%(import_name)s".')
 	        //       % {'import_name': import_name})
 	        //log.error(msg)
-	        ThreadLocalsHolder.getCollector().appendException(String.format(
-	        		"ValidationError: A template file name is not provided with import definition \"%s\"",importName));
+	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE190", String.format(
+	        		"ValidationError: A template file name is not provided with import definition \"%s\"",importName))); 
 	        al[0] = al[1] = null;
 	        return al;
         }
@@ -253,8 +254,8 @@ public class ImportsLoader {
 	            return al;
         	}
         	catch(IOException e) {
-    	        ThreadLocalsHolder.getCollector().appendException(String.format(
-    	        		"ImportError: \"%s\" loading YAML import from \"%s\"",e.getClass().getSimpleName(),fileName));
+    	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE191", String.format(
+    	        		"ImportError: \"%s\" loading YAML import from \"%s\"",e.getClass().getSimpleName(),fileName))); 
     	        al[0] = al[1] = null;
     	        return al;
         	}
@@ -269,7 +270,7 @@ public class ImportsLoader {
             			String msg = String.format(
                             	"ImportError: Absolute file name \"%s\" cannot be used in the URL-based input template \"%s\"",
                             	fileName,path);
-                        ThreadLocalsHolder.getCollector().appendException(msg);
+                        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE192", msg)); 
                         al[0] = al[1] = null;
                         return al;
             		}
@@ -312,7 +313,7 @@ public class ImportsLoader {
                                         //log.error(msg)
                             			String msg = String.format(
                                         		"ValueError: \"%s\" is not a valid file",importTemplate);
-                                        ThreadLocalsHolder.getCollector().appendException(msg);
+                                        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE193", msg)); 
                                         log.debug("ImportsLoader - _loadImportTemplate - {}", msg);
                             		}
                             	}
@@ -330,7 +331,7 @@ public class ImportsLoader {
             	else {
             		String msg = String.format(
             			"Relative file name \"%s\" cannot be used in a pre-parsed input template",fileName);
-                   ThreadLocalsHolder.getCollector().appendException("ImportError: " + msg);
+                   ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE194", "ImportError: " + msg)); 
                    al[0] = al[1] = null;
                    return al;
             	}
@@ -339,8 +340,8 @@ public class ImportsLoader {
             if(importTemplate == null || importTemplate.isEmpty()) {
                 //log.error(_('Import "%(name)s" is not valid.') %
                 //          {'name': import_uri_def})
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                		"ImportError: Import \"%s\" is not valid",importUriDef));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE195", String.format(
+                		"ImportError: Import \"%s\" is not valid",importUriDef))); 
     	        al[0] = al[1] = null;
     	        return al;
             }
@@ -348,8 +349,8 @@ public class ImportsLoader {
             // for now, this must be a file
             if(!aFile) {
             	log.error("ImportsLoader - _loadImportTemplate - Error!! Expected a file. importUriDef = {}, importTemplate = {}", importUriDef, importTemplate);
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                		"ImportError: Import \"%s\" is not a file",importName));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE196", String.format(
+                		"ImportError: Import \"%s\" is not a file",importName))); 
     	        al[0] = al[1] = null;
     	        return al;
             }
@@ -361,14 +362,14 @@ public class ImportsLoader {
 	            return al;
             }
             catch(FileNotFoundException e) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                		"ImportError: Failed to load YAML from \"%s\"",importName));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE197", String.format(
+                		"ImportError: Failed to load YAML from \"%s\"",importName))); 
     	        al[0] = al[1] = null;
     	        return al;
             }
             catch(Exception e) {
-                ThreadLocalsHolder.getCollector().appendException(String.format(
-                		"ImportError: Exception from SnakeYAML file = \"%s\"",importName));
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE198", String.format(
+                		"ImportError: Exception from SnakeYAML file = \"%s\"",importName))); 
     	        al[0] = al[1] = null;
     	        return al;
             }
@@ -376,8 +377,8 @@ public class ImportsLoader {
             	
         if(shortImportNotation) {
             //log.error(_('Import "%(name)s" is not valid.') % import_uri_def)
-            ThreadLocalsHolder.getCollector().appendException(String.format(
-            		"ImportError: Import \"%s\" is not valid",importName));
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE199", String.format(
+            		"ImportError: Import \"%s\" is not valid",importName))); 
 	        al[0] = al[1] = null;
 	        return al;
         }
@@ -410,7 +411,7 @@ public class ImportsLoader {
                 String msg = String.format(
                 	"referenced repository \"%s\" in import definition \"%s\" not found",
                 	repository,importName);
-                ThreadLocalsHolder.getCollector().appendException("ImportError: " + msg);
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE200", "ImportError: " + msg)); 
    	        	al[0] = al[1] = null;
    	        	return al;
         	}
@@ -424,8 +425,8 @@ public class ImportsLoader {
 	            return al;
         	}
         	catch(IOException e) {
-    	        ThreadLocalsHolder.getCollector().appendException(String.format(
-    	        		"ImportError: Exception loading YAML import from \"%s\"",fullUrl));
+    	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE201", String.format(
+    	        		"ImportError: Exception loading YAML import from \"%s\"",fullUrl))); 
     	        al[0] = al[1] = null;
     	        return al;
         	}
@@ -434,13 +435,13 @@ public class ImportsLoader {
             String msg = String.format(
                 	"repository URL \"%s\" in import definition \"%s\" is not valid",
                 	repoUrl,importName);
-               ThreadLocalsHolder.getCollector().appendException("ImportError: " + msg);
+               ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE202", "ImportError: " + msg)); 
         }
           
         // if we got here something is wrong with the flow...
         log.error("ImportsLoader - _loadImportTemplate - got to dead end (importName {})", importName);
-        ThreadLocalsHolder.getCollector().appendException(String.format(
-        		"ImportError: _loadImportTemplate got to dead end (importName %s)\n",importName));
+        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE203", String.format(
+        		"ImportError: _loadImportTemplate got to dead end (importName %s)\n",importName))); 
         al[0] = al[1] = null;
         return al;
     }
@@ -464,7 +465,7 @@ public class ImportsLoader {
 import logging
 import os
 
-from toscaparser.common.exception import ExceptionCollector
+from toscaparser.common.exception import ValidationIssueCollector
 from toscaparser.common.exception import InvalidPropertyValueError
 from toscaparser.common.exception import MissingRequiredFieldError
 from toscaparser.common.exception import UnknownFieldError
@@ -491,7 +492,7 @@ class ImportsLoader(object):
         if not path and not tpl:
             msg = _('Input tosca template is not provided.')
             log.warning(msg)
-            ExceptionCollector.appendException(ValidationError(message=msg))
+            ValidationIssueCollector.appendException(ValidationError(message=msg))
         self.path = path
         self.repositories = {}
         if tpl and tpl.get('repositories'):
@@ -514,7 +515,7 @@ class ImportsLoader(object):
             msg = _('"imports" keyname is defined without including '
                     'templates.')
             log.error(msg)
-            ExceptionCollector.appendException(ValidationError(message=msg))
+            ValidationIssueCollector.appendException(ValidationError(message=msg))
             return
 
         for import_def in self.importslist:
@@ -524,7 +525,7 @@ class ImportsLoader(object):
                         msg = (_('Duplicate import name "%s" was found.') %
                                import_name)
                         log.error(msg)
-                        ExceptionCollector.appendException(
+                        ValidationIssueCollector.appendException(
                             ValidationError(message=msg))
                     imports_names.add(import_name)
 
@@ -568,7 +569,7 @@ class ImportsLoader(object):
         if self.FILE not in import_uri_def.keys():
             log.warning(_('Missing keyname "file" in import "%(name)s".')
                         % {'name': import_name})
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 MissingRequiredFieldError(
                     what='Import of template "%s"' % import_name,
                     required=self.FILE))
@@ -577,7 +578,7 @@ class ImportsLoader(object):
                 log.warning(_('Unknown keyname "%(key)s" error in '
                               'imported definition "%(def)s".')
                             % {'key': key, 'def': import_name})
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     UnknownFieldError(
                         what='Import of template "%s"' % import_name,
                         field=key))
@@ -610,7 +611,7 @@ class ImportsLoader(object):
             repos = self.repositories.keys()
             if repository is not None:
                 if repository not in repos:
-                    ExceptionCollector.appendException(
+                    ValidationIssueCollector.appendException(
                         InvalidPropertyValueError(
                             what=_('Repository is not found in "%s"') % repos))
         else:
@@ -623,7 +624,7 @@ class ImportsLoader(object):
                      'definition "%(import_name)s".')
                    % {'import_name': import_name})
             log.error(msg)
-            ExceptionCollector.appendException(ValidationError(message=msg))
+            ValidationIssueCollector.appendException(ValidationError(message=msg))
             return
 
         if toscaparser.utils.urlutils.UrlUtils.validate_url(file_name):
@@ -638,7 +639,7 @@ class ImportsLoader(object):
                                  '"%(template)s".')
                                % {'name': file_name, 'template': self.path})
                         log.error(msg)
-                        ExceptionCollector.appendException(ImportError(msg))
+                        ValidationIssueCollector.appendException(ImportError(msg))
                         return
                     import_template = toscaparser.utils.urlutils.UrlUtils.\
                         join_url(self.path, file_name)
@@ -670,7 +671,7 @@ class ImportsLoader(object):
                                                    % {'import_template':
                                                       import_template})
                                             log.error(msg)
-                                            ExceptionCollector.appendException
+                                            ValidationIssueCollector.appendException
                                             (ValueError(msg))
             else:  # template is pre-parsed
                 if os.path.isabs(file_name) and os.path.isfile(file_name):
@@ -681,13 +682,13 @@ class ImportsLoader(object):
                              'in a pre-parsed input template.')
                            % {'name': file_name})
                     log.error(msg)
-                    ExceptionCollector.appendException(ImportError(msg))
+                    ValidationIssueCollector.appendException(ImportError(msg))
                     return
 
             if not import_template:
                 log.error(_('Import "%(name)s" is not valid.') %
                           {'name': import_uri_def})
-                ExceptionCollector.appendException(
+                ValidationIssueCollector.appendException(
                     ImportError(_('Import "%s" is not valid.') %
                                 import_uri_def))
                 return
@@ -695,7 +696,7 @@ class ImportsLoader(object):
 
         if short_import_notation:
             log.error(_('Import "%(name)s" is not valid.') % import_uri_def)
-            ExceptionCollector.appendException(
+            ValidationIssueCollector.appendException(
                 ImportError(_('Import "%s" is not valid.') % import_uri_def))
             return
 
@@ -714,7 +715,7 @@ class ImportsLoader(object):
                          'definition "%(tpl)s" not found.')
                        % {'n_uri': repository, 'tpl': import_name})
                 log.error(msg)
-                ExceptionCollector.appendException(ImportError(msg))
+                ValidationIssueCollector.appendException(ImportError(msg))
                 return
 
         if toscaparser.utils.urlutils.UrlUtils.validate_url(full_url):
@@ -724,5 +725,5 @@ class ImportsLoader(object):
                      'definition "%(tpl)s".')
                    % {'n_uri': repo_url, 'tpl': import_name})
             log.error(msg)
-            ExceptionCollector.appendException(ImportError(msg))
+            ValidationIssueCollector.appendException(ImportError(msg))
 */
