@@ -1,13 +1,12 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
+import org.openecomp.sdc.toscaparser.api.EntityTemplate;
 import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
+import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.openecomp.sdc.toscaparser.api.EntityTemplate;
-import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class InterfacesDef extends StatefulEntityType {
 

@@ -1,13 +1,13 @@
 package org.openecomp.sdc.toscaparser.api.functions;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-
 import org.openecomp.sdc.toscaparser.api.DataEntity;
 import org.openecomp.sdc.toscaparser.api.TopologyTemplate;
 import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.parameters.Input;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class GetInput extends Function {
 	
@@ -51,11 +51,17 @@ public class GetInput extends Function {
 
 			Object value = DataEntity.validateDatatype(
 					type, toscaTpl.getParsedParams().get(getInputName()),null,null,null);
-
-			if (value instanceof ArrayList && args.size() == 2 && args.get(1) instanceof Integer) {
-				return ((ArrayList) value).get((Integer)args.get(1));
+    		//SDC resolving Get Input
+			if (value instanceof ArrayList){
+				if(args.size() == 2 && args.get(1) instanceof Integer && ((ArrayList) value).size()> (Integer)args.get(1)){
+					return ((ArrayList) value).get((Integer) args.get(1));
+				}
+				else{
+					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE273",String.format(
+							"GetInputError: cannot resolve input name \"%s\", the expected structure is an argument with a name of input type list and a second argument with an index in the list", args.get(0))));
+					return null;
+				}
 			}
-
 			return value;
 		}
 		
