@@ -26,7 +26,7 @@
 		<sitePath>/content/sites/site/org/openecomp/sdc/jtosca/${project.version}</sitePath>
 		<snapshots.path>snapshots</snapshots.path>
 		<releases.path>releases</releases.path>
-		<!--<staging.profile.id>176c31dfe190a</staging.profile.id> -->
+		<staging.profile.id>176c31dfe190a</staging.profile.id>
 
 	</properties>
 
