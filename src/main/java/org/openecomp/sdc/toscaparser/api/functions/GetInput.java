@@ -73,9 +73,14 @@ public class GetInput extends Function {
 			}
 		}
 		if(inputDef != null) {
-			if (args.size() == 2 && args.get(1) instanceof Integer) {
-				if (inputDef.getDefault() != null && inputDef.getDefault() instanceof ArrayList) {
+			if (args.size() == 2 && inputDef.getDefault() != null && inputDef.getDefault() instanceof ArrayList){
+				if ( args.get(1) instanceof Integer
+						&& ((ArrayList) inputDef.getDefault()).size()> ((Integer)args.get(1)).intValue()) {
 					return ((ArrayList) inputDef.getDefault()).get(((Integer)args.get(1)).intValue());
+				}else{
+					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE274",(String.format(
+							"GetInputError: cannot resolve input Def name \"%s\", the expected structure is an argument with a name of input type list and a second argument with an index in the list", args.get(0)))));
+					return null;
 				}
 			}
 			return inputDef.getDefault();
