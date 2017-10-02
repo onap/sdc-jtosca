@@ -98,29 +98,38 @@ public abstract class Function {
 
         if (rawFunctionObj instanceof LinkedHashMap) { // In map type case
 			LinkedHashMap rawFunction = ((LinkedHashMap) rawFunctionObj);
-			if(rawFunction.size() == 1) { // End point
+			if(rawFunction.size() == 1 &&
+					!(rawFunction.values().iterator().next() instanceof  LinkedHashMap)) { // End point
 				return getFunctionForObjectItem(ttpl, context, rawFunction, resolveGetInput);
 			} else {
-			    // iterate over map nested properties in recursion, convert leaves to function,
-                // and collect them in the same hierarchy as the original map.
-				LinkedHashMap rawFunctionObjMap = new LinkedHashMap();
-				for (Object rawFunctionObjItem: rawFunction.entrySet()) {
-					Object itemValue = getFunction(ttpl, context, ((Map.Entry)rawFunctionObjItem).getValue(), resolveGetInput);
-					rawFunctionObjMap.put(((Map.Entry)rawFunctionObjItem).getKey(), itemValue);
-				}
-				return rawFunctionObjMap;
+				return getFunctionForMap(ttpl, context, rawFunction, resolveGetInput);
 			}
 		} else if (rawFunctionObj instanceof ArrayList) { // In list type case
-            // iterate over list properties in recursion, convert leaves to function,
-            // and collect them in the same hierarchy as the original list.
-			ArrayList<Object> rawFunctionObjList = new ArrayList<>();
-			for (Object rawFunctionObjItem: (ArrayList) rawFunctionObj) {
-				rawFunctionObjList.add(getFunction(ttpl, context, rawFunctionObjItem, resolveGetInput));
-			}
-			return rawFunctionObjList;
+			return getFunctionForList(ttpl, context, (ArrayList) rawFunctionObj, resolveGetInput);
 		}
 
 	    return rawFunctionObj;
+	}
+
+	private static Object getFunctionForList(TopologyTemplate ttpl, Object context, ArrayList rawFunctionObj, boolean resolveGetInput) {
+		// iterate over list properties in recursion, convert leaves to function,
+		// and collect them in the same hierarchy as the original list.
+		ArrayList<Object> rawFunctionObjList = new ArrayList<>();
+		for (Object rawFunctionObjItem: rawFunctionObj) {
+            rawFunctionObjList.add(getFunction(ttpl, context, rawFunctionObjItem, resolveGetInput));
+        }
+		return rawFunctionObjList;
+	}
+
+	private static Object getFunctionForMap(TopologyTemplate ttpl, Object context, LinkedHashMap rawFunction, boolean resolveGetInput) {
+		// iterate over map nested properties in recursion, convert leaves to function,
+		// and collect them in the same hierarchy as the original map.
+		LinkedHashMap rawFunctionObjMap = new LinkedHashMap();
+		for (Object rawFunctionObjItem: rawFunction.entrySet()) {
+            Object itemValue = getFunction(ttpl, context, ((Map.Entry)rawFunctionObjItem).getValue(), resolveGetInput);
+            rawFunctionObjMap.put(((Map.Entry)rawFunctionObjItem).getKey(), itemValue);
+        }
+		return rawFunctionObjMap;
 	}
 
 	private static Object getFunctionForObjectItem(TopologyTemplate ttpl, Object context, Object rawFunctionObjItem, boolean resolveGetInput) {
