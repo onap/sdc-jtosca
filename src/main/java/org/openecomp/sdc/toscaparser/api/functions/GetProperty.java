@@ -58,7 +58,7 @@ public class GetProperty extends Function {
 	        }
 	        Object prop = foundProp.getValue();
 	        if(prop instanceof Function) {
-	            Function.getFunction(toscaTpl,context, prop, toscaTpl.getResolveGetInput());
+	            Function.getFunction(toscaTpl,context, prop);
 	        }
 	    }
 	    else if(args.size() >= 3) {
@@ -336,7 +336,7 @@ public class GetProperty extends Function {
         if(propertyValue instanceof Function) {
             return ((Function)propertyValue).result();
         }
-        return Function.getFunction(toscaTpl,context,propertyValue, toscaTpl.getResolveGetInput());
+        return Function.getFunction(toscaTpl,context,propertyValue);
 	}
 
 	public String getNodeTemplateName() {

@@ -37,6 +37,10 @@ public class ExtTools {
 	    // for all folders in extdir
 	    File extDir = new File(extdir);
 	    File extDirList[] = extDir.listFiles();
+	    if (extDirList == null)  {
+	    	String a = "aaaa";
+	    	
+	    }
 	    if (extDirList != null) {
 		    for(File f: extDirList) {
 		    	if(f.isDirectory()) {
