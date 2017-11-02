@@ -144,10 +144,9 @@ public class ToscaTemplate extends Object {
 			path = _getPath(_path);
 			// load the YAML template
 			if (path != null && !path.isEmpty()) {
-				try {
+				try (InputStream input = new FileInputStream(new File(path));){
 					//System.out.println("Loading YAML file " + path);
 					log.debug("ToscaTemplate Loading YAMEL file {}", path);
-					InputStream input = new FileInputStream(new File(path));
 					Yaml yaml = new Yaml();
 					Object data = yaml.load(input);
 					this.tpl = (LinkedHashMap<String,Object>) data;

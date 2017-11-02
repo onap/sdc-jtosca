@@ -273,8 +273,7 @@ public class CSAR {
 	public LinkedHashMap<String,Object> getMainTemplateYaml() throws JToscaException {
     	String mainTemplate = tempDir + File.separator + getMainTemplate();
     	if(mainTemplate != null) {
-			try {
-	    		InputStream input = new FileInputStream(new File(mainTemplate));
+			try (InputStream input = new FileInputStream(new File(mainTemplate));){
 				Yaml yaml = new Yaml();
 				Object data = yaml.load(input);
 		        if(!(data instanceof LinkedHashMap)) {
@@ -459,34 +458,35 @@ public class CSAR {
         if (!destDir.exists()) {
             destDir.mkdir();
         }
-        ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
-        ZipEntry entry = zipIn.getNextEntry();
-        // iterates over entries in the zip file
-        while (entry != null) {
-        	// create all directories needed for nested items
-        	String[] parts = entry.getName().split("/");
-        	String s = destDirectory + File.separator ;
-        	for(int i=0; i< parts.length-1; i++) {
-        		s += parts[i];
-        		File idir = new File(s);
-        		if(!idir.exists()) {
-        			idir.mkdir();
-        		}
-        		s += File.separator;
-        	}
-            String filePath = destDirectory + File.separator + entry.getName();
-            if (!entry.isDirectory()) {
-                // if the entry is a file, extracts it
-                extractFile(zipIn, filePath);
-            } else {
-                // if the entry is a directory, make the directory
-                File dir = new File(filePath);
-                dir.mkdir();
-            }
-            zipIn.closeEntry();
-            entry = zipIn.getNextEntry();
-        }
-        zipIn.close();
+
+        try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));){
+			ZipEntry entry = zipIn.getNextEntry();
+			// iterates over entries in the zip file
+			while (entry != null) {
+				// create all directories needed for nested items
+				String[] parts = entry.getName().split("/");
+				String s = destDirectory + File.separator ;
+				for(int i=0; i< parts.length-1; i++) {
+					s += parts[i];
+					File idir = new File(s);
+					if(!idir.exists()) {
+						idir.mkdir();
+					}
+					s += File.separator;
+				}
+				String filePath = destDirectory + File.separator + entry.getName();
+				if (!entry.isDirectory()) {
+					// if the entry is a file, extracts it
+					extractFile(zipIn, filePath);
+				} else {
+					// if the entry is a directory, make the directory
+					File dir = new File(filePath);
+					dir.mkdir();
+				}
+				zipIn.closeEntry();
+				entry = zipIn.getNextEntry();
+			}
+		}
     }
     
     /**
@@ -499,14 +499,14 @@ public class CSAR {
     
     private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
         //BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
-    	FileOutputStream fos = new FileOutputStream(filePath);
-    	BufferedOutputStream bos = new BufferedOutputStream(fos);
-        byte[] bytesIn = new byte[BUFFER_SIZE];
-        int read = 0;
-        while ((read = zipIn.read(bytesIn)) != -1) {
-            bos.write(bytesIn, 0, read);
-        }
-        bos.close();
+		try (FileOutputStream fos = new FileOutputStream(filePath);
+			 BufferedOutputStream bos = new BufferedOutputStream(fos);){
+			byte[] bytesIn = new byte[BUFFER_SIZE];
+			int read = 0;
+			while ((read = zipIn.read(bytesIn)) != -1) {
+				bos.write(bytesIn, 0, read);
+			}
+		}
     }
 
 }	

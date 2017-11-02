@@ -246,9 +246,8 @@ public class ImportsLoader {
         }
 
         if(UrlUtils.validateUrl(fileName)) {
-        	try {
-	            al[0] = fileName;
-        		InputStream input = new URL(fileName).openStream();
+			try (InputStream input = new URL(fileName).openStream();) {
+				al[0] = fileName;
 				Yaml yaml = new Yaml();
 				al[1] = yaml.load(input);
 	            return al;
@@ -354,9 +353,9 @@ public class ImportsLoader {
     	        al[0] = al[1] = null;
     	        return al;
             }
-            try {
+            try (InputStream input = new FileInputStream(new File(importTemplate));) {
 	            al[0] = importTemplate;
-				InputStream input = new FileInputStream(new File(importTemplate));
+
 				Yaml yaml = new Yaml();
 				al[1] = yaml.load(input);
 	            return al;
@@ -417,9 +416,8 @@ public class ImportsLoader {
         	}
         }
         if(UrlUtils.validateUrl(fullUrl)) {
-        	try {
-	            al[0] = fullUrl;
-        		InputStream input = new URL(fullUrl).openStream();
+			try (InputStream input = new URL(fullUrl).openStream();) {
+				al[0] = fullUrl;
 				Yaml yaml = new Yaml();
 				al[1] = yaml.load(input);
 	            return al;
