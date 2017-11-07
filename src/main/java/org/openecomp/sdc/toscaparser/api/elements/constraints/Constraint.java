@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 
 import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.elements.ScalarUnit;
+import org.openecomp.sdc.toscaparser.api.functions.Function;
 import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public abstract class Constraint {
@@ -141,6 +142,11 @@ public abstract class Constraint {
 	}
 
 	public void validate(Object value) {
+		if (Function.isFunction(value)){
+			//skipping constraints check for functions
+		    return;
+		}
+
 		valueMsg = value;
         boolean bFound = false;
         for(String s: ScalarUnit.SCALAR_UNIT_TYPES) {
