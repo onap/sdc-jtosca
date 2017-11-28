@@ -116,11 +116,13 @@ public class ToscaTemplate extends Object {
 
 		VALID_TEMPLATE_VERSIONS = new ArrayList<>();
 		VALID_TEMPLATE_VERSIONS.add("tosca_simple_yaml_1_0");
+		VALID_TEMPLATE_VERSIONS.add("tosca_simple_yaml_1_1");
 	    VALID_TEMPLATE_VERSIONS.addAll(exttools.getVersions());
 		ADDITIONAL_SECTIONS = new LinkedHashMap<>();
 		SPECIAL_SECTIONS = new ArrayList<>();
 		SPECIAL_SECTIONS.add(METADATA);
 		ADDITIONAL_SECTIONS.put("tosca_simple_yaml_1_0",SPECIAL_SECTIONS);
+		ADDITIONAL_SECTIONS.put("tosca_simple_yaml_1_1",SPECIAL_SECTIONS);
 	    ADDITIONAL_SECTIONS.putAll(exttools.getSections());
 
 		//long startTime = System.nanoTime();
@@ -495,8 +497,9 @@ public class ToscaTemplate extends Object {
 				"InvalidTemplateVersion: \"%s\" is invalid. Valid versions are %s",
 				sVersion,VALID_TEMPLATE_VERSIONS.toString()))); 
 		}
-		else if(!sVersion.equals("tosca_simple_yaml_1_0")) {
+		else if ((!sVersion.equals("tosca_simple_yaml_1_0") && !sVersion.equals("tosca_simple_yaml_1_1"))) {
 			EntityType.updateDefinitions(sVersion);
+
 		}
 	}
 

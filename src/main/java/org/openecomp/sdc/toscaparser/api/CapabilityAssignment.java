@@ -12,13 +12,15 @@ public class CapabilityAssignment {
 	private String name;
 	private LinkedHashMap<String,Object> _properties;
 	private CapabilityTypeDef _definition;
+	private LinkedHashMap<String, Object> _customDef;
 
 	public CapabilityAssignment(String cname,
-								LinkedHashMap<String,Object> cproperties,
-								CapabilityTypeDef cdefinition) {
+								LinkedHashMap<String, Object> cproperties,
+								CapabilityTypeDef cdefinition, LinkedHashMap<String, Object> customDef) {
 		name = cname;
 		_properties = cproperties;
 		_definition = cdefinition;
+		_customDef = customDef;
 	}
 
 	/**
@@ -38,7 +40,7 @@ public class CapabilityAssignment {
 				if(propsDef != null) {
 					PropertyDef pd = (PropertyDef)propsDef.get(pname);
 					if(pd != null) {
-						properties.add(new Property(pname,pvalue,pd.getSchema(),null));
+						properties.add(new Property(pname,pvalue,pd.getSchema(), _customDef));
 					}
 				}
 			}

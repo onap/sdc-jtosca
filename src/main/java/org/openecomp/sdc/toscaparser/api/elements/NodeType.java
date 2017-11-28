@@ -131,16 +131,15 @@ public class NodeType extends StatefulEntityType {
 
         // This method will lookup all node types if they have the
         // provided capability.
-
         // Filter the node types
         ArrayList<String> nodeTypes = new ArrayList<>();
-        for(String nt: TOSCA_DEF.keySet()) {
-        	if(nt.startsWith(NODE_PREFIX) && !nt.equals("tosca.nodes.Root")) {
+        for(String nt: customDef.keySet()) {
+        	if(nt.startsWith(NODE_PREFIX) || nt.startsWith("org.openecomp") && !nt.equals("tosca.nodes.Root")) {
         		nodeTypes.add(nt);
         	}
         }
         for(String nt: nodeTypes) {
-			LinkedHashMap<String,Object> nodeDef = (LinkedHashMap<String,Object>)TOSCA_DEF.get(nt);
+			LinkedHashMap<String,Object> nodeDef = (LinkedHashMap<String,Object>)customDef.get(nt);
             if(nodeDef instanceof LinkedHashMap && nodeDef.get("capabilities") != null) {
             	LinkedHashMap<String,Object> nodeCaps = (LinkedHashMap<String,Object>)nodeDef.get("capabilities");
             	if(nodeCaps != null) {
@@ -161,13 +160,17 @@ public class NodeType extends StatefulEntityType {
     @SuppressWarnings("unchecked")
 	private String _getRelation(String key,String ndtype) {
     	String relation = null;
-    	NodeType ntype = new NodeType(ndtype,null);
+    	NodeType ntype = new NodeType(ndtype, customDef);
     	LinkedHashMap<String,CapabilityTypeDef> caps = ntype.getCapabilities();
     	if(caps != null && caps.get(key) != null) {
     		CapabilityTypeDef c = caps.get(key);
     		for(int i=0; i< RELATIONSHIP_TYPE.length; i++) {
     			String r = RELATIONSHIP_TYPE[i];
-    			LinkedHashMap<String,Object> rtypedef = (LinkedHashMap<String,Object>)TOSCA_DEF.get(r);
+				if(r != null) {
+					relation = r;
+					break;
+				}
+    			LinkedHashMap<String,Object> rtypedef = (LinkedHashMap<String,Object>)customDef.get(r);
     			for(Object o: rtypedef.values()) {
     				LinkedHashMap<String,Object> properties = (LinkedHashMap<String,Object>)o;
     				if(properties.get(c.getType()) != null) {

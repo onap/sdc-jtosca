@@ -41,6 +41,7 @@ public class TypeValidation {
     private static ArrayList<String> _getVTV() {
     	ArrayList<String> vtv = new ArrayList<>();
     	vtv.add("tosca_simple_yaml_1_0");
+		vtv.add("tosca_simple_yaml_1_1");
     	ExtTools exttools = new ExtTools();
         vtv.addAll(exttools.getVersions());
         return vtv;

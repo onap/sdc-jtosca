@@ -279,7 +279,7 @@ public abstract class EntityTemplate {
 					if(pp != null) {
 						properties.putAll(pp);
 					}
-                    CapabilityAssignment cap = new CapabilityAssignment(name, properties, c);
+                    CapabilityAssignment cap = new CapabilityAssignment(name, properties, c, customDef);
                     capability.add(cap);
 				}
 			}
