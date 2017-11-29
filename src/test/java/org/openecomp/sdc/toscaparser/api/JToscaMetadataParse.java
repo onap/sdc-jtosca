@@ -32,10 +32,8 @@ public class JToscaMetadataParse {
         String fileStr = JToscaMetadataParse.class.getClassLoader().getResource("csars/tmpCSAR_Huawei_vSPGW_fixed.csar.csar").getFile();
         File file = new File(fileStr);
         ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
-
-
-//        Collection<JToscaValidationIssue> issues = ThreadLocalsHolder.getCollector().getValidationIssues().values();
-//        assertTrue(issues.size() == 0 );
+        int validationIssuesCaught = ThreadLocalsHolder.getCollector().validationIssuesCaught();
+        assertTrue(validationIssuesCaught == 0 );
     }
 
 }
