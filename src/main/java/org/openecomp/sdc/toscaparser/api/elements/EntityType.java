@@ -1,15 +1,15 @@
 package org.openecomp.sdc.toscaparser.api.elements;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.openecomp.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.openecomp.sdc.toscaparser.api.extensions.ExtTools;
 import org.openecomp.sdc.toscaparser.api.utils.CopyUtils;
+import org.openecomp.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -238,30 +238,30 @@ public class EntityType {
    public static void updateDefinitions(String version) {
         ExtTools exttools = new ExtTools();
         String extensionDefsFile = exttools.getDefsFile(version);
-        
-		InputStream input = null;
-		try {
-			input = new FileInputStream(new File(extensionDefsFile));
-		} 
-		catch (FileNotFoundException e) {
-			log.error("EntityType - updateDefinitions - Failed to open extension defs file ", extensionDefsFile);
-			return;		
-		}
-		Yaml yaml = new Yaml();
-		LinkedHashMap<String,Object> nfvDefFile = (LinkedHashMap<String,Object>)yaml.load(input);
-		LinkedHashMap<String,Object> nfvDef = new LinkedHashMap<>();
-		for(String section: TOSCA_DEF_SECTIONS) {
-			if(nfvDefFile.get(section) != null) {
-				LinkedHashMap<String,Object> value = 
-						(LinkedHashMap<String,Object>)nfvDefFile.get(section);
-				for(String key: value.keySet()) {
-					nfvDef.put(key, value.get(key));
+
+		try (InputStream input = EntityType.class.getClassLoader().getResourceAsStream(extensionDefsFile);){
+			Yaml yaml = new Yaml();
+			LinkedHashMap<String,Object> nfvDefFile = (LinkedHashMap<String,Object>)yaml.load(input);
+			LinkedHashMap<String,Object> nfvDef = new LinkedHashMap<>();
+			for(String section: TOSCA_DEF_SECTIONS) {
+				if(nfvDefFile.get(section) != null) {
+					LinkedHashMap<String,Object> value =
+							(LinkedHashMap<String,Object>)nfvDefFile.get(section);
+					for(String key: value.keySet()) {
+						nfvDef.put(key, value.get(key));
+					}
 				}
 			}
+			TOSCA_DEF.putAll(nfvDef);
+		} 
+		catch (IOException e) {
+			log.error("EntityType - updateDefinitions - Failed to update definitions from defs file {}",extensionDefsFile);
+			log.error("Exception:", e);
+			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE280",
+					String.format("Failed to update definitions from defs file \"%s\" ",extensionDefsFile)));
+			return;
 		}
-		TOSCA_DEF.putAll(nfvDef);
     }
-    
 }
 
 /*python
