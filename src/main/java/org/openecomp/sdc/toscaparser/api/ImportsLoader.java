@@ -362,13 +362,13 @@ public class ImportsLoader {
             }
             catch(FileNotFoundException e) {
                 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE197", String.format(
-                		"ImportError: Failed to load YAML from \"%s\"",importName))); 
+                		"ImportError: Failed to load YAML from \"%s\"" + e,importName)));
     	        al[0] = al[1] = null;
     	        return al;
             }
             catch(Exception e) {
                 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE198", String.format(
-                		"ImportError: Exception from SnakeYAML file = \"%s\"",importName))); 
+                		"ImportError: Exception from SnakeYAML file = \"%s\"" + e,importName)));
     	        al[0] = al[1] = null;
     	        return al;
             }

@@ -153,10 +153,16 @@ public class ToscaTemplate extends Object {
 				} 
 				catch (FileNotFoundException e) {
 					log.error("ToscaTemplate - Exception loading yaml: {}", e.getMessage());
+					log.error("Exception", e);
+					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE275",
+							"ToscaTemplate - Exception loading yaml: -> " + e.getMessage()));
 					return;
 				}
 				catch(Exception e) {
-					log.error("ToscaTemplate - Error loading yaml, aborting");
+					log.error("ToscaTemplate - Error loading yaml, aborting -> ", e.getMessage());
+					log.error("Exception", e);
+					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE275",
+							"ToscaTemplate - Error loading yaml, aborting -> " + e.getMessage()));
 					return;
 				}
 				
