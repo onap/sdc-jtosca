@@ -141,7 +141,7 @@
 				<configuration>
 					<nexusUrl>${nexus.proxy}</nexusUrl>
 					<stagingProfileId>${staging.profile.id}</stagingProfileId>
-					<serverId>ecomp-staging</serverId>
+					<serverId>onap-staging</serverId>
 				</configuration>
 			</plugin>
 
