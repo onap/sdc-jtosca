@@ -172,8 +172,7 @@ public class ToscaTemplate extends Object {
 		            //log.info(msg)
 		            log.debug("ToscaTemplate - Both path and yaml_dict_tpl arguments were provided. Using path and ignoring yaml_dict_tpl");
 		        }
-			}
-			else {
+			} else {
 				// no input to process...
 				_abort();
 			}
@@ -225,6 +224,7 @@ public class ToscaTemplate extends Object {
 		verifyTemplate();
 		throw new JToscaException("jtosca aborting", JToscaErrorCodes.PATH_NOT_VALID.getValue());
 	}
+	
 	private TopologyTemplate _topologyTemplate() {
 		return new TopologyTemplate(
 				_tplTopologyTemplate(),

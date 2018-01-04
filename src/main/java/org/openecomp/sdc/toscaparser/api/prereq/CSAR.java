@@ -54,7 +54,6 @@ public class CSAR {
 		metaProperties = new LinkedHashMap<>();
 	}
 
-	@SuppressWarnings("unchecked")
 	public boolean validate() throws JToscaException {
 		isValidated = true;
 	
@@ -310,9 +309,11 @@ public class CSAR {
         if(!isValidated) {
             validate();
         }
-       	tempDir = Files.createTempDirectory("JTP").toString();
-       	unzip(path,tempDir);
-       
+        
+        if(tempDir == null || tempDir.isEmpty()) {
+        	tempDir = Files.createTempDirectory("JTP").toString();
+        	unzip(path,tempDir);
+        }
     }
     
 	private void _validateExternalReferences() throws JToscaException {
