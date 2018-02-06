@@ -136,6 +136,7 @@ public class ToscaTemplate extends Object {
 		nestedToscaTplsWithTopology = new ConcurrentHashMap<>();
 		nestedToscaTemplatesWithTopology = new ArrayList<TopologyTemplate>();
 		resolveGetInput = _resolveGetInput;
+		metaProperties = new LinkedHashMap<>();
 
 		if(_path != null && !_path.isEmpty()) {
 			// save the original input path
