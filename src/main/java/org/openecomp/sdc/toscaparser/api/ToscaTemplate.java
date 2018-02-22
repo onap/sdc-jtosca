@@ -9,9 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.nio.file.Files;
-import java.util.function.Predicate;
-import java.nio.file.Paths;
 
 import org.openecomp.sdc.toscaparser.api.common.ValidationIssueCollector;
 import org.openecomp.sdc.toscaparser.api.common.JToscaException;
@@ -73,7 +70,6 @@ public class ToscaTemplate extends Object {
 	private boolean isFile;
 	private String path;
 	private String inputPath;
-	private String rootPath;
 	private LinkedHashMap<String,Object> parsedParams;
 	private boolean resolveGetInput;
 	private LinkedHashMap<String,Object> tpl;
@@ -95,7 +91,6 @@ public class ToscaTemplate extends Object {
     private String csarTempDir;
     private int nestingLoopCounter;
 	private LinkedHashMap<String, LinkedHashMap<String, Object>> metaProperties;
-	private Set<String> processedImports;
 
 	public ToscaTemplate(String _path,
 						LinkedHashMap<String,Object> _parsedParams,
@@ -198,9 +193,6 @@ public class ToscaTemplate extends Object {
         if(tpl != null) {
             parsedParams = _parsedParams;
             _validateField();
-            this.rootPath = path;
-            this.processedImports = new HashSet<String>();
-            this.imports = _tplImports();
             this.version = _tplVersion();
             this.metaData = _tplMetaData();
             this.relationshipTypes = _tplRelationshipTypes();
@@ -313,198 +305,28 @@ public class ToscaTemplate extends Object {
 	private ArrayList<Policy> _policies() {
 		return topologyTemplate.getPolicies();
 	}
-
-	/**
-	 * This method is used to get consolidated custom definitions from all imports
-	 * It is logically divided in two parts to handle imports; map and list formats.
-	 * Before processing the imports; it sorts them to make sure the current directory imports are
-	 * being processed first and then others. Once sorted; it processes each import one by one in
-	 * recursive manner.
-	 * To avoid cyclic dependency among imports; this method uses a set to keep track of all
-	 * imports which are already processed and filters the imports which occurs more than once.
-	 *
-	 * @param alImports all imports which needs to be processed
-	 * @return the linked hash map containing all import definitions
-	 */
-	private LinkedHashMap<String,Object> _getAllCustomDefs(Object alImports) {
-
+	
+	private LinkedHashMap<String,Object> _getAllCustomDefs(ArrayList<Object> alImports) {
+		
 		String types[] = {
-				IMPORTS, NODE_TYPES, CAPABILITY_TYPES, RELATIONSHIP_TYPES,
-				DATA_TYPES, INTERFACE_TYPES, POLICY_TYPES, GROUP_TYPES
+			IMPORTS, NODE_TYPES, CAPABILITY_TYPES, RELATIONSHIP_TYPES, 
+			DATA_TYPES, INTERFACE_TYPES, POLICY_TYPES, GROUP_TYPES
 		};
-		LinkedHashMap<String,Object> customDefsFinal = new LinkedHashMap<>();
-
-		List<Map<String, Object>> imports = (List<Map<String, Object>>) alImports;
-		if (imports != null && !imports.isEmpty()) {
-			if (imports.get(0) instanceof LinkedHashMap) {
-				imports = sortImports(imports);
-
-				for (Map<String, Object> map : imports) {
-					List<Map<String, Object>> singleImportList = new ArrayList();
-					singleImportList.add(map);
-
-					Map<String, String> importNameDetails = getValidFileNameForImportReference(singleImportList);
-					singleImportList = filterImportsForRecursion(singleImportList, importNameDetails);
-
-					if(!singleImportList.get(0).isEmpty()){
-						LinkedHashMap<String, Object> customDefs = _getCustomTypes(types, new ArrayList<>(singleImportList));
-						processedImports.add(importNameDetails.get("importFileName"));
-
-						if (customDefs != null) {
-							customDefsFinal.putAll(customDefs);
-
-							if (customDefs.get(IMPORTS) != null) {
-								resetPathForRecursiveImports(importNameDetails.get("importRelativeName"));
-								LinkedHashMap<String, Object> importDefs = _getAllCustomDefs(customDefs.get(IMPORTS));
-								customDefsFinal.putAll(importDefs);
-							}
-						}
-					}
-				}
-			} else {
-				LinkedHashMap<String, Object> customDefs = _getCustomTypes(types, new ArrayList<>(imports));
-				if (customDefs != null) {
-					customDefsFinal.putAll(customDefs);
-
-					if (customDefs.get(IMPORTS) != null) {
-						LinkedHashMap<String, Object> importDefs = _getAllCustomDefs(customDefs.get(IMPORTS));
-						customDefsFinal.putAll(importDefs);
-					}
-				}
+		LinkedHashMap<String,Object> customDefsFinal = new LinkedHashMap<String,Object>(); 
+		LinkedHashMap<String,Object> customDefs = _getCustomTypes(types,alImports);
+		if(customDefs != null) {
+			customDefsFinal.putAll(customDefs);
+			if(customDefs.get(IMPORTS) != null) {
+				@SuppressWarnings("unchecked")
+				LinkedHashMap<String,Object> importDefs = _getAllCustomDefs((ArrayList<Object>)customDefs.get(IMPORTS));
+				customDefsFinal.putAll(importDefs);
 			}
 		}
-
-		// As imports are not custom_types, remove from the dict
-		customDefsFinal.remove(IMPORTS);
+		
+        // As imports are not custom_types, remove from the dict
+        customDefsFinal.remove(IMPORTS);
 
 		return customDefsFinal;
-	}
-
-	/**
-	 * This method is used to sort the imports in order so that same directory
-	 * imports will be processed first
-	 *
-	 * @param customImports the custom imports
-	 * @return the sorted list of imports
-	 */
-	private List<Map<String, Object>> sortImports(List<Map<String, Object>> customImports){
-		List<Map<String, Object>> finalList1 = new ArrayList<>();
-		List<Map<String, Object>> finalList2 = new ArrayList<>();
-		Iterator<Map<String, Object>> itr = customImports.iterator();
-		while(itr.hasNext()) {
-			Map innerMap = itr.next();
-			if (innerMap.toString().contains("../")) {
-				finalList2.add(innerMap);
-				itr.remove();
-			}
-			else if (innerMap.toString().contains("/")) {
-				finalList1.add(innerMap);
-				itr.remove();
-			}
-		}
-
-		customImports.addAll(finalList1);
-		customImports.addAll(finalList2);
-		return customImports;
-	}
-
-	/**
-	 * This method is used to reset PATH variable after processing of current import file is done
-	 * This is required because of relative path nature of imports present in files.
-	 *
-	 * @param currImportRelativeName the current import relative name
-	 */
-	private void resetPathForRecursiveImports(String currImportRelativeName){
-		path = getPath(path, currImportRelativeName);
-	}
-
-	/**
-	 * This is a recursive method which starts from current import and then recursively finds a
-	 * valid path relative to current import file name.
-	 * By doing this it handles all nested hierarchy of imports defined in CSARs
-	 *
-	 * @param path           the path
-	 * @param importFileName the import file name
-	 * @return the string containing updated path value
-	 */
-	private String getPath(String path, String importFileName){
-		String tempFullPath = (Paths.get(path).toAbsolutePath().getParent()
-				.toString() + File.separator + importFileName.replace("../", "")).replace('\\', '/');
-		String tempPartialPath = (Paths.get(path).toAbsolutePath().getParent().toString()).replace('\\', '/');
-		if(Files.exists(Paths.get(tempFullPath)))
-			return tempFullPath;
-		else
-			return getPath(tempPartialPath, importFileName);
-	}
-
-	/**
-	 * This method is used to get full path name for the file which needs to be processed. It helps
-	 * in situation where files are present in different directory and are references as relative
-	 * paths.
-	 *
-	 * @param customImports the custom imports
-	 * @return the map containing import file full and relative paths
-	 */
-	private Map<String, String> getValidFileNameForImportReference(List<Map<String, Object>>
-																																		 customImports){
-		String importFileName;
-		Map<String, String> retMap = new HashMap<>();
-		for (Map<String, Object> map1 : customImports) {
-			for (Map.Entry<String, Object> entry : map1.entrySet()) {
-				Map innerMostMap = (Map) entry.getValue();
-				Iterator<Map.Entry<String, String>> it = innerMostMap.entrySet().iterator();
-				while (it.hasNext()) {
-					Map.Entry<String, String> val = it.next();
-					if(val.getValue().contains("/")){
-						importFileName = (Paths.get(rootPath).toAbsolutePath().getParent().toString() + File
-								.separator + val.getValue().replace("../", "")).replace('\\', '/');
-					}
-					else {
-						importFileName = (Paths.get(path).toAbsolutePath().getParent().toString() + File
-								.separator + val.getValue().replace("../", "")).replace('\\', '/');
-					}
-					retMap.put("importFileName", importFileName);
-					retMap.put("importRelativeName", val.getValue());
-				}
-			}
-		}
-		return retMap;
-	}
-
-	/**
-	 * This method is used to filter the imports which already gets processed in previous step.
-	 * It handles the use case of cyclic dependency in imports which may cause Stack Overflow
-	 * exception
-	 *
-	 * @param customImports     the custom imports
-	 * @param importNameDetails the import name details
-	 * @return the list containing filtered imports
-	 */
-	private List<Map<String, Object>> filterImportsForRecursion(List<Map<String, Object>>
-																																	customImports, Map<String,
-			String> importNameDetails){
-		for (Map<String, Object> map1 : customImports) {
-			for (Map.Entry<String, Object> entry : map1.entrySet()) {
-				Map innerMostMap = (Map) entry.getValue();
-				Iterator<Map.Entry<String, String>> it = innerMostMap.entrySet().iterator();
-				while (it.hasNext()) {
-					it.next();
-					if (processedImports.contains(importNameDetails.get("importFileName"))) {
-						it.remove();
-					}
-				}
-			}
-		}
-
-		// Remove Empty elements
-		Iterator<Map<String, Object>> itr = customImports.iterator();
-		while(itr.hasNext()) {
-			Map innerMap = itr.next();
-			Predicate<Map> predicate = p-> p.values().isEmpty();
-			innerMap.values().removeIf(predicate);
-		}
-
-		return customImports;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -574,8 +396,6 @@ public class ToscaTemplate extends Object {
 			log.error("ToscaTemplate - _handleNestedToscaTemplatesWithTopology - Nested Topologies Loop: too many levels, aborting");
 			return;
 		}
-		// Reset Processed Imports for nested templates
-		this.processedImports = new HashSet<>();
 		for(Map.Entry<String,Object> me: nestedToscaTplsWithTopology.entrySet()) {
 			String fname = me.getKey();
 			LinkedHashMap<String,Object> toscaTpl = 
@@ -834,6 +654,10 @@ public class ToscaTemplate extends Object {
 	
 	public ArrayList<TopologyTemplate> getNestedTemplates() {
 		return nestedToscaTemplatesWithTopology;
+	}
+
+	public ConcurrentHashMap<String, Object> getNestedTopologyTemplates() {
+		return nestedToscaTplsWithTopology;
 	}
 
 	@Override

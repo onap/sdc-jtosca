@@ -28,7 +28,6 @@ public class ImportsLoader {
 	private ArrayList<String> typeDefinitionList;
 	
 	private LinkedHashMap<String,Object> customDefs;
-	private LinkedHashMap<String,Object> allCustomDefs;
 	private ArrayList<LinkedHashMap<String,Object>> nestedToscaTpls;
 	private LinkedHashMap<String,Object> repositories;
 
@@ -40,7 +39,6 @@ public class ImportsLoader {
 		
 	        this.importslist = _importslist;
 	        customDefs = new LinkedHashMap<String,Object>();
-			allCustomDefs = new LinkedHashMap<String,Object>();
 	        nestedToscaTpls = new ArrayList<LinkedHashMap<String,Object>>();
 	        if((_path == null || _path.isEmpty()) && tpl == null) {
 	            //msg = _('Input tosca template is not provided.')
@@ -67,7 +65,7 @@ public class ImportsLoader {
 	}
 
 	public LinkedHashMap<String,Object> getCustomDefs() {
-	        return allCustomDefs;
+	        return customDefs;
 	}
 
     public ArrayList<LinkedHashMap<String,Object>> getNestedToscaTpls() {
@@ -133,50 +131,33 @@ public class ImportsLoader {
     	}
     }
 
-	/**
-	 * This method is used to get consolidated custom definitions by passing custom Types from
-	 * each import. The resultant collection is then passed back which contains all import
-	 * definitions
-	 *
-	 * @param customType      the custom type
-	 * @param namespacePrefix the namespace prefix
-	 */
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
 	private void _updateCustomDefs(LinkedHashMap<String,Object> customType, String namespacePrefix) {
-		LinkedHashMap<String,Object> outerCustomTypes;
-		for(String typeDef: typeDefinitionList) {
-			if(typeDef.equals("imports")) {
-				customDefs.put("imports", customType.get(typeDef));
-				if (allCustomDefs.isEmpty() || allCustomDefs.get("imports") == null){
-					allCustomDefs.put("imports",customType.get(typeDef));
-				}
-				else if (customType.get(typeDef) != null){
-					Set<Object> allCustomImports = new HashSet<>((ArrayList<Object>)allCustomDefs.get("imports"));
-					allCustomImports.addAll((ArrayList<Object>) customType.get(typeDef));
-					allCustomDefs.put("imports", new ArrayList<>(allCustomImports));
-				}
-			}
-			else {
-				outerCustomTypes = (LinkedHashMap<String,Object>)customType.get(typeDef);
-				if(outerCustomTypes != null) {
-					if(namespacePrefix != null && !namespacePrefix.isEmpty()) {
-						LinkedHashMap<String,Object> prefixCustomTypes = new LinkedHashMap<String,Object>();
-						for(Map.Entry<String,Object> me: outerCustomTypes.entrySet()) {
-							String typeDefKey = me.getKey();
-							String nameSpacePrefixToKey = namespacePrefix + "." + typeDefKey;
-							prefixCustomTypes.put(nameSpacePrefixToKey, outerCustomTypes.get(typeDefKey));
-						}
-						customDefs.putAll(prefixCustomTypes);
-						allCustomDefs.putAll(prefixCustomTypes);
-					}
-					else {
-						customDefs.putAll(outerCustomTypes);
-						allCustomDefs.putAll(outerCustomTypes);
-					}
-				}
-			}
-		}
-	}
+    	LinkedHashMap<String,Object> outerCustomTypes;// = new LinkedHashMap<String,Object>();
+    	for(String typeDef: typeDefinitionList) {
+    		if(typeDef.equals("imports")) {
+    			// imports are ArrayList...
+    			customDefs.put("imports",(ArrayList<Object>)customType.get(typeDef));
+    		}
+    		else {
+	    		outerCustomTypes = (LinkedHashMap<String,Object>)customType.get(typeDef);
+	    		if(outerCustomTypes != null) {
+    				if(namespacePrefix != null && !namespacePrefix.isEmpty()) {
+    			    	LinkedHashMap<String,Object> prefixCustomTypes = new LinkedHashMap<String,Object>();
+    	    			for(Map.Entry<String,Object> me: outerCustomTypes.entrySet()) {
+    	    				String typeDefKey = me.getKey();
+    	    				String nameSpacePrefixToKey = namespacePrefix + "." + typeDefKey;
+    	    				prefixCustomTypes.put(nameSpacePrefixToKey, outerCustomTypes.get(typeDefKey));
+    	    			}
+    	    			customDefs.putAll(prefixCustomTypes);
+    				}
+    				else {
+    	    			customDefs.putAll(outerCustomTypes);
+    				}
+	    		}
+    		}
+    	}
+    }
 
     private void _updateNestedToscaTpls(String fullFileName,LinkedHashMap<String,Object> customTpl) {
     	if(fullFileName != null && customTpl != null) {
