@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.openecomp.sdc.jtosca</groupId>
+	<groupId>org.onap.sdc.jtosca</groupId>
 	<artifactId>jtosca</artifactId>
-	<version>1.2.2-SNAPSHOT</version>
+	<version>1.3.0</version>
         <name>sdc-jtosca</name>
 	<properties>
 
@@ -23,7 +23,7 @@
 		<!--<sonar.projectBaseDir>${project.basedir}</sonar.projectBaseDir>-->
 		<sonar.jacoco.reportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.reportPath>
 		<nexus.proxy>https://nexus.onap.org</nexus.proxy>
-		<sitePath>/content/sites/site/org/openecomp/sdc/jtosca/${project.version}</sitePath>
+		<sitePath>/content/sites/site/org/onap/sdc/jtosca/${project.version}</sitePath>
 		<snapshots.path>snapshots</snapshots.path>
 		<releases.path>releases</releases.path>
 		<staging.profile.id>176c31dfe190a</staging.profile.id>
