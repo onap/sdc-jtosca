@@ -4,7 +4,7 @@
 
 	<groupId>org.onap.sdc.jtosca</groupId>
 	<artifactId>jtosca</artifactId>
-	<version>1.3.0</version>
+	<version>1.3.0-SNAPSHOT</version>
         <name>sdc-jtosca</name>
 	<properties>
 
