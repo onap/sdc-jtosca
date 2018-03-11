@@ -836,6 +836,10 @@ public class ToscaTemplate extends Object {
 		return nestedToscaTemplatesWithTopology;
 	}
 
+	public ConcurrentHashMap<String, Object> getNestedTopologyTemplates() {
+		return nestedToscaTplsWithTopology;
+	}
+
 	@Override
 	public String toString() {
 		return "ToscaTemplate{" +

@@ -119,6 +119,12 @@ public class Policy extends EntityTemplate {
 				", properties=" + properties +
 				'}';
 	}
+	
+	public int compareTo(Policy other){
+		if(this.equals(other))
+			return 0;
+		return this.getName().compareTo(other.getName()) == 0 ? this.getType().compareTo(other.getType()) : this.getName().compareTo(other.getName());
+	}
 }
 
 /*python
