@@ -134,7 +134,7 @@ public class NodeType extends StatefulEntityType {
         // Filter the node types
         ArrayList<String> nodeTypes = new ArrayList<>();
         for(String nt: customDef.keySet()) {
-        	if(nt.startsWith(NODE_PREFIX) || nt.startsWith("org.onap") && !nt.equals("tosca.nodes.Root")) {
+        	if(nt.startsWith(NODE_PREFIX) || nt.startsWith("org.openecomp") && !nt.equals("tosca.nodes.Root")) {
         		nodeTypes.add(nt);
         	}
         }
