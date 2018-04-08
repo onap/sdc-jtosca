@@ -89,6 +89,7 @@ public class ToscaTemplate extends Object {
     private ArrayList<NodeTemplate> nodeTemplates;
     private ArrayList<Output> outputs;
 	private ArrayList<Policy> policies;
+	private ArrayList<Group> groups;
     private ConcurrentHashMap<String,Object> nestedToscaTplsWithTopology;
     private ArrayList<TopologyTemplate> nestedToscaTemplatesWithTopology;
     private ToscaGraph graph;
@@ -213,6 +214,7 @@ public class ToscaTemplate extends Object {
                 this.nodeTemplates = _nodeTemplates();
                 this.outputs = _outputs();
                 this.policies = _policies();
+                this.groups = _groups();
 //                _handleNestedToscaTemplatesWithTopology();
 				_handleNestedToscaTemplatesWithTopology(topologyTemplate);
                 graph = new ToscaGraph(nodeTemplates);
@@ -312,6 +314,10 @@ public class ToscaTemplate extends Object {
 
 	private ArrayList<Policy> _policies() {
 		return topologyTemplate.getPolicies();
+	}
+	
+	private ArrayList<Group> _groups() {
+		return topologyTemplate.getGroups();
 	}
 
 	/**
@@ -763,6 +769,10 @@ public class ToscaTemplate extends Object {
 	
 	public ArrayList<Policy> getPolicies() {
 		return policies;
+	}
+	
+	public ArrayList<Group> getGroups() {
+		return groups;
 	}
 	
 	public ArrayList<NodeTemplate> getNodeTemplates() {

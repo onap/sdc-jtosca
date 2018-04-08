@@ -87,6 +87,12 @@ public class Group extends EntityTemplate {
 				", metaData=" + metaData +
 				'}';
 	}
+	
+	public int compareTo(Group other){
+		if(this.equals(other))
+			return 0;
+		return this.getName().compareTo(other.getName()) == 0 ? this.getType().compareTo(other.getType()) : this.getName().compareTo(other.getName());
+	}
 }
 
 /*python
