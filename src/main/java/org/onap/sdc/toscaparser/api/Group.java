@@ -41,6 +41,7 @@ public class Group extends EntityTemplate {
         }
         memberNodes = _memberNodes;
         _validateKeys();
+        getCapabilities();
 	}
 
 	public Metadata getMetadata() {

@@ -21,6 +21,7 @@ public class NodeTemplate extends EntityTemplate {
 	private ArrayList<RelationshipTemplate> relationshipTpl;
 	private LinkedHashMap<RelationshipType,NodeTemplate> _relationships;
 	private SubstitutionMappings subMappingToscaTemplate;
+	private TopologyTemplate originComponentTemplate;
 	private Metadata metadata;
 
 	private static final String METADATA = "metadata";
@@ -451,6 +452,14 @@ public class NodeTemplate extends EntityTemplate {
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	public TopologyTemplate getOriginComponentTemplate() {
+		return originComponentTemplate;
+	}
+
+	public void setOriginComponentTemplate(TopologyTemplate originComponentTemplate) {
+		this.originComponentTemplate = originComponentTemplate;
 	}
 
 }

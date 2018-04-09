@@ -255,7 +255,12 @@ public abstract class EntityTemplate {
 							((EntityType)typeDefinition).getValue(CAPABILITIES,entityTpl,true);
 		if(caps != null) {
 			//?!? getCapabilities defined only for NodeType...
-			LinkedHashMap<String,CapabilityTypeDef> capabilities = ((NodeType)typeDefinition).getCapabilities();
+			LinkedHashMap<String,CapabilityTypeDef> capabilities = null;
+			if(typeDefinition instanceof NodeType){
+				capabilities = ((NodeType)typeDefinition).getCapabilities();
+			} else if (typeDefinition instanceof GroupType){
+				capabilities = ((GroupType)typeDefinition).getCapabilities();
+			}
 			for(Map.Entry<String,Object> me: caps.entrySet()) {
 				String name = me. getKey();
 				LinkedHashMap<String,Object> props = (LinkedHashMap<String,Object>)me.getValue();

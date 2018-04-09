@@ -599,6 +599,7 @@ public class ToscaTemplate extends Object {
 											 parsedParams,
 											 nt,
 											 resolveGetInput);
+					nt.setOriginComponentTemplate(topologyWithSubMapping);
 					if(topologyWithSubMapping.getSubstitutionMappings() != null) {
                         // Record nested topology templates in top level template
                         //nestedToscaTemplatesWithTopology.add(topologyWithSubMapping);

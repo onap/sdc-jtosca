@@ -3,7 +3,9 @@ package org.onap.sdc.toscaparser.api.elements;
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class GroupType extends StatefulEntityType {
 
@@ -124,7 +126,34 @@ public class GroupType extends StatefulEntityType {
 	public String getType() {
 		return groupType;
 	}
-
+	
+    @SuppressWarnings("unchecked")
+	public ArrayList<CapabilityTypeDef> getCapabilitiesObjects() {
+        // Return a list of capability objects
+		ArrayList<CapabilityTypeDef> typecapabilities = new ArrayList<>();
+		LinkedHashMap<String,Object> caps = (LinkedHashMap<String,Object>)getValue(CAPABILITIES, null, true);
+        if(caps != null) {
+            // 'cname' is symbolic name of the capability
+            // 'cvalue' is a dict { 'type': <capability type name> }
+        	for(Map.Entry<String,Object> me: caps.entrySet()) {
+        		String cname = me.getKey();
+        		LinkedHashMap<String,String> cvalue = (LinkedHashMap<String,String>)me.getValue();
+        		String ctype = cvalue.get("type");
+        		CapabilityTypeDef cap = new CapabilityTypeDef(cname,ctype,type,customDef);
+        		typecapabilities.add(cap);
+        	}
+        }
+        return typecapabilities;
+	}
+ 
+	public LinkedHashMap<String,CapabilityTypeDef> getCapabilities() {
+        // Return a dictionary of capability name-objects pairs
+		LinkedHashMap<String,CapabilityTypeDef> caps = new LinkedHashMap<>();
+		for(CapabilityTypeDef ctd: getCapabilitiesObjects()) {
+			caps.put(ctd.getName(),ctd);
+		}
+		return caps;
+	}
 
 }
 

@@ -12,6 +12,7 @@ import org.onap.sdc.toscaparser.api.parameters.Output;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -188,39 +189,35 @@ public class TopologyTemplate {
 	@SuppressWarnings("unchecked")
 	private ArrayList<Policy> _policies() {
 		ArrayList<Policy> alPolicies = new ArrayList<>();
-		for(Object po: _tplPolicies()) {
-			LinkedHashMap<String,Object> policy = (LinkedHashMap<String,Object>)po;
-			for(Map.Entry<String,Object> me: policy.entrySet()) {
-				String policyName = me.getKey();
-				LinkedHashMap<String,Object> policyTpl = (LinkedHashMap<String,Object>)me.getValue();
-				ArrayList<String> targetList = (ArrayList<String>)policyTpl.get("targets");
-				//ArrayList<Object> targetObjects = new ArrayList<>();
-				ArrayList<NodeTemplate> targetNodes = new ArrayList<>();
-				ArrayList<Object> targetObjects = new ArrayList<>();
-				ArrayList<Group> targetGroups = new ArrayList<>();
-				String targetsType = "groups"; 
-				if(targetList != null && targetList.size() >= 1) {
-                    targetGroups = _getPolicyGroups(targetList);
-                    if(targetGroups == null) {
-                    	targetsType = "node_templates";
-                        targetNodes = _getGroupMembers(targetList);
-                        for(NodeTemplate nt: targetNodes) {
-                        	targetObjects.add(nt);
-                        }
-                    }
-                    else {
-                    	for(Group gr: targetGroups) {
-                    		targetObjects.add(gr);
-                    	}
-                    }
-				}
-                Policy policyObj = new Policy(policyName, 
-                							  policyTpl,
-		                                      targetObjects, 
-		                                      targetsType,
-		                                      customDefs);
-                alPolicies.add(policyObj);
+		for(Map.Entry<String,Object> me: _tplPolicies().entrySet()) {
+			String policyName = me.getKey();
+			LinkedHashMap<String,Object> policyTpl = (LinkedHashMap<String,Object>)me.getValue();
+			ArrayList<String> targetList = (ArrayList<String>)policyTpl.get("targets");
+			ArrayList<NodeTemplate> targetNodes = new ArrayList<>();
+			ArrayList<Object> targetObjects = new ArrayList<>();
+			ArrayList<Group> targetGroups = new ArrayList<>();
+			String targetsType = "groups"; 
+			if(targetList != null && targetList.size() >= 1) {
+                   targetGroups = _getPolicyGroups(targetList);
+                   if(targetGroups == null || targetGroups.isEmpty()) {
+                   	targetsType = "node_templates";
+                       targetNodes = _getGroupMembers(targetList);
+                       for(NodeTemplate nt: targetNodes) {
+                       	targetObjects.add(nt);
+                       }
+                   }
+                   else {
+                   	for(Group gr: targetGroups) {
+                   		targetObjects.add(gr);
+                   	}
+                   }
 			}
+               Policy policyObj = new Policy(policyName, 
+               							  policyTpl,
+	                                      targetObjects, 
+	                                      targetsType,
+	                                      customDefs);
+               alPolicies.add(policyObj);
 		}
         return alPolicies;
 	}
@@ -368,12 +365,12 @@ public class TopologyTemplate {
     }
 
     @SuppressWarnings("unchecked")
-    private ArrayList<Object> _tplPolicies() {
+    private LinkedHashMap<String,Object> _tplPolicies() {
         if(tpl.get(POLICIES) != null) {
-        	return (ArrayList<Object>)tpl.get(POLICIES);
+        	return (LinkedHashMap<String,Object>)tpl.get(POLICIES);
         }
         else {
-        	return new ArrayList<Object>();
+        	return new LinkedHashMap<>();
         }
     }
 
