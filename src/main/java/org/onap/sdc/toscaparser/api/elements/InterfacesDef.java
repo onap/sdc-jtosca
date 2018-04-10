@@ -20,88 +20,88 @@ public class InterfacesDef extends StatefulEntityType {
 	};
 
 	public static final String IMPLEMENTATION = "implementation";
+	public static final String DESCRIPTION = "description";
 	public static final String INPUTS = "inputs";
-	
-	public static final String INTERFACEVALUE[] = {IMPLEMENTATION, INPUTS};
 
 	public static final String INTERFACE_DEF_RESERVED_WORDS[] = {
 			"type", "inputs", "derived_from", "version", "description"};
-	
+
 	private EntityType ntype;
 	private EntityTemplate nodeTemplate;
-	private String name;
-	private Object value;
+
+	private String operationName;
+	private Object operationDef;
 	private String implementation;
 	private LinkedHashMap<String,Object> inputs;
+	private String description;
 
-	
 	@SuppressWarnings("unchecked")
 	public InterfacesDef(EntityType inodeType,
-					     String interfaceType,
-					     EntityTemplate inodeTemplate,
-					     String iname,
-					     Object ivalue) {
+			String interfaceType,
+			EntityTemplate inodeTemplate,
+			String iname,
+			Object ivalue) {
 		// void
 		super();
-		
-        ntype = inodeType;
-        nodeTemplate = inodeTemplate;
-        type = interfaceType;
-        name = iname;
-        value = ivalue;
-        implementation = null;
-        inputs = null;
-        defs = new LinkedHashMap<String,Object>();
 
-        if(interfaceType.equals(LIFECYCLE_SHORTNAME)) {
-            interfaceType = LIFECYCLE;
-        }
-        if(interfaceType.equals(CONFIGURE_SHORTNAME)) {
-            interfaceType = CONFIGURE;
-        }
-      
-        // only NodeType has getInterfaces "hasattr(ntype,interfaces)"
-        // while RelationshipType does not
-        if(ntype instanceof NodeType) {
-	        if(((NodeType)ntype).getInterfaces() != null &&
-	        		((NodeType)ntype).getInterfaces().values().contains(interfaceType)) {
-	        	LinkedHashMap<String,Object> nii = (LinkedHashMap<String,Object>)
-	        			((NodeType)ntype).getInterfaces().get(interfaceType);
-	        	interfaceType = (String)nii.get("type");
-	        }
-        }
-        if(inodeType != null) {
-        	if(nodeTemplate != null && nodeTemplate.getCustomDef() != null &&
-        			nodeTemplate.getCustomDef().values().contains(interfaceType)) {
-        		defs = (LinkedHashMap<String,Object>)
-        					nodeTemplate.getCustomDef().get(interfaceType);
-        	}
-        	else {
-        		defs = (LinkedHashMap<String,Object>)TOSCA_DEF.get(interfaceType);
-        	}
-        }
-        
-        if(ivalue != null) {
-        	if(ivalue instanceof LinkedHashMap) {
-        		for(Map.Entry<String,Object> me: ((LinkedHashMap<String,Object>)ivalue).entrySet()) {
-        			if(me.getKey().equals("implementation")) {
-        				implementation = (String)me.getValue();
-        			}
-        			else if(me.getKey().equals("inputs")) {
-        				inputs = (LinkedHashMap<String,Object>)me.getValue();
-        			}
-        			else {
-                        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE123", String.format(
-                            "UnknownFieldError: \"interfaces\" of template \"%s\" contain unknown field \"%s\"",
-                            nodeTemplate.getName(),me.getKey()))); 
-        			}
-        		}
-        	}
-    		else {
-    			implementation = (String)ivalue;
-    		}
-        }
- 	}
+		ntype = inodeType;
+		nodeTemplate = inodeTemplate;
+		type = interfaceType;
+		operationName = iname;
+		operationDef = ivalue;
+		implementation = null;
+		inputs = null;
+		defs = new LinkedHashMap<String,Object>();
+
+		if(interfaceType.equals(LIFECYCLE_SHORTNAME)) {
+			interfaceType = LIFECYCLE;
+		}
+		if(interfaceType.equals(CONFIGURE_SHORTNAME)) {
+			interfaceType = CONFIGURE;
+		}
+
+		// only NodeType has getInterfaces "hasattr(ntype,interfaces)"
+		// while RelationshipType does not
+		if(ntype instanceof NodeType) {
+			if(((NodeType)ntype).getInterfaces() != null &&
+					((NodeType)ntype).getInterfaces().values().contains(interfaceType)) {
+				LinkedHashMap<String,Object> nii = (LinkedHashMap<String,Object>)
+						((NodeType)ntype).getInterfaces().get(interfaceType);
+				interfaceType = (String)nii.get("type");
+			}
+		}
+		if(inodeType != null) {
+			if(nodeTemplate != null && nodeTemplate.getCustomDef() != null &&
+					nodeTemplate.getCustomDef().containsKey(interfaceType)) {
+				defs = (LinkedHashMap<String,Object>)
+						nodeTemplate.getCustomDef().get(interfaceType);
+			}
+			else {
+				defs = (LinkedHashMap<String,Object>)TOSCA_DEF.get(interfaceType);
+			}
+		}
+
+		if(ivalue != null) {
+			if(ivalue instanceof LinkedHashMap) {
+				for(Map.Entry<String,Object> me: ((LinkedHashMap<String,Object>)ivalue).entrySet()) {
+					if(me.getKey().equals(IMPLEMENTATION)) {
+						implementation = (String)me.getValue();
+					}
+					else if(me.getKey().equals(INPUTS)) {
+						inputs = (LinkedHashMap<String,Object>)me.getValue();
+					}
+					else if(me.getKey().equals(DESCRIPTION)) {
+						description = (String)me.getValue();
+					}
+					else {
+						ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE123", String.format(
+								"UnknownFieldError: \"interfaces\" of template \"%s\" contain unknown field \"%s\"",
+								nodeTemplate.getName(),me.getKey())));
+					}
+				}
+			}
+		}
+	}
 
 	public ArrayList<String> getLifecycleOps() {
 		if(defs != null) {
@@ -111,7 +111,20 @@ public class InterfacesDef extends StatefulEntityType {
 		}
 		return null;
 	}
-	
+
+	public ArrayList<String> getInterfaceOps() {
+		if(defs != null) {
+			ArrayList<String> ops = _ops();
+			ArrayList<String> idrw = new ArrayList<>();
+			for(int i=0; i<InterfacesDef.INTERFACE_DEF_RESERVED_WORDS.length; i++) {
+				idrw.add(InterfacesDef.INTERFACE_DEF_RESERVED_WORDS[i]);
+			}
+			ops.removeAll(idrw);
+			return ops;
+		}
+		return null;
+	}
+
 	public ArrayList<String> getConfigureOps() {
 		if(defs != null) {
 			if(type.equals(CONFIGURE)) {
@@ -120,21 +133,47 @@ public class InterfacesDef extends StatefulEntityType {
 		}
 		return null;
 	}
-	
+
 	private ArrayList<String> _ops() {
 		return new ArrayList<String>(defs.keySet());
 	}
-	
+
 	// getters/setters
-	
+
 	public LinkedHashMap<String,Object> getInputs() {
 		return inputs;
 	}
-	
+
 	public void setInput(String name,Object value) {
 		inputs.put(name, value);
 	}
+
+	public String getImplementation(){
+		return  implementation;
+	}
+
+	public void setImplementation(String implementation){
+		this.implementation = implementation;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getOperationName() {
+		return operationName;
+	}
+
+	public void setOperationName(String operationName) {
+		this.operationName = operationName;
+	}
 }
+
+
 
 /*python
 

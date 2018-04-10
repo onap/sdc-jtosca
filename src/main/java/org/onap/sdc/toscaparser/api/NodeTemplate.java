@@ -1,5 +1,6 @@
 package org.onap.sdc.toscaparser.api;
 
+import static org.onap.sdc.toscaparser.api.elements.EntityType.TOSCA_DEF;
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
 
 import java.util.ArrayList;
@@ -403,6 +404,46 @@ public class NodeTemplate extends EntityTemplate {
 		}
 		allowedOperations.removeAll(idrw);
 		return allowedOperations;
+	}
+
+	/**
+	 * Get all interface details for given node template.<br>
+	 * @return Map that contains the list of all interfaces and their definitions.
+	 * If none found, an empty map will be returned.
+	 */
+	public Map<String, List<InterfacesDef>> getAllInterfaceDetailsForNodeType(){
+		Map<String, List<InterfacesDef>> interfaceMap = new LinkedHashMap<>();
+
+		// Get custom interface details
+		Map<String, Object> customInterfacesDetails = ((NodeType)typeDefinition).getInterfaces();
+		// Get native interface details from tosca definitions
+		Object nativeInterfaceDetails = TOSCA_DEF.get(InterfacesDef.LIFECYCLE);
+		Map<String, Object> allInterfaceDetails = new LinkedHashMap<>();
+		allInterfaceDetails.putAll(customInterfacesDetails);
+		if (nativeInterfaceDetails != null){
+			allInterfaceDetails.put(InterfacesDef.LIFECYCLE, nativeInterfaceDetails);
+		}
+
+		// Process all interface details from combined collection and return an interface Map with
+		// interface names and their definitions
+		for(Map.Entry<String,Object> me: allInterfaceDetails.entrySet()) {
+			ArrayList<InterfacesDef> interfaces = new ArrayList<>();
+			String interfaceType = me.getKey();
+			Map<String,Object> interfaceValue = (Map<String,Object>)me.getValue();
+			if(interfaceValue.containsKey("type")){
+				interfaceType = (String) interfaceValue.get("type");
+			}
+
+			for(Map.Entry<String,Object> ve: interfaceValue.entrySet()) {
+				// Filter type as this is a reserved key and not an operation
+				if(!ve.getKey().equals("type")){
+					InterfacesDef iface = new InterfacesDef(typeDefinition, interfaceType,this, ve.getKey(), ve.getValue());
+					interfaces.add(iface);
+				}
+			}
+			interfaceMap.put(interfaceType, interfaces);
+		}
+		return interfaceMap;
 	}
 
 	private void _validateFields(LinkedHashMap<String,Object> nodetemplate) {
