@@ -1,28 +1,34 @@
 package org.onap.sdc.toscaparser.api;
 
-import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
-import org.onap.sdc.toscaparser.api.common.ValidationIssueCollector;
-import org.onap.sdc.toscaparser.api.parameters.Output;
-import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.nio.file.Files;
-import java.util.function.Predicate;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import org.onap.sdc.toscaparser.api.common.JToscaException;
+import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
+import org.onap.sdc.toscaparser.api.common.ValidationIssueCollector;
 import org.onap.sdc.toscaparser.api.elements.EntityType;
 import org.onap.sdc.toscaparser.api.elements.Metadata;
 import org.onap.sdc.toscaparser.api.extensions.ExtTools;
 import org.onap.sdc.toscaparser.api.parameters.Input;
+import org.onap.sdc.toscaparser.api.parameters.Output;
 import org.onap.sdc.toscaparser.api.prereq.CSAR;
 import org.onap.sdc.toscaparser.api.utils.JToscaErrorCodes;
+import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -281,10 +287,12 @@ public class ToscaTemplate extends Object {
 		return (String)tpl.get(DESCRIPTION);
 	}
 
+	@SuppressWarnings("unchecked")
 	private ArrayList<Object> _tplImports() {
 		return (ArrayList<Object>)tpl.get(IMPORTS);
 	}
 
+	@SuppressWarnings("unchecked")
 	private ArrayList<Repository> _tplRepositories() {
 		LinkedHashMap<String,Object> repositories = 
 				(LinkedHashMap<String,Object>)tpl.get(REPOSITORIES);
@@ -300,11 +308,6 @@ public class ToscaTemplate extends Object {
 
 	private LinkedHashMap<String,Object> _tplRelationshipTypes() {
 		return (LinkedHashMap<String,Object>)_getCustomTypes(RELATIONSHIP_TYPES,null);
-	}
-
-	@SuppressWarnings("unchecked")
-	private LinkedHashMap<String,Object> _tplRelationshipTemplates() {
-		return (LinkedHashMap<String,Object>)_tplTopologyTemplate().get(RELATIONSHIP_TEMPLATES);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -332,6 +335,7 @@ public class ToscaTemplate extends Object {
 	 * @param alImports all imports which needs to be processed
 	 * @return the linked hash map containing all import definitions
 	 */
+	@SuppressWarnings("unchecked")
 	private LinkedHashMap<String,Object> _getAllCustomDefs(Object alImports) {
 
 		String types[] = {
@@ -346,7 +350,7 @@ public class ToscaTemplate extends Object {
 				imports = sortImports(imports);
 
 				for (Map<String, Object> map : imports) {
-					List<Map<String, Object>> singleImportList = new ArrayList();
+					List<Map<String, Object>> singleImportList = new ArrayList<>();
 					singleImportList.add(map);
 
 					Map<String, String> importNameDetails = getValidFileNameForImportReference(singleImportList);
@@ -398,7 +402,7 @@ public class ToscaTemplate extends Object {
 		List<Map<String, Object>> finalList2 = new ArrayList<>();
 		Iterator<Map<String, Object>> itr = customImports.iterator();
 		while(itr.hasNext()) {
-			Map innerMap = itr.next();
+			Map<String, Object> innerMap = itr.next();
 			if (innerMap.toString().contains("../")) {
 				finalList2.add(innerMap);
 				itr.remove();
@@ -451,8 +455,7 @@ public class ToscaTemplate extends Object {
 	 * @param customImports the custom imports
 	 * @return the map containing import file full and relative paths
 	 */
-	private Map<String, String> getValidFileNameForImportReference(List<Map<String, Object>>
-																																		 customImports){
+	private Map<String, String> getValidFileNameForImportReference(List<Map<String, Object>> customImports){
 		String importFileName;
 		Map<String, String> retMap = new HashMap<>();
 		for (Map<String, Object> map1 : customImports) {
@@ -575,6 +578,7 @@ public class ToscaTemplate extends Object {
 	}
 
 	// multi level nesting - RECURSIVE
+	@SuppressWarnings("unchecked")
 	private void _handleNestedToscaTemplatesWithTopology(TopologyTemplate tt) {
 		if(++nestingLoopCounter > 10) {
 			log.error("ToscaTemplate - _handleNestedToscaTemplatesWithTopology - Nested Topologies Loop: too many levels, aborting");
@@ -583,7 +587,6 @@ public class ToscaTemplate extends Object {
 		// Reset Processed Imports for nested templates
 		this.processedImports = new HashSet<>();
 		for(Map.Entry<String,Object> me: nestedToscaTplsWithTopology.entrySet()) {
-			String fname = me.getKey();
 			LinkedHashMap<String,Object> toscaTpl = 
 							(LinkedHashMap<String,Object>)me.getValue();
 			for(NodeTemplate nt: tt.getNodeTemplates()) {
@@ -761,6 +764,9 @@ public class ToscaTemplate extends Object {
 	}
 	
 	public ArrayList<Input> getInputs() {
+		if(inputs != null){
+			inputs.stream().forEach(Input::resetAnnotaions);
+		}
 		return inputs;
 	}
 	
@@ -821,6 +827,7 @@ public class ToscaTemplate extends Object {
 		return pparams;
 	}
 
+	@SuppressWarnings("unchecked")
 	private String getSubMappingNodeType(LinkedHashMap<String,Object> toscaTpl) {
 		// Return substitution mappings node type
 		if(toscaTpl != null) {
@@ -828,12 +835,6 @@ public class ToscaTemplate extends Object {
 					(LinkedHashMap<String,Object>)toscaTpl.get(TOPOLOGY_TEMPLATE));
 		}
 		return null;
-	}
-
-	private boolean _hasSubstitutionMapping() {
-        // Return True if the template has valid substitution mappings
-        return topologyTemplate != null &&
-            topologyTemplate.getSubstitutionMappings() != null;
 	}
 
 	public boolean hasNestedTemplates() {
@@ -880,6 +881,14 @@ public class ToscaTemplate extends Object {
 				", csarTempDir='" + csarTempDir + '\'' +
 				", nestingLoopCounter=" + nestingLoopCounter +
 				'}';
+	}
+
+	public List<Input> getInputs(boolean annotationsRequired) {
+		if(inputs != null && annotationsRequired){
+			inputs.stream().forEach(Input::parseAnnotations);
+			return inputs;
+		}
+		return getInputs();
 	}
 }
 

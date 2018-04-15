@@ -2,7 +2,10 @@ package org.onap.sdc.toscaparser.api;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
+import org.onap.sdc.toscaparser.api.elements.PropertyDef;
+import org.onap.sdc.toscaparser.api.elements.StatefulEntityType;
 import org.onap.sdc.toscaparser.api.elements.constraints.Constraint;
 import org.onap.sdc.toscaparser.api.elements.constraints.Schema;
 import org.onap.sdc.toscaparser.api.functions.Function;
@@ -29,6 +32,10 @@ public class Property {
 	private Schema schema;
 	private LinkedHashMap<String,Object> customDef;
 
+	public Property(Map.Entry<String,Object> propertyEntry){
+        name = propertyEntry.getKey();
+        value = propertyEntry.getValue();
+	}
 	public Property(String propname,
 					Object propvalue,
 					LinkedHashMap<String,Object> propschemaDict,

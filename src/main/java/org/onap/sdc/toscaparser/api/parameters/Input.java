@@ -1,16 +1,18 @@
 package org.onap.sdc.toscaparser.api.parameters;
 
-import org.onap.sdc.toscaparser.api.DataEntity;
-import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
-import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.onap.sdc.toscaparser.api.DataEntity;
+import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.onap.sdc.toscaparser.api.elements.EntityType;
 import org.onap.sdc.toscaparser.api.elements.constraints.Constraint;
 import org.onap.sdc.toscaparser.api.elements.constraints.Schema;
+import org.onap.sdc.toscaparser.api.elements.enums.ToscaElementNames;
+import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class Input {
 	
@@ -41,6 +43,7 @@ public class Input {
     private String name;
     private Schema schema;
 	private LinkedHashMap<String,Object> customDefs;
+	private Map<String, Annotation> annotations;
 	
 	public Input(){
 		/**
@@ -53,7 +56,20 @@ public class Input {
 		schema = new Schema(_name,_schemaDict);
 		customDefs = _customDefs;
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	public void parseAnnotations() {
+		if(schema.getSchema() != null){
+			LinkedHashMap<String, Object> annotations = (LinkedHashMap<String, Object>) schema.getSchema().get(ToscaElementNames.ANNOTATIONS.getName());
+			if(annotations != null){
+				setAnnotations(annotations.entrySet().stream()
+				.map(Annotation::new)
+				.filter(Annotation::isHeatSourceType)
+				.collect(Collectors.toMap(a -> a.getName(), a -> a)));
+			}
+		}
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -124,7 +140,8 @@ public class Input {
 		}
     }
     
-    private void _validateValue(Object value) {
+    @SuppressWarnings("unchecked")
+	private void _validateValue(Object value) {
     	Object datatype = null;
     	if(EntityType.TOSCA_DEF.get(getType()) != null) {
     		datatype = EntityType.TOSCA_DEF.get(getType());
@@ -147,87 +164,16 @@ public class Input {
     	
     	DataEntity.validateDatatype(getType(), value, null, (LinkedHashMap<String,Object>)datatype, null);
     }
+
+	public Map<String, Annotation> getAnnotations() {
+		return annotations;
+	}
+
+	private void setAnnotations(Map<String, Annotation> annotations) {
+		this.annotations = annotations;
+	}
+	
+	public void resetAnnotaions(){
+		annotations = null;
+	}
 }
-
-/*python
-
-from toscaparser.common.exception import ValidationIssueCollector
-from toscaparser.common.exception import MissingRequiredFieldError
-from toscaparser.common.exception import UnknownFieldError
-from toscaparser.dataentity import DataEntity
-from toscaparser.elements.constraints import Schema
-from toscaparser.elements.entity_type import EntityType
-from toscaparser.utils.gettextutils import _
-
-
-log = logging.getLogger('tosca')
-
-
-class Input(object):
-
-    INPUTFIELD = (TYPE, DESCRIPTION, DEFAULT, CONSTRAINTS, REQUIRED, STATUS,
-                  ENTRY_SCHEMA) = ('type', 'description', 'default',
-                                   'constraints', 'required', 'status',
-                                   'entry_schema')
-
-    def __init__(self, name, schema_dict):
-        self.name = name
-        self.schema = Schema(name, schema_dict)
-
-        self._validate_field()
-        self.validate_type(self.type)
-
-    @property
-    def type(self):
-        return self.schema.type
-
-    @property
-    def required(self):
-        return self.schema.required
-
-    @property
-    def description(self):
-        return self.schema.description
-
-    @property
-    def default(self):
-        return self.schema.default
-
-    @property
-    def constraints(self):
-        return self.schema.constraints
-
-    @property
-    def status(self):
-        return self.schema.status
-
-    def validate(self, value=None):
-        if value is not None:
-            self._validate_value(value)
-
-    def _validate_field(self):
-        for name in self.schema.schema:
-            if name not in self.INPUTFIELD:
-                ValidationIssueCollector.appendException(
-                    UnknownFieldError(what='Input "%s"' % self.name,
-                                      field=name))
-
-    def validate_type(self, input_type):
-        if input_type not in Schema.PROPERTY_TYPES:
-            ValidationIssueCollector.appendException(
-                ValueError(_('Invalid type "%s".') % type))
-
-    # tODO(anyone) Need to test for any built-in datatype not just network
-    # that is, tosca.datatypes.* and not assume tosca.datatypes.network.*
-    # tODO(anyone) Add support for tosca.datatypes.Credential
-    def _validate_value(self, value):
-        tosca = EntityType.TOSCA_DEF
-        datatype = None
-        if self.type in tosca:
-            datatype = tosca[self.type]
-        elif EntityType.DATATYPE_NETWORK_PREFIX + self.type in tosca:
-            datatype = tosca[EntityType.DATATYPE_NETWORK_PREFIX + self.type]
-
-        DataEntity.validate_datatype(self.type, value, None, datatype)
-
-*/
