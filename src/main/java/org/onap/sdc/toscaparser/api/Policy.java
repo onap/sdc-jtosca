@@ -67,7 +67,11 @@ public class Policy extends EntityTemplate {
 		return targetsType;
 	}
  
-//	public ArrayList<NodeTemplate> getTargetsList() {
+	public LinkedHashMap<String, Object> getMetaData() {
+		return metaData;
+	}
+
+	//	public ArrayList<NodeTemplate> getTargetsList() {
 	public ArrayList<Object> getTargetsList() {
 		return targetsList;
 	}
