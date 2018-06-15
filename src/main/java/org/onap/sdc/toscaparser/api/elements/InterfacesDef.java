@@ -31,7 +31,7 @@ public class InterfacesDef extends StatefulEntityType {
 
 	private String operationName;
 	private Object operationDef;
-	private String implementation;
+	private Object implementation;
 	private LinkedHashMap<String,Object> inputs;
 	private String description;
 
@@ -85,7 +85,7 @@ public class InterfacesDef extends StatefulEntityType {
 			if(ivalue instanceof LinkedHashMap) {
 				for(Map.Entry<String,Object> me: ((LinkedHashMap<String,Object>)ivalue).entrySet()) {
 					if(me.getKey().equals(IMPLEMENTATION)) {
-						implementation = (String)me.getValue();
+						implementation = me.getValue();
 					}
 					else if(me.getKey().equals(INPUTS)) {
 						inputs = (LinkedHashMap<String,Object>)me.getValue();
@@ -148,11 +148,11 @@ public class InterfacesDef extends StatefulEntityType {
 		inputs.put(name, value);
 	}
 
-	public String getImplementation(){
+	public Object getImplementation(){
 		return  implementation;
 	}
 
-	public void setImplementation(String implementation){
+	public void setImplementation(Object implementation){
 		this.implementation = implementation;
 	}
 
