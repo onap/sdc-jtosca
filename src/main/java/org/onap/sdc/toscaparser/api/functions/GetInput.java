@@ -50,7 +50,7 @@ public class GetInput extends Function {
 			String type = (String)ttinpinp.get("type");
 
 			Object value = DataEntity.validateDatatype(
-					type, toscaTpl.getParsedParams().get(getInputName()),null,null,null);
+					type, toscaTpl.getParsedParams().get(getInputName()),null,toscaTpl.getCustomDefs(),null);
     		//SDC resolving Get Input
 			if (value instanceof ArrayList){
 				if(args.size() == 2 && args.get(1) instanceof Integer && ((ArrayList) value).size()> (Integer)args.get(1)){

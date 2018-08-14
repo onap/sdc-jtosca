@@ -103,6 +103,7 @@ public class ToscaTemplate extends Object {
     private int nestingLoopCounter;
 	private LinkedHashMap<String, LinkedHashMap<String, Object>> metaProperties;
 	private Set<String> processedImports;
+	private LinkedHashMap<String,Object> customDefsFinal = new LinkedHashMap<>();
 
 	public ToscaTemplate(String _path,
 						LinkedHashMap<String,Object> _parsedParams,
@@ -335,14 +336,15 @@ public class ToscaTemplate extends Object {
 	 * @param alImports all imports which needs to be processed
 	 * @return the linked hash map containing all import definitions
 	 */
+
 	@SuppressWarnings("unchecked")
 	private LinkedHashMap<String,Object> _getAllCustomDefs(Object alImports) {
+
 
 		String types[] = {
 				IMPORTS, NODE_TYPES, CAPABILITY_TYPES, RELATIONSHIP_TYPES,
 				DATA_TYPES, INTERFACE_TYPES, POLICY_TYPES, GROUP_TYPES
 		};
-		LinkedHashMap<String,Object> customDefsFinal = new LinkedHashMap<>();
 
 		List<Map<String, Object>> imports = (List<Map<String, Object>>) alImports;
 		if (imports != null && !imports.isEmpty()) {

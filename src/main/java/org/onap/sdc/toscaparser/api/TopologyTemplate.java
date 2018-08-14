@@ -540,6 +540,9 @@ public class TopologyTemplate {
 	public boolean getResolveGetInput() {
 		return resolveGetInput;
 	}
+	public LinkedHashMap<String, Object> getCustomDefs() {
+		return customDefs;
+	}
 }
 
 /*python

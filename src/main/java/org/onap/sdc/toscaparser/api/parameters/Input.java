@@ -153,7 +153,7 @@ public class Input {
     	String type = getType();
     	// if it's one of the basic types DON'T look in customDefs
     	if(Arrays.asList(PRIMITIVE_TYPES).contains(type)) {
-        	DataEntity.validateDatatype(getType(), value, null, (LinkedHashMap<String,Object>)datatype, null);
+        	DataEntity.validateDatatype(getType(), value, null, customDefs, null);
         	return;	
     	}
     	else if(customDefs.get(getType()) != null) {
@@ -162,7 +162,7 @@ public class Input {
         	return;
     	}
     	
-    	DataEntity.validateDatatype(getType(), value, null, (LinkedHashMap<String,Object>)datatype, null);
+    	DataEntity.validateDatatype(getType(), value, null, customDefs, null);
     }
 
 	public Map<String, Annotation> getAnnotations() {

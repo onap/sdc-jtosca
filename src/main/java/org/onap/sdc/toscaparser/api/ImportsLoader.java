@@ -1,5 +1,6 @@
 package org.onap.sdc.toscaparser.api;
 
+import com.google.common.base.Charsets;
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.onap.sdc.toscaparser.api.utils.UrlUtils;
@@ -372,11 +373,11 @@ public class ImportsLoader {
     	        al[0] = al[1] = null;
     	        return al;
             }
-            try (InputStream input = new FileInputStream(new File(importTemplate));) {
+            try (BufferedReader br = new BufferedReader(new FileReader(importTemplate));) {
 	            al[0] = importTemplate;
 
 				Yaml yaml = new Yaml();
-				al[1] = yaml.load(input);
+				al[1] = yaml.load(br);
 	            return al;
             }
             catch(FileNotFoundException e) {
