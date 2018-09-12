@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class JToscaImportTest {
@@ -94,7 +95,23 @@ public class JToscaImportTest {
 		assertTrue(inputs.stream().filter(i -> i.getAnnotations() != null).collect(Collectors.toList()).isEmpty());
 	}
 
-	private void validateInputsAnnotations(List<Input> inputs) {
+    @Test
+    public void testGetPropertyNameTest() throws JToscaException {
+
+        String fileStr = JToscaImportTest.class.getClassLoader().getResource("csars/service-AdiodVmxVpeBvService-csar.csar").getFile();
+        File file = new File(fileStr);
+        ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
+        NodeTemplate nodeTemplate = toscaTemplate.getNodeTemplates().get(0);
+
+        ArrayList<String> valueList = (ArrayList<String>)nodeTemplate.getPropertyValueFromTemplatesByName("vmxvpfe_sriov41_0_port_vlanfilter");
+        assertEquals(4, valueList.size());
+
+        assertEquals("vPE", (String) nodeTemplate.getPropertyValueFromTemplatesByName("nf_role"));
+
+        assertNull(nodeTemplate.getPropertyValueFromTemplatesByName("test"));
+    }
+
+    private void validateInputsAnnotations(List<Input> inputs) {
 		List<Input> inputsWithAnnotations = inputs.stream().filter(i -> i.getAnnotations() != null)
 				.collect(Collectors.toList());
 		assertTrue(!inputs.isEmpty());

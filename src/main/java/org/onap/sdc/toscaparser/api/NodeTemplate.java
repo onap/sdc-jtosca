@@ -1,6 +1,8 @@
 package org.onap.sdc.toscaparser.api;
 
 import static org.onap.sdc.toscaparser.api.elements.EntityType.TOSCA_DEF;
+
+import com.google.common.collect.Lists;
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
 
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ public class NodeTemplate extends EntityTemplate {
 	private Metadata metadata;
 
 	private static final String METADATA = "metadata";
+
 
 	@SuppressWarnings("unchecked")
 	public NodeTemplate(String name,
@@ -245,6 +248,17 @@ public class NodeTemplate extends EntityTemplate {
         for(Property prop: getPropertiesObjects()) {
         	prop.validate();
         }
+	}
+
+	public Object getPropertyValueFromTemplatesByName(String propertyName) {
+        LinkedHashMap<String,Object> nodeObject = (LinkedHashMap<String,Object>) templates.get(name);
+        if (nodeObject != null) {
+            LinkedHashMap<String,Object> properties = (LinkedHashMap<String, Object>)nodeObject.get(PROPERTIES);
+            if (properties != null) {
+                return properties.get(propertyName);
+            }
+        }
+		return null;
 	}
 
 	private Metadata _metaData() {

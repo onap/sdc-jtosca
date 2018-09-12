@@ -57,11 +57,10 @@ public class GetInput extends Function {
 					return ((ArrayList) value).get((Integer) args.get(1));
 				}
 				/* commented out for network cloud (SDNC)
-				else{
-					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE273",String.format(
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE273",String.format(
 							"GetInputError: cannot resolve input name \"%s\", the expected structure is an argument with a name of input type list and a second argument with an index in the list", args.get(0))));
-					return null;
-				}*/
+				return null;
+*/
 			}
 			return value;
 		}
@@ -78,11 +77,13 @@ public class GetInput extends Function {
 				if ( args.get(1) instanceof Integer
 						&& ((ArrayList) inputDef.getDefault()).size()> ((Integer)args.get(1)).intValue()) {
 					return ((ArrayList) inputDef.getDefault()).get(((Integer)args.get(1)).intValue());
-				}else{
-					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE274",(String.format(
-							"GetInputError: cannot resolve input Def name \"%s\", the expected structure is an argument with a name of input type list and a second argument with an index in the list", args.get(0)))));
-					return null;
 				}
+/*
+				commented out for network cloud (SDNC)
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE274",(String.format(
+						"GetInputError: cannot resolve input Def name \"%s\", the expected structure is an argument with a name of input type list and a second argument with an index in the list", args.get(0)))));
+				return null;
+*/
 			}
 			return inputDef.getDefault();
 		}

@@ -197,16 +197,24 @@ public abstract class EntityTemplate {
     public LinkedHashMap<String,Property> getProperties() {
     	LinkedHashMap<String,Property> props = new LinkedHashMap<>();
     	for(Property po: getPropertiesObjects()) {
-    		props.put(((Property)po).getName(),po);
+    		props.put(po.getName(),po);
     	}
     	return props;
     }
     
     public Object getPropertyValue(String name) {
-    	LinkedHashMap<String,Property> props = getProperties();
-    	Property p = (Property)props.get(name);
-    	return p != null ? p.getValue() : null;
-    }
+		LinkedHashMap<String,Property> props = getProperties();
+		Property p = props.get(name);
+		return p != null ? p.getValue() : null;
+	}
+
+	public String getPropertyType(String name) {
+		Property property = getProperties().get(name);
+        if (property != null) {
+            return property.getType();
+        }
+        return null;
+	}
 
     public ArrayList<InterfacesDef> getInterfaces() {
     	if(_interfaces == null) {
