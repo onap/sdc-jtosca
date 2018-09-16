@@ -35,6 +35,7 @@ import org.yaml.snakeyaml.Yaml;
 
 public class ToscaTemplate extends Object {
 
+	public static final int MAX_LEVELS = 20;
 	private static Logger log = LoggerFactory.getLogger(ToscaTemplate.class.getName());
 
 	// TOSCA template key names
@@ -582,7 +583,7 @@ public class ToscaTemplate extends Object {
 	// multi level nesting - RECURSIVE
 	@SuppressWarnings("unchecked")
 	private void _handleNestedToscaTemplatesWithTopology(TopologyTemplate tt) {
-		if(++nestingLoopCounter > 10) {
+		if(++nestingLoopCounter > MAX_LEVELS) {
 			log.error("ToscaTemplate - _handleNestedToscaTemplatesWithTopology - Nested Topologies Loop: too many levels, aborting");
 			return;
 		}
