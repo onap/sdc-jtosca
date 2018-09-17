@@ -56,11 +56,12 @@ public class GetInput extends Function {
 				if(args.size() == 2 && args.get(1) instanceof Integer && ((ArrayList) value).size()> (Integer)args.get(1)){
 					return ((ArrayList) value).get((Integer) args.get(1));
 				}
+				/* commented out for network cloud (SDNC)
 				else{
 					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE273",String.format(
 							"GetInputError: cannot resolve input name \"%s\", the expected structure is an argument with a name of input type list and a second argument with an index in the list", args.get(0))));
 					return null;
-				}
+				}*/
 			}
 			return value;
 		}
