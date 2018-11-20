@@ -49,9 +49,11 @@ public class DataEntity {
         else {
             if(!(value instanceof LinkedHashMap)) {
             	//ERROR under investigation
-                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE001", String.format(
-                    "TypeMismatchError: \"%s\" is not a map. The type is \"%s\"",
-                    value.toString(),dataType.getType())));
+				String checkedVal = value != null ? value.toString() : null;
+
+				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE001", String.format(
+						"TypeMismatchError: \"%s\" is not a map. The type is \"%s\"",
+						checkedVal, dataType.getType())));
                 
 				if (value instanceof List && ((List) value).size() > 0)  {
 					value = ((List) value).get(0);

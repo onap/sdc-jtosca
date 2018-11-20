@@ -111,6 +111,16 @@ public class JToscaImportTest {
         assertNull(nodeTemplate.getPropertyValueFromTemplatesByName("test"));
     }
 
+	@Test
+	public void testNullValueHasNoNullPointerException() throws JToscaException {
+
+		String fileStr = JToscaImportTest.class.getClassLoader().getResource("csars/service-JennyVtsbcKarunaSvc-csar.csar").getFile();
+		File file = new File(fileStr);
+		ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
+		List<Input> inputs = toscaTemplate.getInputs();
+		assertNotNull(inputs);
+	}
+
     private void validateInputsAnnotations(List<Input> inputs) {
 		List<Input> inputsWithAnnotations = inputs.stream().filter(i -> i.getAnnotations() != null)
 				.collect(Collectors.toList());
