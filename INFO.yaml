@@ -43,6 +43,11 @@ committers:
         company: 'ATT'
         id: 'el489u'
         timezone: 'Israel/Lod'
+    - name: 'Ofir Sonsino'
+        email: 'ofir.sonsino@intl.att.com'
+        company: 'ATT'
+        id: 'os0695'
+        timezone: 'Israel/Lod'
 tsc:
     approval: 'https://lists.onap.org/pipermail/onap-tsc'
     changes:
@@ -53,3 +58,6 @@ tsc:
             name: 'Yuli Shlosberg'
             name: 'ELI LEVI'
             link: 'https://wiki.onap.org/pages/viewpage.action?pageId=25435557'
+        - type: 'Addition'
+            name: 'Ofir Sonsino'
+            link: 'https://wiki.onap.org/pages/viewpage.action?pageId=45305945'
