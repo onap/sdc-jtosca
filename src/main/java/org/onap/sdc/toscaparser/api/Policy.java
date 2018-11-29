@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.onap.sdc.toscaparser.api.elements.Metadata;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.onap.sdc.toscaparser.api.utils.ValidateUtils;
 
@@ -20,8 +21,9 @@ public class Policy extends EntityTemplate {
 	private static final String TRIGGERS = "triggers";
 	private static final String SECTIONS[] = {
 			TYPE, METADATA, DESCRIPTION, PROPERTIES, TARGETS, TRIGGERS};
-	
-	LinkedHashMap<String,Object> metaData;
+
+//	LinkedHashMap<String,Object> metaData;
+	Metadata metaData;
 	ArrayList<Object> targetsList; // *** a list of NodeTemplate OR a list of Group ***
 	String targetsType;
 	ArrayList<Object> triggers;
@@ -35,10 +37,10 @@ public class Policy extends EntityTemplate {
 				  LinkedHashMap<String,Object> _customDef) {
 		super(_name,_policy,"policy_type",_customDef);
 
-        metaData = null;
         if(_policy.get(METADATA) != null) {
-        	metaData = (LinkedHashMap<String,Object>)_policy.get(METADATA);
-        	ValidateUtils.validateMap(metaData);
+			LinkedHashMap<String,Object> metadataMap = (LinkedHashMap<String,Object>)_policy.get(METADATA);
+        	ValidateUtils.validateMap(metadataMap);
+        	metaData = new Metadata(metadataMap);
         }
 
         targetsList = targetObjects;
@@ -67,8 +69,12 @@ public class Policy extends EntityTemplate {
 		return targetsType;
 	}
  
-	public LinkedHashMap<String, Object> getMetaData() {
+	public Metadata getMetaDataObj() {
 		return metaData;
+	}
+
+	public LinkedHashMap<String, Object> getMetaData() {
+		return (LinkedHashMap)metaData.getAllProperties();
 	}
 
 	//	public ArrayList<NodeTemplate> getTargetsList() {
