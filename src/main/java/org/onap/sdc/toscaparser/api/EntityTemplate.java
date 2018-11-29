@@ -5,6 +5,7 @@ import org.onap.sdc.toscaparser.api.elements.*;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,16 +52,27 @@ public abstract class EntityTemplate {
 	private ArrayList<RequirementAssignment> _requirements;
 	private ArrayList<CapabilityAssignment> _capabilities;
 
+	@Nullable
+	private NodeTemplate _parentNodeTemplate;
+
 	// dummy constructor for subclasses that don't want super
 	public EntityTemplate() {
 		return;
 	}
 
+    public EntityTemplate(String _name,
+                          LinkedHashMap<String,Object> _template,
+                          String _entityName,
+                          LinkedHashMap<String,Object> _customDef) {
+	    this(_name, _template, _entityName, _customDef, null);
+    }
+
     @SuppressWarnings("unchecked")
 	public EntityTemplate(String _name, 
     					  LinkedHashMap<String,Object> _template, 
     					  String _entityName, 
-    					  LinkedHashMap<String,Object> _customDef) {
+    					  LinkedHashMap<String,Object> _customDef,
+						  NodeTemplate parentNodeTemplate) {
         name = _name;
         entityTpl = _template;
         customDef = _customDef;
@@ -111,7 +123,12 @@ public abstract class EntityTemplate {
         _interfaces = null;
         _requirements = null;
         _capabilities = null;
+        _parentNodeTemplate = parentNodeTemplate;
     }
+
+	public NodeTemplate getParentNodeTemplate() {
+		return _parentNodeTemplate;
+	}
 
     public String getType() {
     	if(typeDefinition != null) {

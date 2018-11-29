@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -110,6 +111,38 @@ public class JToscaImportTest {
 
         assertNull(nodeTemplate.getPropertyValueFromTemplatesByName("test"));
     }
+
+	@Test
+	public void testGetParentNodeTemplateTest() throws JToscaException {
+
+		String fileStr = JToscaImportTest.class.getClassLoader().getResource("csars/service-AdiodVmxVpeBvService-csar.csar").getFile();
+		File file = new File(fileStr);
+		ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
+		NodeTemplate nodeTemplate = toscaTemplate.getNodeTemplates().get(0);
+		//parent of this VF is service (null)
+		assertNull(nodeTemplate.getParentNodeTemplate());
+		List<NodeTemplate> children = nodeTemplate.getSubMappingToscaTemplate().getNodeTemplates();
+		assertFalse(children.isEmpty());
+		NodeTemplate cVFC = children.get(4);
+		//parent is the VF above
+		assertEquals("2017-488_ADIOD-vPE 0", cVFC.getParentNodeTemplate().getName());
+		List<NodeTemplate> children1 = cVFC.getSubMappingToscaTemplate().getNodeTemplates();
+		assertFalse(children1.isEmpty());
+		//parent is the CVFC above
+		assertEquals(cVFC, children1.get(0).getParentNodeTemplate());
+
+/*
+
+		TopologyTemplate tt = nodeTemplate.getOriginComponentTemplate();
+		List<Group> groups = tt.getGroups();
+		List<Policy> policies = tt.getPolicies();
+
+		TopologyTemplate tt1 = cVFC.getOriginComponentTemplate();
+		groups = tt.getGroups();
+		policies = tt.getPolicies();
+*/
+
+	}
 
 	@Test
 	public void testNullValueHasNoNullPointerException() throws JToscaException {

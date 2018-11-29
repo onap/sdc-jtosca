@@ -71,6 +71,7 @@ public class TopologyTemplate {
 			description = _tplDescription();
 			inputs = _inputs();
 	        relationshipTemplates =_relationshipTemplates();
+	        //todo: pass subMappedNodeTemplate to ET constractor
 	        nodeTemplates = _nodeTemplates();
 	        outputs = _outputs();
 	        if(nodeTemplates != null) {
@@ -128,7 +129,8 @@ public class TopologyTemplate {
 													tpls,
 													customDefs,
 													relationshipTemplates,
-													relTypes);
+													relTypes,
+													subMappedNodeTemplate);
 				if(tpl.getTypeDefinition() != null) {
 					boolean b = NodeType.TOSCA_DEF.get(tpl.getType()) != null;
 					if(b || (tpl.getCustomDef() != null && !tpl.getCustomDef().isEmpty())) {
@@ -148,7 +150,7 @@ public class TopologyTemplate {
 		if(tpls != null) {
 			for(String name: tpls.keySet()) {
 				RelationshipTemplate tpl = new RelationshipTemplate(
-						(LinkedHashMap<String,Object>)tpls.get(name),name,customDefs,null,null);
+						(LinkedHashMap<String,Object>)tpls.get(name),name,customDefs,null,null, subMappedNodeTemplate);
 						
 				alRelationshipTemplates.add(tpl);
 			}
@@ -216,7 +218,8 @@ public class TopologyTemplate {
                							  policyTpl,
 	                                      targetObjects, 
 	                                      targetsType,
-	                                      customDefs);
+	                                      customDefs,
+					   					  subMappedNodeTemplate);
                alPolicies.add(policyObj);
 		}
         return alPolicies;
@@ -244,7 +247,7 @@ public class TopologyTemplate {
             Group group = new Group(groupName,
             						groupTpl,
             						memberNodes,
-            						customDefs);
+            						customDefs, subMappedNodeTemplate);
             groups.add(group);
 		}
 		return groups;
@@ -314,9 +317,7 @@ public class TopologyTemplate {
         if(tpl.get(INPUTS) != null) {
         	return (LinkedHashMap<String,Object>)tpl.get(INPUTS);
         }
-        else {
-        	return new LinkedHashMap<String,Object>();
-        }
+       	return new LinkedHashMap<String,Object>();
     }
 
     @SuppressWarnings("unchecked")
@@ -329,19 +330,15 @@ public class TopologyTemplate {
         if(tpl.get(RELATIONSHIP_TEMPLATES) != null) {
         	return (LinkedHashMap<String,Object>)tpl.get(RELATIONSHIP_TEMPLATES);
         }
-        else {
-        	return new LinkedHashMap<String,Object>();
-        }
+       	return new LinkedHashMap<String,Object>();
     }
 
     @SuppressWarnings("unchecked")
  	private LinkedHashMap<String,Object> _tplOutputs() {
-         if(tpl.get(OUTPUTS) != null) {
-         	return (LinkedHashMap<String,Object>)tpl.get(OUTPUTS);
-         }
-         else {
-         	return new LinkedHashMap<String,Object>();
-         }
+		if(tpl.get(OUTPUTS) != null) {
+			return (LinkedHashMap<String,Object>)tpl.get(OUTPUTS);
+		}
+ 		return new LinkedHashMap<String,Object>();
      }
 
     @SuppressWarnings("unchecked")
@@ -349,9 +346,7 @@ public class TopologyTemplate {
         if(tpl.get(SUBSTITUTION_MAPPINGS) != null) {
         	return (LinkedHashMap<String,Object>)tpl.get(SUBSTITUTION_MAPPINGS);
         }
-        else {
-        	return new LinkedHashMap<String,Object>();
-        }
+       	return new LinkedHashMap<String,Object>();
     }
 
     @SuppressWarnings("unchecked")
@@ -359,9 +354,7 @@ public class TopologyTemplate {
         if(tpl.get(GROUPS) != null) {
         	return (LinkedHashMap<String,Object>)tpl.get(GROUPS);
         }
-        else {
-        	return new LinkedHashMap<String,Object>();
-        }
+       	return new LinkedHashMap<String,Object>();
     }
 
     @SuppressWarnings("unchecked")
@@ -369,9 +362,7 @@ public class TopologyTemplate {
         if(tpl.get(POLICIES) != null) {
         	return (LinkedHashMap<String,Object>)tpl.get(POLICIES);
         }
-        else {
-        	return new LinkedHashMap<>();
-        }
+		return new LinkedHashMap<>();
     }
 
     private void _validateField() {

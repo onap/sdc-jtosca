@@ -25,12 +25,18 @@ public class Group extends EntityTemplate {
 	ArrayList<NodeTemplate> memberNodes;
 	LinkedHashMap<String,Object> customDef;
 	Metadata metaData;
-	
+
+
+	public Group(String _name, LinkedHashMap<String, Object> _templates,
+				 ArrayList<NodeTemplate> _memberNodes,
+				 LinkedHashMap<String, Object> _customDef){
+		this(_name, _templates, _memberNodes, _customDef, null);
+	}
 
 	public Group(String _name, LinkedHashMap<String, Object> _templates, 
 					ArrayList<NodeTemplate> _memberNodes,
-					LinkedHashMap<String, Object> _customDef) {
-		super(_name, _templates, "group_type", _customDef);
+					LinkedHashMap<String, Object> _customDef, NodeTemplate parentNodeTemplate) {
+		super(_name, _templates, "group_type", _customDef, parentNodeTemplate);
 
 		name = _name;
         tpl = _templates;

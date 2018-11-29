@@ -28,14 +28,22 @@ public class Policy extends EntityTemplate {
 	String targetsType;
 	ArrayList<Object> triggers;
 	LinkedHashMap<String,Object> properties;
-	
+
+	public Policy(String _name,
+				  LinkedHashMap<String,Object> _policy,
+				  ArrayList<Object> targetObjects,
+				  String _targetsType,
+				  LinkedHashMap<String,Object> _customDef) {
+		this(_name, _policy, targetObjects, _targetsType, _customDef, null);
+	}
+
 	public Policy(String _name,
 				  LinkedHashMap<String,Object> _policy,
 //				  ArrayList<NodeTemplate> targetObjects,
 				  ArrayList<Object> targetObjects,
 				  String _targetsType,
-				  LinkedHashMap<String,Object> _customDef) {
-		super(_name,_policy,"policy_type",_customDef);
+				  LinkedHashMap<String,Object> _customDef, NodeTemplate parentNodeTemplate) {
+		super(_name,_policy,"policy_type",_customDef, parentNodeTemplate);
 
         if(_policy.get(METADATA) != null) {
 			LinkedHashMap<String,Object> metadataMap = (LinkedHashMap<String,Object>)_policy.get(METADATA);

@@ -29,15 +29,25 @@ public class NodeTemplate extends EntityTemplate {
 
 	private static final String METADATA = "metadata";
 
+	public NodeTemplate(String name,
+						LinkedHashMap<String,Object> ntnodeTemplates,
+						LinkedHashMap<String,Object> ntcustomDef,
+						ArrayList<RelationshipTemplate> ntavailableRelTpls,
+						LinkedHashMap<String,Object> ntavailableRelTypes) {
+		this( name, ntnodeTemplates, ntcustomDef, ntavailableRelTpls,
+				ntavailableRelTypes, null);
+	}
 
 	@SuppressWarnings("unchecked")
 	public NodeTemplate(String name,
 						LinkedHashMap<String,Object> ntnodeTemplates,
 						LinkedHashMap<String,Object> ntcustomDef,
 						ArrayList<RelationshipTemplate> ntavailableRelTpls,
-						LinkedHashMap<String,Object> ntavailableRelTypes) {
+						LinkedHashMap<String,Object> ntavailableRelTypes,
+						NodeTemplate parentNodeTemplate) {
 		
-       super(name, (LinkedHashMap<String,Object>)ntnodeTemplates.get(name), "node_type", ntcustomDef);
+       super(name, (LinkedHashMap<String,Object>)ntnodeTemplates.get(name),
+			   "node_type", ntcustomDef, parentNodeTemplate);
 
        templates = ntnodeTemplates;
        _validateFields((LinkedHashMap<String,Object>)templates.get(name));
@@ -209,7 +219,7 @@ public class NodeTemplate extends EntityTemplate {
 		LinkedHashMap<String,Object> req = new LinkedHashMap<>();
 		req.put("relationship", CopyUtils.copyLhmOrAl(requirement.getRelationship()));
 		req.put("type",rtype);
-		RelationshipTemplate tpl = new RelationshipTemplate(req, rtype, customDef, this, source);
+		RelationshipTemplate tpl = new RelationshipTemplate(req, rtype, customDef, this, source, getParentNodeTemplate());
 		relationshipTpl.add(tpl);
 	}
 

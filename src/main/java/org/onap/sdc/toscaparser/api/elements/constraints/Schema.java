@@ -4,6 +4,7 @@ import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,6 +43,11 @@ public class Schema {
 	        INTEGER, STRING, BOOLEAN, FLOAT, RANGE,NUMBER, TIMESTAMP, LIST, MAP,
 	        SCALAR_UNIT_SIZE, SCALAR_UNIT_FREQUENCY, SCALAR_UNIT_TIME,
 	        VERSION, PORTDEF, PORTSPEC, JSON};
+
+	public static final String SIMPLE_PROPERTY_TYPES[] = {
+			INTEGER, STRING, BOOLEAN, FLOAT, RANGE,NUMBER, TIMESTAMP,
+			SCALAR_UNIT_SIZE, SCALAR_UNIT_FREQUENCY, SCALAR_UNIT_TIME,
+			VERSION};
 	
 	@SuppressWarnings("unused")
 	private static final String SCALAR_UNIT_SIZE_DEFAULT = "B";
@@ -106,6 +112,10 @@ public class Schema {
     public String getStatus() {
         return (String)schema.getOrDefault(STATUS,"");
     }
+
+    public static boolean isRequestedTypeSimple(String type) {
+		return Arrays.stream(SIMPLE_PROPERTY_TYPES).anyMatch(t->t.equals(type));
+	}
 
     @SuppressWarnings("unchecked")
 	public ArrayList<Constraint> getConstraints() {

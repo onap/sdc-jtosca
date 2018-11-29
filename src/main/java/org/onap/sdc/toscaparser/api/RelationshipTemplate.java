@@ -24,13 +24,21 @@ public class RelationshipTemplate extends EntityTemplate {
 	private NodeTemplate target;
 	private NodeTemplate source;
 	private ArrayList<Property> _properties;
-	
+
 	public RelationshipTemplate(LinkedHashMap<String,Object> rtrelationshipTemplate,
 								String rtname,
 								LinkedHashMap<String,Object> rtcustomDef,
 								NodeTemplate rttarget,
 								NodeTemplate rtsource) {
-		super(rtname,rtrelationshipTemplate,"relationship_type",rtcustomDef);
+		this(rtrelationshipTemplate, rtname, rtcustomDef, rttarget, rtsource, null);
+	}
+	
+	public RelationshipTemplate(LinkedHashMap<String,Object> rtrelationshipTemplate,
+								String rtname,
+								LinkedHashMap<String,Object> rtcustomDef,
+								NodeTemplate rttarget,
+								NodeTemplate rtsource, NodeTemplate parentNodeTemplate) {
+		super(rtname,rtrelationshipTemplate,"relationship_type",rtcustomDef, parentNodeTemplate);
 		
 		name = rtname;
 		target = rttarget;
