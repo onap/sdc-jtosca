@@ -12,7 +12,7 @@ public class ValidateUtils {
 
 	public static Object strToNum(Object value) {
 	    // Convert a string representation of a number into a numeric type
-	    // tODO(TBD) we should not allow numeric values in, input should be str
+	    // TODO(TBD) we should not allow numeric values in, input should be str
 		if(value instanceof Number) {
 			return value;
 		}

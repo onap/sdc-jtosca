@@ -101,24 +101,33 @@ public class NodeType extends StatefulEntityType {
             				keyword = "node";
             			}
             			else {
-                            // If value is a dict and has a type key
+							String getRelation = null;
+                            // If nodeTypeByCap is a dict and has a type key
                             // we need to lookup the node type using
                             // the capability type
             				String captype = (String)req.get("capability");
-            				String value = _getNodeTypeByCap(captype);
-            				String getRelation = _getRelation(key,value);
+            				nodeType = _getNodeTypeByCap(captype);
+            				if (nodeType != null){
+								getRelation = _getRelation(key, nodeType);
+							} else {
+								ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE11", String.format(
+										"NodeTypeForCapabilityNotFoundError: Node type for capability type \"%s\" is not found",captype)));
+							}
             				if (getRelation != null)  {
             					relation = getRelation;
             				}
             				keyword = key;
-            				nodeType = value;
             			}
             		}
-            		
             	}
-            	RelationshipType rtype = new RelationshipType(relation, keyword, customDef);
-            	NodeType relatednode = new NodeType(nodeType, customDef);
-            	relationship.put(rtype, relatednode);
+            	if(relation == null || nodeType == null){
+					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE11", String.format(
+							"NodeTypeForRelationNotFound: Node type \"%s\" with relationship type \"%s\" is not found",nodeType, relation)));
+				} else {
+					RelationshipType rtype = new RelationshipType(relation, keyword, customDef);
+					NodeType relatednode = new NodeType(nodeType, customDef);
+					relationship.put(rtype, relatednode);
+				}
             }
 		}
 		return relationship;
