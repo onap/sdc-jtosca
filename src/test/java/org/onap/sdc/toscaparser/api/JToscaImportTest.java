@@ -154,6 +154,31 @@ public class JToscaImportTest {
 		assertNotNull(inputs);
 	}
 
+	@Test
+	public void testGetPolicyMetadata() throws JToscaException {
+		String fileStr = JToscaImportTest.class.getClassLoader().getResource("csars/service-NetworkCloudVnfServiceMock-csar.csar").getFile();
+		File file = new File(fileStr);
+		ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
+		ArrayList<Policy> policies = toscaTemplate.getPolicies();
+		assertNotNull(policies);
+		assertEquals(1, policies.size());
+		assertEquals("org.openecomp.policies.External", policies.get(0).getType());
+		assertEquals("adf03496-bf87-43cf-b20a-450e47cb44bd", policies.get(0).getMetaData().getOrDefault("UUID", "").toString());
+		assertTrue(policies.get(0).getMetaData().getOrDefault("UUID_test", "").toString().isEmpty());
+	}
+
+	@Test
+	public void testGetPolicyMetadataObj() throws JToscaException {
+		String fileStr = JToscaImportTest.class.getClassLoader().getResource("csars/service-NetworkCloudVnfServiceMock-csar.csar").getFile();
+		File file = new File(fileStr);
+		ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
+		ArrayList<Policy> policies = toscaTemplate.getPolicies();
+		assertNotNull(policies);
+		assertEquals(1, policies.size());
+		assertEquals("adf03496-bf87-43cf-b20a-450e47cb44bd", policies.get(0).getMetaDataObj().getAllProperties().getOrDefault("UUID", "").toString());
+		assertTrue(policies.get(0).getMetaDataObj().getAllProperties().getOrDefault("name_test", "").toString().isEmpty());
+	}
+
     private void validateInputsAnnotations(List<Input> inputs) {
 		List<Input> inputsWithAnnotations = inputs.stream().filter(i -> i.getAnnotations() != null)
 				.collect(Collectors.toList());
@@ -173,5 +198,6 @@ public class JToscaImportTest {
 		assertTrue(source_type.isPresent());
 		assertEquals(source_type.get().getValue(), "HEAT");
 	}
+
 
 }

@@ -13,17 +13,17 @@ import org.onap.sdc.toscaparser.api.utils.ValidateUtils;
 public class Policy extends EntityTemplate {
 	
 
-	private static final String TYPE = "type";
-	private static final String METADATA = "metadata";
-	private static final String DESCRIPTION = "description";
-	private static final String PROPERTIES = "properties";
-	private static final String TARGETS = "targets";
+	static final String TYPE = "type";
+	static final String METADATA = "metadata";
+	static final String DESCRIPTION = "description";
+	static final String PROPERTIES = "properties";
+	static final String TARGETS = "targets";
 	private static final String TRIGGERS = "triggers";
 	private static final String SECTIONS[] = {
 			TYPE, METADATA, DESCRIPTION, PROPERTIES, TARGETS, TRIGGERS};
 
-//	LinkedHashMap<String,Object> metaData;
-	Metadata metaData;
+	Metadata metaDataObject;
+	LinkedHashMap<String,Object> metaData = null;
 	ArrayList<Object> targetsList; // *** a list of NodeTemplate OR a list of Group ***
 	String targetsType;
 	ArrayList<Object> triggers;
@@ -46,9 +46,9 @@ public class Policy extends EntityTemplate {
 		super(_name,_policy,"policy_type",_customDef, parentNodeTemplate);
 
         if(_policy.get(METADATA) != null) {
-			LinkedHashMap<String,Object> metadataMap = (LinkedHashMap<String,Object>)_policy.get(METADATA);
-        	ValidateUtils.validateMap(metadataMap);
-        	metaData = new Metadata(metadataMap);
+			metaData = (LinkedHashMap<String,Object>)_policy.get(METADATA);
+        	ValidateUtils.validateMap(metaData);
+        	metaDataObject = new Metadata(metaData);
         }
 
         targetsList = targetObjects;
@@ -78,11 +78,11 @@ public class Policy extends EntityTemplate {
 	}
  
 	public Metadata getMetaDataObj() {
-		return metaData;
+		return metaDataObject;
 	}
 
 	public LinkedHashMap<String, Object> getMetaData() {
-		return (LinkedHashMap)metaData.getAllProperties();
+		return metaData;
 	}
 
 	//	public ArrayList<NodeTemplate> getTargetsList() {
