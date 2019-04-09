@@ -953,6 +953,10 @@ policy_types:
     description: The TOSCA Policy Type definition that is used to declare
       performance requirements for TOSCA nodes or groups of nodes.
 
+  onap.policies.Monitoring:
+    derived_from: tosca.policies.Root
+    description: The ONAP Policy Type definition for DCAE uS component monitoring policies.
+
 ##########################################################################
  # Group Type.
  # Group Type represents logical grouping of TOSCA nodes that have an
