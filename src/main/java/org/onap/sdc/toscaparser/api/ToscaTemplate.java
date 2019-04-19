@@ -1,3 +1,22 @@
+/*-
+ * ============LICENSE_START=======================================================
+ * Copyright (c) 2017 AT&T Intellectual Property.
+ * ================================================================================
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ============LICENSE_END=========================================================
+ * Modifications copyright (c) 2019 Fujitsu Limited.
+ * ================================================================================
+ */
 package org.onap.sdc.toscaparser.api;
 
 import java.io.File;
@@ -22,6 +41,7 @@ import org.onap.sdc.toscaparser.api.common.JToscaException;
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.onap.sdc.toscaparser.api.common.ValidationIssueCollector;
 import org.onap.sdc.toscaparser.api.elements.EntityType;
+import org.onap.sdc.toscaparser.api.elements.DataType;
 import org.onap.sdc.toscaparser.api.elements.Metadata;
 import org.onap.sdc.toscaparser.api.extensions.ExtTools;
 import org.onap.sdc.toscaparser.api.parameters.Input;
@@ -105,6 +125,7 @@ public class ToscaTemplate extends Object {
 	private LinkedHashMap<String, LinkedHashMap<String, Object>> metaProperties;
 	private Set<String> processedImports;
 	private LinkedHashMap<String,Object> customDefsFinal = new LinkedHashMap<>();
+	private HashSet<DataType> dataTypes;
 
 	public ToscaTemplate(String _path,
 						LinkedHashMap<String,Object> _parsedParams,
@@ -214,7 +235,8 @@ public class ToscaTemplate extends Object {
             this.metaData = _tplMetaData();
             this.relationshipTypes = _tplRelationshipTypes();
             this.description = _tplDescription();
-            this.topologyTemplate = _topologyTemplate();
+			this.dataTypes = getTopologyDataTypes();
+			this.topologyTemplate = _topologyTemplate();
             this.repositories = _tplRepositories();
             if(topologyTemplate.getTpl() != null) {
                 this.inputs = _inputs();
@@ -323,6 +345,27 @@ public class ToscaTemplate extends Object {
 	
 	private ArrayList<Group> _groups() {
 		return topologyTemplate.getGroups();
+	}
+
+	/**
+	 * Read datatypes field
+	 * @return return list of datatypes.
+	 */
+	@SuppressWarnings("unchecked")
+	private HashSet<DataType> getTopologyDataTypes(){
+		LinkedHashMap<String,Object> value =
+				(LinkedHashMap<String,Object>)tpl.get(DATA_TYPES);
+		HashSet<DataType> datatypes = new HashSet<>();
+		if(value != null) {
+			customDefsFinal.putAll(value);
+			for(Map.Entry<String,Object> me: value.entrySet()) {
+				DataType datatype = new DataType(me.getKey(), value);
+				datatypes.add(datatype);
+			}
+		}
+
+
+		return datatypes;
 	}
 
 	/**
@@ -855,6 +898,14 @@ public class ToscaTemplate extends Object {
 		return nestedToscaTplsWithTopology;
 	}
 
+	/**
+	 * Get datatypes.
+	 * @return return list of datatypes.
+	 */
+	public HashSet<DataType> getDataTypes() {
+		return dataTypes;
+	}
+
 	@Override
 	public String toString() {
 		return "ToscaTemplate{" +
@@ -883,6 +934,7 @@ public class ToscaTemplate extends Object {
 				", graph=" + graph +
 				", csarTempDir='" + csarTempDir + '\'' +
 				", nestingLoopCounter=" + nestingLoopCounter +
+				", dataTypes=" + dataTypes +
 				'}';
 	}
 

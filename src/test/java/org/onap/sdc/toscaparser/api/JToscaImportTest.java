@@ -1,22 +1,41 @@
+/*-
+ * ============LICENSE_START=======================================================
+ * Copyright (c) 2017 AT&T Intellectual Property.
+ * ================================================================================
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ============LICENSE_END=========================================================
+ * Modifications copyright (c) 2019 Fujitsu Limited.
+ * ================================================================================
+ */
 package org.onap.sdc.toscaparser.api;
 
 import org.junit.Test;
 import org.onap.sdc.toscaparser.api.common.JToscaException;
+import org.onap.sdc.toscaparser.api.elements.DataType;
+import org.onap.sdc.toscaparser.api.elements.PropertyDef;
+import org.onap.sdc.toscaparser.api.elements.constraints.Schema;
 import org.onap.sdc.toscaparser.api.parameters.Annotation;
 import org.onap.sdc.toscaparser.api.parameters.Input;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.*;
 
 public class JToscaImportTest {
 
@@ -199,5 +218,92 @@ public class JToscaImportTest {
 		assertEquals(source_type.get().getValue(), "HEAT");
 	}
 
+	private static final String TEST_DATATYPE_FILENAME ="csars/dataTypes-test-service.csar";
+	private static final String TEST_DATATYPE_TEST1 = "TestType1";
+	private static final String TEST_DATATYPE_TEST2 = "TestType2";
+	private static final String TEST_DATATYPE_PROPERTY_STR = "strdata";
+	private static final String TEST_DATATYPE_PROPERTY_INT = "intdata";
+	private static final String TEST_DATATYPE_PROPERTY_LIST = "listdata";
+	private static final String TEST_DATATYPE_PROPERTY_TYPE = "type";
+	private static final String TEST_DATATYPE_PROPERTY_ENTRY_SCHEMA = "entry_schema";
+	private static final String TEST_DATATYPE_TOSTRING = "data_types=";
 
+	@Test
+	public void testGetDataType() throws JToscaException {
+		String fileStr = JToscaImportTest.class.getClassLoader().getResource(TEST_DATATYPE_FILENAME).getFile();
+		File file = new File(fileStr);
+		ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
+		HashSet<DataType> dataTypes = toscaTemplate.getDataTypes();
+		assertThat(dataTypes,notNullValue());
+		assertThat(dataTypes.size(),is(2));
+
+		for(DataType dataType: dataTypes){
+			LinkedHashMap<String, PropertyDef> properties;
+			PropertyDef property;
+			if(dataType.getType().equals(TEST_DATATYPE_TEST1)){
+				properties = dataType.getAllProperties();
+				property = properties.get(TEST_DATATYPE_PROPERTY_STR);
+				assertThat(property,notNullValue());
+				assertThat(property.getName(),is(TEST_DATATYPE_PROPERTY_STR));
+				assertThat( property.getSchema().get(TEST_DATATYPE_PROPERTY_TYPE),is(Schema.STRING));
+			}
+			if(dataType.getType().equals(TEST_DATATYPE_TEST2)){
+				properties = dataType.getAllProperties();
+				property = properties.get(TEST_DATATYPE_PROPERTY_INT);
+				assertThat(property,notNullValue());
+				assertThat(property.getName(),is(TEST_DATATYPE_PROPERTY_INT));
+				assertThat(property.getSchema().get(TEST_DATATYPE_PROPERTY_TYPE),is(Schema.INTEGER));
+
+				property = properties.get(TEST_DATATYPE_PROPERTY_LIST);
+				assertThat(property,notNullValue());
+				assertThat(property.getName(),is(TEST_DATATYPE_PROPERTY_LIST));
+				assertThat(property.getSchema().get(TEST_DATATYPE_PROPERTY_TYPE),is(Schema.LIST));
+				assertThat(property.getSchema().get(TEST_DATATYPE_PROPERTY_ENTRY_SCHEMA),is(TEST_DATATYPE_TEST1));
+
+				assertThat((LinkedHashMap<String, Object>) toscaTemplate.getTopologyTemplate().getCustomDefs().get(TEST_DATATYPE_TEST1),notNullValue());
+				assertThat((LinkedHashMap<String, Object>) toscaTemplate.getTopologyTemplate().getCustomDefs().get(TEST_DATATYPE_TEST2),notNullValue());
+				assertThat(toscaTemplate.toString(),containsString(TEST_DATATYPE_TOSTRING));
+			}
+		}
+
+	}
+
+	@Test
+	public void testGetInputValidate() throws JToscaException {
+		String fileStr = JToscaImportTest.class.getClassLoader().getResource(TEST_DATATYPE_FILENAME).getFile();
+		File file = new File(fileStr);
+		ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
+		HashSet<DataType> dataTypes = toscaTemplate.getDataTypes();
+		assertThat(dataTypes,notNullValue());
+		assertThat(dataTypes.size(),is(2));
+
+		for(DataType dataType: dataTypes) {
+			LinkedHashMap<String, PropertyDef> properties;
+			PropertyDef property;
+			if(dataType.getType().equals(TEST_DATATYPE_TEST1)) {
+				properties = dataType.getAllProperties();
+				property = properties.get(TEST_DATATYPE_PROPERTY_STR);
+				assertThat(property,notNullValue());
+				assertThat(property.getName(),is(TEST_DATATYPE_PROPERTY_STR));
+				assertThat(property.getSchema().get(TEST_DATATYPE_PROPERTY_TYPE),is(Schema.STRING));
+			}
+			if(dataType.getType().equals(TEST_DATATYPE_TEST2)) {
+				properties = dataType.getAllProperties();
+				property = properties.get(TEST_DATATYPE_PROPERTY_INT);
+				assertThat(property,notNullValue());
+				assertThat(property.getName(),is(TEST_DATATYPE_PROPERTY_INT));
+				assertThat(property.getSchema().get(TEST_DATATYPE_PROPERTY_TYPE),is(Schema.INTEGER));
+
+				property = properties.get(TEST_DATATYPE_PROPERTY_LIST);
+				assertThat(property,notNullValue());
+				assertThat(property.getName(),is(TEST_DATATYPE_PROPERTY_LIST));
+				assertThat(property.getSchema().get(TEST_DATATYPE_PROPERTY_TYPE),is(Schema.LIST));
+				assertThat(property.getSchema().get(TEST_DATATYPE_PROPERTY_ENTRY_SCHEMA),is(TEST_DATATYPE_TEST1));
+
+				assertThat((LinkedHashMap<String, Object>) toscaTemplate.getTopologyTemplate().getCustomDefs().get(TEST_DATATYPE_TEST1),notNullValue());
+				assertThat((LinkedHashMap<String, Object>) toscaTemplate.getTopologyTemplate().getCustomDefs().get(TEST_DATATYPE_TEST2),notNullValue());
+				assertThat(toscaTemplate.toString(),containsString(TEST_DATATYPE_TOSTRING));
+			}
+		}
+	}
 }

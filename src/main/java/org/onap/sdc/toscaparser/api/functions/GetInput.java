@@ -1,3 +1,22 @@
+/*-
+ * ============LICENSE_START=======================================================
+ * Copyright (c) 2017 AT&T Intellectual Property.
+ * ================================================================================
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ============LICENSE_END=========================================================
+ * Modifications copyright (c) 2019 Fujitsu Limited.
+ * ================================================================================
+ */
 package org.onap.sdc.toscaparser.api.functions;
 
 import org.onap.sdc.toscaparser.api.DataEntity;
@@ -10,7 +29,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 public class GetInput extends Function {
-	
+
+	public static final String INDEX = "INDEX";
+	public static final String INPUTS = "inputs";
+	public static final String TYPE = "type";
+	public static final String PROPERTIES = "properties";
+	public static final String ENTRY_SCHEMA = "entry_schema";
+
 	public GetInput(TopologyTemplate toscaTpl, Object context, String name, ArrayList<Object> _args) {
 		super(toscaTpl,context,name,_args);
 		
@@ -18,17 +43,13 @@ public class GetInput extends Function {
 
 	@Override
 	void validate() {
+
 //	    if(args.size() != 1) {
 //	    	//PA - changed to WARNING from CRITICAL after talking to Renana, 22/05/2017
 //	        ThreadLocalsHolder.getCollector().appendWarning(String.format(
 //	            "ValueError: Expected one argument for function \"get_input\" but received \"%s\"",
 //	            args.toString()));
 //	    }
-		if(args.size() > 2) {
-			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE009", String.format(
-					"ValueError: Expected max 2 arguments for function \"get_input\" but received \"%s\"",
-					args.size())));
-		}
 	    boolean bFound = false;
 	    for(Input inp: toscaTpl.getInputs()) {
 	    	if(inp.getName().equals(args.get(0))) {
@@ -40,12 +61,48 @@ public class GetInput extends Function {
 	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE158", String.format(
 	            "UnknownInputError: Unknown input \"%s\"",args.get(0)))); 
 	    }
+	    else if(args.size() > 2){
+			LinkedHashMap<String,Object> inputs = (LinkedHashMap<String,Object>)toscaTpl.getTpl().get(INPUTS);
+			LinkedHashMap<String,Object> data = (LinkedHashMap<String,Object>)inputs.get(getInputName());
+			String type ;
+
+	    	for(int argumentNumber=1;argumentNumber<args.size();argumentNumber++){
+				String dataTypeName="";
+	    		bFound=false;
+	    		if(INDEX.equals(args.get(argumentNumber).toString()) || (args.get(argumentNumber) instanceof Integer)){
+	    			bFound=true;
+				}
+	    		else{
+					type = (String)data.get(TYPE);
+	    			//get type name
+	    			if(type.equals("list") || type.equals("map")){
+						LinkedHashMap<String,Object> schema = (LinkedHashMap<String,Object>)data.get(ENTRY_SCHEMA);
+	    				dataTypeName=(String)schema.get(TYPE);
+					}else{
+	    				dataTypeName=type;
+					}
+	    			//check property name
+					LinkedHashMap<String,Object> dataType = (LinkedHashMap<String,Object>)toscaTpl.getCustomDefs().get(dataTypeName);
+	    			if(dataType != null) {
+						LinkedHashMap<String, Object> props = (LinkedHashMap<String, Object>) dataType.get(PROPERTIES);
+						data = (LinkedHashMap<String, Object>)props.get(args.get(argumentNumber).toString());
+						if(data != null) {
+							bFound = true;
+						}
+					}
+				}
+				if(!bFound){
+					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE282", String.format(
+							"UnknownDataType: Unknown data type \"%s\"",args.get(argumentNumber))));
+				}
+			}
+		}
 	}
 
 	public 	Object result() {
 		if(toscaTpl.getParsedParams() != null && 
 				toscaTpl.getParsedParams().get(getInputName()) != null) {
-			LinkedHashMap<String,Object> ttinp = (LinkedHashMap<String,Object>)toscaTpl.getTpl().get("inputs");
+			LinkedHashMap<String,Object> ttinp = (LinkedHashMap<String,Object>)toscaTpl.getTpl().get(INPUTS);
 			LinkedHashMap<String,Object> ttinpinp = (LinkedHashMap<String,Object>)ttinp.get(getInputName());
 			String type = (String)ttinpinp.get("type");
 
@@ -94,6 +151,15 @@ public class GetInput extends Function {
 		return (String)args.get(0);
 	}
 
+	public LinkedHashMap<String,Object> getEntrySchema() {
+		LinkedHashMap<String,Object> inputs = (LinkedHashMap<String,Object>)toscaTpl.getTpl().get(INPUTS);
+		LinkedHashMap<String,Object> inputValue = (LinkedHashMap<String,Object>)inputs.get(getInputName());
+		return (LinkedHashMap<String,Object>)inputValue.get(ENTRY_SCHEMA);
+	}
+
+	public ArrayList<Object> getArguments(){
+		return args;
+	}
 }
 
 /*python

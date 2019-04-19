@@ -176,4 +176,9 @@ public class Input {
 	public void resetAnnotaions(){
 		annotations = null;
 	}
+
+	public LinkedHashMap<String,Object> getEntrySchema() {
+		return schema.getEntrySchema();
+	}
+
 }
