@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+
 //Generate excel file, include all validation issues errors in jtosca
 //the error java code, the line number and file name for each error.
 public class GetValidationIssues {
@@ -37,13 +38,13 @@ public class GetValidationIssues {
     public static List<String[]> data = new ArrayList<>();
 
     public static void main(String[] args) {
-    	System.out.println("GetAllValidationIssues - path to project files Directory is " + Arrays.toString(args));
-        File jtoscaFiles = new File(args[0]+ "\\jtosca\\src\\main\\java\\org\\onap\\sdc\\toscaparser\\api");
+        System.out.println("GetAllValidationIssues - path to project files Directory is " + Arrays.toString(args));
+        File jtoscaFiles = new File(args[0] + "\\jtosca\\src\\main\\java\\org\\onap\\sdc\\toscaparser\\api");
 
         try {
             printFiles(jtoscaFiles);
-            fileWriter = new CSVWriter(new FileWriter(args[1]+"\\JToscaValidationIssues_"+System.currentTimeMillis()+".csv"), '\t');
-            fileWriter.writeNext(new String[] {"Error Message", "Class Name", "Line No."}, false);
+            fileWriter = new CSVWriter(new FileWriter(args[1] + "\\JToscaValidationIssues_" + System.currentTimeMillis() + ".csv"), '\t');
+            fileWriter.writeNext(new String[]{"Error Message", "Class Name", "Line No."}, false);
             fileWriter.writeAll(data, false);
         } catch (IOException e) {
             e.printStackTrace();

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,134 +25,132 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class CapabilityTypeDef extends StatefulEntityType {
-	// TOSCA built-in capabilities type
+    // TOSCA built-in capabilities type
 
-	private static final String TOSCA_TYPEURI_CAPABILITY_ROOT = "tosca.capabilities.Root";
+    private static final String TOSCA_TYPEURI_CAPABILITY_ROOT = "tosca.capabilities.Root";
 
-	private String name;
-	private String nodetype;
-	private LinkedHashMap<String,Object> customDef;
-	private LinkedHashMap<String,Object> properties;
-	private LinkedHashMap<String,Object> parentCapabilities;
+    private String name;
+    private String nodetype;
+    private LinkedHashMap<String, Object> customDef;
+    private LinkedHashMap<String, Object> properties;
+    private LinkedHashMap<String, Object> parentCapabilities;
 
-	@SuppressWarnings("unchecked")
-	public CapabilityTypeDef(String cname,String ctype,String ntype,LinkedHashMap<String,Object> ccustomDef) {
-		super(ctype,CAPABILITY_PREFIX,ccustomDef);
-		
-		name = cname;
+    @SuppressWarnings("unchecked")
+    public CapabilityTypeDef(String cname, String ctype, String ntype, LinkedHashMap<String, Object> ccustomDef) {
+        super(ctype, CAPABILITY_PREFIX, ccustomDef);
+
+        name = cname;
         nodetype = ntype;
         properties = null;
         customDef = ccustomDef;
-        if(defs != null) {
-        	properties = (LinkedHashMap<String,Object>)defs.get(PROPERTIES);
+        if (defs != null) {
+            properties = (LinkedHashMap<String, Object>) defs.get(PROPERTIES);
         }
-        parentCapabilities = _getParentCapabilities(customDef);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public ArrayList<PropertyDef> getPropertiesDefObjects () {
+        parentCapabilities = getParentCapabilities(customDef);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ArrayList<PropertyDef> getPropertiesDefObjects() {
         // Return a list of property definition objects
-		ArrayList<PropertyDef> propsdefs = new ArrayList<>();
-		LinkedHashMap<String,Object> parentProperties = new LinkedHashMap<>();
-		if(parentCapabilities != null) {
-			for(Map.Entry<String,Object> me: parentCapabilities.entrySet()) {
-				parentProperties.put(me.getKey(),((LinkedHashMap<String,Object>)me.getValue()).get("properties"));
-			}
-		}
-		if(properties != null) {
-			for(Map.Entry<String,Object> me: properties.entrySet()) {
-				propsdefs.add(new PropertyDef(me.getKey(),null,(LinkedHashMap<String,Object>)me.getValue()));
-			}
-		}
-		if(parentProperties != null) {
-			for(Map.Entry<String,Object> me: parentProperties.entrySet()) {
-				LinkedHashMap<String,Object> props = (LinkedHashMap<String,Object>)me.getValue();
-				if (props != null)  {
-					for(Map.Entry<String,Object> pe: props.entrySet()) {
-						String prop = pe.getKey();
-						LinkedHashMap<String,Object> schema = (LinkedHashMap<String,Object>)pe.getValue();
-	                    // add parent property if not overridden by children type
-	                    if(properties == null || properties.get(prop) == null) {
-	                        propsdefs.add(new PropertyDef(prop, null, schema));
-	                    }
-					}
-				}
-			}
-		}
-		return propsdefs;
-	}
+        ArrayList<PropertyDef> propsdefs = new ArrayList<>();
+        LinkedHashMap<String, Object> parentProperties = new LinkedHashMap<>();
+        if (parentCapabilities != null) {
+            for (Map.Entry<String, Object> me : parentCapabilities.entrySet()) {
+                parentProperties.put(me.getKey(), ((LinkedHashMap<String, Object>) me.getValue()).get("properties"));
+            }
+        }
+        if (properties != null) {
+            for (Map.Entry<String, Object> me : properties.entrySet()) {
+                propsdefs.add(new PropertyDef(me.getKey(), null, (LinkedHashMap<String, Object>) me.getValue()));
+            }
+        }
+        if (parentProperties != null) {
+            for (Map.Entry<String, Object> me : parentProperties.entrySet()) {
+                LinkedHashMap<String, Object> props = (LinkedHashMap<String, Object>) me.getValue();
+                if (props != null) {
+                    for (Map.Entry<String, Object> pe : props.entrySet()) {
+                        String prop = pe.getKey();
+                        LinkedHashMap<String, Object> schema = (LinkedHashMap<String, Object>) pe.getValue();
+                        // add parent property if not overridden by children type
+                        if (properties == null || properties.get(prop) == null) {
+                            propsdefs.add(new PropertyDef(prop, null, schema));
+                        }
+                    }
+                }
+            }
+        }
+        return propsdefs;
+    }
 
-	public LinkedHashMap<String,PropertyDef> getPropertiesDef() {
-		LinkedHashMap<String,PropertyDef> pds = new LinkedHashMap<>();
-		for(PropertyDef pd: getPropertiesDefObjects()) {
-			pds.put(pd.getName(),pd);
-		}
-		return pds;
-	}
+    public LinkedHashMap<String, PropertyDef> getPropertiesDef() {
+        LinkedHashMap<String, PropertyDef> pds = new LinkedHashMap<>();
+        for (PropertyDef pd : getPropertiesDefObjects()) {
+            pds.put(pd.getName(), pd);
+        }
+        return pds;
+    }
 
-	public PropertyDef getPropertyDefValue(String pdname) {
+    public PropertyDef getPropertyDefValue(String pdname) {
         // Return the definition of a given property name
-		LinkedHashMap<String,PropertyDef> propsDef = getPropertiesDef();
-		if(propsDef != null && propsDef.get(pdname) != null) {
-			return (PropertyDef)propsDef.get(pdname).getPDValue();
-		}
-		return null;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private LinkedHashMap<String,Object> _getParentCapabilities(LinkedHashMap<String,Object> customDef) {
-		LinkedHashMap<String,Object> capabilities = new LinkedHashMap<>();
-		CapabilityTypeDef parentCap = getParentType();
-		if(parentCap != null) {
-			String sParentCap = parentCap.getType();
-			while(!sParentCap.equals(TOSCA_TYPEURI_CAPABILITY_ROOT)) {
-				if(TOSCA_DEF.get(sParentCap) != null) {
-					capabilities.put(sParentCap,TOSCA_DEF.get(sParentCap));
-				}
-				else if(customDef != null && customDef.get(sParentCap) != null) {
-					capabilities.put(sParentCap,customDef.get(sParentCap));
-				}
-				sParentCap = (String)((LinkedHashMap<String,Object>)capabilities.get(sParentCap)).get("derived_from");
-			}
-		}
-		return capabilities;
-	}
+        LinkedHashMap<String, PropertyDef> propsDef = getPropertiesDef();
+        if (propsDef != null && propsDef.get(pdname) != null) {
+            return (PropertyDef) propsDef.get(pdname).getPDValue();
+        }
+        return null;
+    }
 
-	public CapabilityTypeDef getParentType() {
+    @SuppressWarnings("unchecked")
+    private LinkedHashMap<String, Object> getParentCapabilities(LinkedHashMap<String, Object> customDef) {
+        LinkedHashMap<String, Object> capabilities = new LinkedHashMap<>();
+        CapabilityTypeDef parentCap = getParentType();
+        if (parentCap != null) {
+            String sParentCap = parentCap.getType();
+            while (!sParentCap.equals(TOSCA_TYPEURI_CAPABILITY_ROOT)) {
+                if (TOSCA_DEF.get(sParentCap) != null) {
+                    capabilities.put(sParentCap, TOSCA_DEF.get(sParentCap));
+                } else if (customDef != null && customDef.get(sParentCap) != null) {
+                    capabilities.put(sParentCap, customDef.get(sParentCap));
+                }
+                sParentCap = (String) ((LinkedHashMap<String, Object>) capabilities.get(sParentCap)).get("derived_from");
+            }
+        }
+        return capabilities;
+    }
+
+    public CapabilityTypeDef getParentType() {
         // Return a capability this capability is derived from
-		if(defs == null) {
-			return null;
-		}
-		String pnode = derivedFrom(defs);
-		if(pnode != null && !pnode.isEmpty()) {
+        if (defs == null) {
+            return null;
+        }
+        String pnode = derivedFrom(defs);
+        if (pnode != null && !pnode.isEmpty()) {
             return new CapabilityTypeDef(name, pnode, nodetype, customDef);
-		}
-		return null;
-	}
+        }
+        return null;
+    }
 
-	public boolean inheritsFrom(ArrayList<String> typeNames) {
+    public boolean inheritsFrom(ArrayList<String> typeNames) {
         // Check this capability is in type_names
 
         // Check if this capability or some of its parent types
         // are in the list of types: type_names
-		if(typeNames.contains(getType())) {
-			return true;
-		}
-		else if(getParentType() != null) {
-			return getParentType().inheritsFrom(typeNames);
-		}
-		return false;
-	}
+        if (typeNames.contains(getType())) {
+            return true;
+        } else if (getParentType() != null) {
+            return getParentType().inheritsFrom(typeNames);
+        }
+        return false;
+    }
 
-	// getters/setters
-            		
-	public LinkedHashMap<String,Object> getProperties() {
-		return properties;
-	}
-		
-	public String getName() {
-		return name;
-	}
+    // getters/setters
+
+    public LinkedHashMap<String, Object> getProperties() {
+        return properties;
+    }
+
+    public String getName() {
+        return name;
+    }
 }
 
 /*python
@@ -227,7 +225,7 @@ class CapabilityTypeDef(StatefulEntityType):
         if pnode:
             return CapabilityTypeDef(self.name, pnode,
                                      self.nodetype, self.custom_def)
-                                     
+
     def inherits_from(self, type_names):
         '''Check this capability is in type_names
 

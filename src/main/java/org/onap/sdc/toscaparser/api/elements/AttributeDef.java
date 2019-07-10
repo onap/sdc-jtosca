@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,27 +24,27 @@ import java.util.LinkedHashMap;
 
 public class AttributeDef {
     // TOSCA built-in Attribute type
-	
-	private String name;
-	private Object value;
-	private LinkedHashMap<String,Object> schema;
 
-    public AttributeDef(String adName, Object adValue, LinkedHashMap<String,Object> adSchema) {
+    private String name;
+    private Object value;
+    private LinkedHashMap<String, Object> schema;
+
+    public AttributeDef(String adName, Object adValue, LinkedHashMap<String, Object> adSchema) {
         name = adName;
         value = adValue;
         schema = adSchema;
     }
-    
+
     public String getName() {
-    	return name;
+        return name;
     }
 
     public Object getValue() {
-    	return value;
+        return value;
     }
 
-    public LinkedHashMap<String,Object> getSchema() {
-    	return schema;
+    public LinkedHashMap<String, Object> getSchema() {
+        return schema;
     }
 }
 

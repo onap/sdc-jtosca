@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,75 +20,75 @@
 
 package org.onap.sdc.toscaparser.api;
 
+import org.onap.sdc.toscaparser.api.elements.RelationshipType;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-
-import org.onap.sdc.toscaparser.api.elements.RelationshipType;
 
 //import java.util.Iterator;
 
 public class ToscaGraph {
     // Graph of Tosca Node Templates
 
-	private ArrayList<NodeTemplate> nodeTemplates;
-	private LinkedHashMap<String,NodeTemplate> vertices;
-	
-	public ToscaGraph(ArrayList<NodeTemplate> inodeTemplates) {
-		nodeTemplates = inodeTemplates;
-		vertices = new LinkedHashMap<String,NodeTemplate>();
-		_create();
-	}
-	
-	private void _createVertex(NodeTemplate node) {
-        if(vertices.get(node.getName()) == null) {
-            vertices.put(node.getName(),node);
+    private ArrayList<NodeTemplate> nodeTemplates;
+    private LinkedHashMap<String, NodeTemplate> vertices;
+
+    public ToscaGraph(ArrayList<NodeTemplate> inodeTemplates) {
+        nodeTemplates = inodeTemplates;
+        vertices = new LinkedHashMap<String, NodeTemplate>();
+        create();
+    }
+
+    private void createVertex(NodeTemplate node) {
+        if (vertices.get(node.getName()) == null) {
+            vertices.put(node.getName(), node);
         }
-	}
-	
-	private void _createEdge(NodeTemplate node1,
-							 NodeTemplate node2,
-							 RelationshipType relation) {
-		if(vertices.get(node1.getName()) == null) {
-			_createVertex(node1);
-			vertices.get(node1.name)._addNext(node2,relation);
-		}
-	}
-	
-	public NodeTemplate vertex(String name) {
-        if(vertices.get(name) != null) {
+    }
+
+    private void createEdge(NodeTemplate node1,
+                            NodeTemplate node2,
+                            RelationshipType relation) {
+        if (vertices.get(node1.getName()) == null) {
+            createVertex(node1);
+            vertices.get(node1.name)._addNext(node2, relation);
+        }
+    }
+
+    public NodeTemplate vertex(String name) {
+        if (vertices.get(name) != null) {
             return vertices.get(name);
         }
         return null;
-	}
-	
-//	public Iterator getIter() {
+    }
+
+//  public Iterator getIter() {
 //		return vertices.values().iterator();
 //	}
-	
-	private void _create() {
-		for(NodeTemplate node: nodeTemplates) {
-			LinkedHashMap<RelationshipType,NodeTemplate> relation = node.getRelationships();
-			if(relation != null) {
-				for(RelationshipType rel: relation.keySet()) {
-					NodeTemplate nodeTpls = relation.get(rel);
-					for(NodeTemplate tpl: nodeTemplates) {
-						if(tpl.getName().equals(nodeTpls.getName())) {
-							_createEdge(node,tpl,rel);
-						}
-					}
-				}
-			}
-			_createVertex(node);
-		}
-	}
 
-	@Override
-	public String toString() {
-		return "ToscaGraph{" +
-				"nodeTemplates=" + nodeTemplates +
-				", vertices=" + vertices +
-				'}';
-	}
+    private void create() {
+        for (NodeTemplate node : nodeTemplates) {
+            LinkedHashMap<RelationshipType, NodeTemplate> relation = node.getRelationships();
+            if (relation != null) {
+                for (RelationshipType rel : relation.keySet()) {
+                    NodeTemplate nodeTpls = relation.get(rel);
+                    for (NodeTemplate tpl : nodeTemplates) {
+                        if (tpl.getName().equals(nodeTpls.getName())) {
+                            createEdge(node, tpl, rel);
+                        }
+                    }
+                }
+            }
+            createVertex(node);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "ToscaGraph{"
+                + "nodeTemplates=" + nodeTemplates
+                + ", vertices=" + vertices
+                + '}';
+    }
 }
 
 /*python

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,55 +21,53 @@
 package org.onap.sdc.toscaparser.api.elements.constraints;
 
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
-
-import java.util.LinkedHashMap;
-
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+
 public class MinLength extends Constraint {
-	// Constraint class for "min_length"
-	
-	// Constrains the property or parameter to a value of a minimum length.
+    // Constraint class for "min_length"
 
-	@Override
-	protected void _setValues() {
+    // Constrains the property or parameter to a value of a minimum length.
 
-		constraintKey = MIN_LENGTH;
+    @Override
+    protected void setValues() {
 
-		validTypes.add("Integer");
-		
-		validPropTypes.add(Schema.STRING);
-		validPropTypes.add(Schema.MAP);
-		
-	}
-	
-	public MinLength(String name,String type,Object c) {
-		super(name,type,c);
-		
-		if(!validTypes.contains(constraintValue.getClass().getSimpleName())) {
-	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE113", "InvalidSchemaError: The property \"min_length\" expects an integer")); 
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	protected boolean _isValid(Object value) {
-	    if(value instanceof String && constraintValue instanceof Integer &&
-	    		((String)value).length() >= (Integer)constraintValue) {
-	        return true;
-	    }
-	    else if(value instanceof LinkedHashMap && constraintValue instanceof Integer &&
-	    		((LinkedHashMap<String,Object>)value).size() >= (Integer)constraintValue) {
-	        return true;
-	    }
-		return false;
-	}
+        setConstraintKey(MIN_LENGTH);
 
-	@Override
-	protected String _errMsg(Object value) {
-	    return String.format("Length of value \"%s\" of property \"%s\" must be at least \"%s\"",
-	    					 value.toString(),propertyName,constraintValue.toString());
-	}
+        addValidTypes(Collections.singletonList("Integer"));
+
+        validPropTypes.add(Schema.STRING);
+        validPropTypes.add(Schema.MAP);
+
+    }
+
+    public MinLength(String name, String type, Object c) {
+        super(name, type, c);
+
+        if (!validTypes.contains(constraintValue.getClass().getSimpleName())) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE113", "InvalidSchemaError: The property \"min_length\" expects an integer"));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected boolean isValid(Object value) {
+        if (value instanceof String && constraintValue instanceof Integer
+                && ((String) value).length() >= (Integer) constraintValue) {
+            return true;
+        } else {
+            return value instanceof LinkedHashMap && constraintValue instanceof Integer
+                    && ((LinkedHashMap<String, Object>) value).size() >= (Integer) constraintValue;
+        }
+    }
+
+    @Override
+    protected String errMsg(Object value) {
+        return String.format("Length of value \"%s\" of property \"%s\" must be at least \"%s\"",
+                value.toString(), propertyName, constraintValue.toString());
+    }
 
 }
 
@@ -77,16 +75,16 @@ public class MinLength extends Constraint {
 
 class MinLength(Constraint):
 	"""Constraint class for "min_length"
-	
+
 	Constrains the property or parameter to a value to a minimum length.
 	"""
-	
+
 	constraint_key = Constraint.MIN_LENGTH
-	
+
 	valid_types = (int, )
-	
+
 	valid_prop_types = (Schema.STRING, Schema.MAP)
-	
+
 	def __init__(self, property_name, property_type, constraint):
 	    super(MinLength, self).__init__(property_name, property_type,
 	                                    constraint)
@@ -94,14 +92,14 @@ class MinLength(Constraint):
 	        ValidationIsshueCollector.appendException(
 	            InvalidSchemaError(message=_('The property "min_length" '
 	                                         'expects an integer.')))
-	
+
 	def _is_valid(self, value):
 	    if ((isinstance(value, str) or isinstance(value, dict)) and
 	       len(value) >= self.constraint_value):
 	        return True
-	
+
 	    return False
-	
+
 	def _err_msg(self, value):
 	    return (_('Length of value "%(pvalue)s" of property "%(pname)s" '
 	              'must be at least "%(cvalue)s".') %

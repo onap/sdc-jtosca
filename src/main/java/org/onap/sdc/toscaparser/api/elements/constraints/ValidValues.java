@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,49 +21,44 @@
 package org.onap.sdc.toscaparser.api.elements.constraints;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class ValidValues extends Constraint {
 
 
-	protected void _setValues() {
+    protected void setValues() {
+        setConstraintKey(VALID_VALUES);
+        Collections.addAll(validPropTypes, Schema.PROPERTY_TYPES);
+    }
 
-		constraintKey = VALID_VALUES;
-		
-		for(String s: Schema.PROPERTY_TYPES) {
-			validPropTypes.add(s);
-		}
-		
-	}
-	
-	
-	public ValidValues(String name,String type,Object c) {
-		super(name,type,c);
-		
-	}
+
+    public ValidValues(String name, String type, Object c) {
+        super(name, type, c);
+    }
 
     @SuppressWarnings("unchecked")
-	protected boolean _isValid(Object val) {
-    	if(!(constraintValue instanceof ArrayList)) {
-    		return false;
-    	}
-    	if(val instanceof ArrayList) {
-    		boolean bAll = true;
-    		for(Object v: (ArrayList<Object>)val) {
-    			if(!((ArrayList<Object>)constraintValue).contains(v)) {
-    				bAll = false;
-    				break;
-    			};
-    		}
-    		return bAll;
-    	}
-    	return ((ArrayList<Object>)constraintValue).contains(val);
+    protected boolean isValid(Object val) {
+        if (!(constraintValue instanceof ArrayList)) {
+            return false;
+        }
+        if (val instanceof ArrayList) {
+            boolean bAll = true;
+            for (Object v : (ArrayList<Object>) val) {
+                if (!((ArrayList<Object>) constraintValue).contains(v)) {
+                    bAll = false;
+                    break;
+                }
+            }
+            return bAll;
+        }
+        return ((ArrayList<Object>) constraintValue).contains(val);
     }
 
-    protected String _errMsg(Object value) {
-    	return String.format("The value \"%s\" of property \"%s\" is not valid. Expected a value from \"%s\"",
-    			value.toString(),propertyName,constraintValue.toString());
+    protected String errMsg(Object value) {
+        return String.format("The value \"%s\" of property \"%s\" is not valid. Expected a value from \"%s\"",
+                value.toString(), propertyName, constraintValue.toString());
     }
-    
+
 }
 
 /*python

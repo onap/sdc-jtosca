@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,69 +27,69 @@ import org.onap.sdc.toscaparser.api.utils.UrlUtils;
 import java.util.LinkedHashMap;
 
 public class Repository {
-	
-	private static final String DESCRIPTION = "description";
-	private static final String URL = "url";
-	private static final String CREDENTIAL = "credential";
-	private static final String SECTIONS[] ={DESCRIPTION, URL, CREDENTIAL};
-	
-	private String name;
-	private Object reposit;
-	private String url;
-	
-	@SuppressWarnings("unchecked")
-	public Repository(String repName,Object repValue) {
-		name = repName;
-		reposit = repValue;
-		if(reposit instanceof LinkedHashMap) {
-			url = (String)((LinkedHashMap<String,Object>)reposit).get("url");
-            if(url == null) {
+
+    private static final String DESCRIPTION = "description";
+    private static final String URL = "url";
+    private static final String CREDENTIAL = "credential";
+    private static final String SECTIONS[] = {DESCRIPTION, URL, CREDENTIAL};
+
+    private String name;
+    private Object reposit;
+    private String url;
+
+    @SuppressWarnings("unchecked")
+    public Repository(String repName, Object repValue) {
+        name = repName;
+        reposit = repValue;
+        if (reposit instanceof LinkedHashMap) {
+            url = (String) ((LinkedHashMap<String, Object>) reposit).get("url");
+            if (url == null) {
                 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE229", String.format(
-                    "MissingRequiredFieldError: Repository \"%s\" is missing required field \"url\"",
-                    name))); 
+                        "MissingRequiredFieldError: Repository \"%s\" is missing required field \"url\"",
+                        name)));
             }
-		}
-        loadAndValidate(name,reposit);
-	}
+        }
+        loadAndValidate(name, reposit);
+    }
 
-	@SuppressWarnings("unchecked")
-	private void loadAndValidate(String val,Object repositDef) {
-		String keyname = val;
-		if(repositDef instanceof LinkedHashMap) {
-			for(String key: ((LinkedHashMap<String,Object>)reposit).keySet()) {
-				boolean bFound = false;
-				for(String sect: SECTIONS) {
-					if(key.equals(sect)) {
-						bFound = true;
-						break;
-					}
-				}
-				if(!bFound) {
+    @SuppressWarnings("unchecked")
+    private void loadAndValidate(String val, Object repositDef) {
+        String keyname = val;
+        if (repositDef instanceof LinkedHashMap) {
+            for (String key : ((LinkedHashMap<String, Object>) reposit).keySet()) {
+                boolean bFound = false;
+                for (String sect : SECTIONS) {
+                    if (key.equals(sect)) {
+                        bFound = true;
+                        break;
+                    }
+                }
+                if (!bFound) {
                     ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE230", String.format(
-                        "UnknownFieldError: repositories \"%s\" contains unknown field \"%s\"",
-                        keyname,key))); 
-				}
-			}
-			
-			String repositUrl = (String)((LinkedHashMap<String,Object>)repositDef).get("url");
-	        if(repositUrl != null) {
-	            boolean urlVal = UrlUtils.validateUrl(repositUrl);
-	            if(!urlVal) {
-	                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE231", String.format(
-	                    "URLException: repsositories \"%s\" Invalid Url",keyname))); 
-	            }
-	        }
-		}
-	}
+                            "UnknownFieldError: repositories \"%s\" contains unknown field \"%s\"",
+                            keyname, key)));
+                }
+            }
 
-	@Override
-	public String toString() {
-		return "Repository{" +
-				"name='" + name + '\'' +
-				", reposit=" + reposit +
-				", url='" + url + '\'' +
-				'}';
-	}
+            String repositUrl = (String) ((LinkedHashMap<String, Object>) repositDef).get("url");
+            if (repositUrl != null) {
+                boolean urlVal = UrlUtils.validateUrl(repositUrl);
+                if (!urlVal) {
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE231", String.format(
+                            "URLException: repsositories \"%s\" Invalid Url", keyname)));
+                }
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Repository{" +
+                "name='" + name + '\'' +
+                ", reposit=" + reposit +
+                ", url='" + url + '\'' +
+                '}';
+    }
 }
 
 /*python

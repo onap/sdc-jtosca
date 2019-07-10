@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,100 +39,92 @@ import java.util.regex.Pattern;
 
 public class ExtTools {
 
-	private static Logger log = LoggerFactory.getLogger(ExtTools.class.getName());
+    private static Logger log = LoggerFactory.getLogger(ExtTools.class.getName());
 
-	private static LinkedHashMap<String,Object> EXTENSION_INFO = new LinkedHashMap<>();
-	
-	public ExtTools() {
-		
-        EXTENSION_INFO = _loadExtensions();
-	}
+    private static LinkedHashMap<String, Object> extensionInfo = new LinkedHashMap<>();
 
-	private LinkedHashMap<String,Object> _loadExtensions()  {
+    public ExtTools() {
+        extensionInfo = loadExtensions();
+    }
 
-			LinkedHashMap<String, Object> extensions = new LinkedHashMap<>();
+    private LinkedHashMap<String, Object> loadExtensions() {
 
-			Reflections reflections = new Reflections("extensions", new ResourcesScanner());
-			Set<String> resourcePaths = reflections.getResources(Pattern.compile(".*\\.py$"));
+        LinkedHashMap<String, Object> extensions = new LinkedHashMap<>();
 
-			for(String resourcePath : resourcePaths) {
-				try (InputStream is = ExtTools.class.getClassLoader().getResourceAsStream(resourcePath);
-					 InputStreamReader isr = new InputStreamReader(is, Charset.forName("UTF-8"));
-					 BufferedReader br = new BufferedReader(isr);){
-					String version = null;
-					ArrayList<String> sections = null;
-					String defsFile = null;
-					String line;
+        Reflections reflections = new Reflections("extensions", new ResourcesScanner());
+        Set<String> resourcePaths = reflections.getResources(Pattern.compile(".*\\.py$"));
 
-					Pattern pattern = Pattern.compile("^([^#]\\S+)\\s*=\\s*(\\S.*)$");
-					while ((line = br.readLine()) != null) {
-						line = line.replace("'", "\"");
-						Matcher matcher = pattern.matcher(line.toString());
-						if (matcher.find()) {
-							if (matcher.group(1).equals("VERSION")) {
-								version = matcher.group(2);
-								if (version.startsWith("'") || version.startsWith("\"")) {
-									version = version.substring(1, version.length() - 1);
-								}
-							} 
-							else if (matcher.group(1).equals("DEFS_FILE")) {
-								String fn = matcher.group(2);
-								if (fn.startsWith("'") || fn.startsWith("\"")) {
-									fn = fn.substring(1, fn.length() - 1);
-								}
-								defsFile = resourcePath.replaceFirst("\\w*.py$", fn);
-							} 
-							else if (matcher.group(1).equals("SECTIONS")) {
-								sections = new ArrayList<>();
-								Pattern secpat = Pattern.compile("\"([^\"]+)\"");
-								Matcher secmat = secpat.matcher(matcher.group(2));
-								while (secmat.find()) {
-									sections.add(secmat.group(1));
-								}
-							}
-						}
-					}
+        for (String resourcePath : resourcePaths) {
+            try (InputStream is = ExtTools.class.getClassLoader().getResourceAsStream(resourcePath);
+                 InputStreamReader isr = new InputStreamReader(is, Charset.forName("UTF-8"));
+                 BufferedReader br = new BufferedReader(isr);) {
+                String version = null;
+                ArrayList<String> sections = null;
+                String defsFile = null;
+                String line;
 
-					if (version != null && defsFile != null) {
-						LinkedHashMap<String, Object> ext = new LinkedHashMap<>();
-						ext.put("defs_file", defsFile);
-						if (sections != null) {
-							ext.put("sections", sections);
-						}
-						extensions.put(version, ext);
-					} 
-					else {
-						// error
-					}
-				} 
-				catch (Exception e) {
-					log.error("ExtTools - _loadExtensions - {}", e);
-					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue
-							("JE281", "Failed to load extensions" + e.getMessage()));
-					// ...
-				}
-			}
-			return extensions;
-	}
-	
-	public ArrayList<String> getVersions() {
-		return new ArrayList<String>(EXTENSION_INFO.keySet());
-	}
-	
-	public LinkedHashMap<String,ArrayList<String>> getSections() {
-		LinkedHashMap<String,ArrayList<String>> sections = new LinkedHashMap<>();
-        for(String version: EXTENSION_INFO.keySet()) {
-        	LinkedHashMap<String,Object> eiv = (LinkedHashMap<String,Object>)EXTENSION_INFO.get(version);
-        	sections.put(version,(ArrayList<String>)eiv.get("sections"));
+                Pattern pattern = Pattern.compile("^([^#]\\S+)\\s*=\\s*(\\S.*)$");
+                while ((line = br.readLine()) != null) {
+                    line = line.replace("'", "\"");
+                    Matcher matcher = pattern.matcher(line);
+                    if (matcher.find()) {
+                        if (matcher.group(1).equals("VERSION")) {
+                            version = matcher.group(2);
+                            if (version.startsWith("'") || version.startsWith("\"")) {
+                                version = version.substring(1, version.length() - 1);
+                            }
+                        } else if (matcher.group(1).equals("DEFS_FILE")) {
+                            String fn = matcher.group(2);
+                            if (fn.startsWith("'") || fn.startsWith("\"")) {
+                                fn = fn.substring(1, fn.length() - 1);
+                            }
+                            defsFile = resourcePath.replaceFirst("\\w*.py$", fn);
+                        } else if (matcher.group(1).equals("SECTIONS")) {
+                            sections = new ArrayList<>();
+                            Pattern secpat = Pattern.compile("\"([^\"]+)\"");
+                            Matcher secmat = secpat.matcher(matcher.group(2));
+                            while (secmat.find()) {
+                                sections.add(secmat.group(1));
+                            }
+                        }
+                    }
+                }
+
+                if (version != null && defsFile != null) {
+                    LinkedHashMap<String, Object> ext = new LinkedHashMap<>();
+                    ext.put("defs_file", defsFile);
+                    if (sections != null) {
+                        ext.put("sections", sections);
+                    }
+                    extensions.put(version, ext);
+                }
+            } catch (Exception e) {
+                log.error("ExtTools - loadExtensions - {}", e);
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue(
+                        "JE281", "Failed to load extensions" + e.getMessage()));
+            }
+        }
+        return extensions;
+    }
+
+    public ArrayList<String> getVersions() {
+        return new ArrayList<String>(extensionInfo.keySet());
+    }
+
+    public LinkedHashMap<String, ArrayList<String>> getSections() {
+        LinkedHashMap<String, ArrayList<String>> sections = new LinkedHashMap<>();
+        for (String version : extensionInfo.keySet()) {
+            LinkedHashMap<String, Object> eiv = (LinkedHashMap<String, Object>) extensionInfo.get(version);
+            sections.put(version, (ArrayList<String>) eiv.get("sections"));
         }
         return sections;
-	}
+    }
 
-	public String getDefsFile(String version) { 
-    	LinkedHashMap<String,Object> eiv = (LinkedHashMap<String,Object>)EXTENSION_INFO.get(version);
-    	return (String)eiv.get("defs_file");
-	}
-	
+    public String getDefsFile(String version) {
+        LinkedHashMap<String, Object> eiv = (LinkedHashMap<String, Object>) extensionInfo.get(version);
+        return (String) eiv.get("defs_file");
+    }
+
 }
 
 /*python
@@ -147,7 +139,7 @@ REQUIRED_ATTRIBUTES = ['VERSION', 'DEFS_FILE']
 
 class ExtTools(object):
     def __init__(self):
-        self.EXTENSION_INFO = self._load_extensions()
+        self.extensionInfo = self._load_extensions()
 
     def _load_extensions(self):
         '''Dynamically load all the extensions .'''
@@ -193,17 +185,17 @@ class ExtTools(object):
         return extensions
 
     def get_versions(self):
-        return self.EXTENSION_INFO.keys()
+        return self.extensionInfo.keys()
 
     def get_sections(self):
         sections = {}
-        for version in self.EXTENSION_INFO.keys():
-            sections[version] = self.EXTENSION_INFO[version]['sections']
+        for version in self.extensionInfo.keys():
+            sections[version] = self.extensionInfo[version]['sections']
 
         return sections
 
     def get_defs_file(self, version):
-        versiondata = self.EXTENSION_INFO.get(version)
+        versiondata = self.extensionInfo.get(version)
 
         if versiondata:
             return versiondata.get('defs_file')

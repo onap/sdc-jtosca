@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,20 +38,23 @@ public class UnsupportedType {
     of un_supported_types. As tosca-parser move to provide support for version
     1.1 and higher, they will be removed.
     */
-	
-    private static final String unsupportedTypes[] = {
-    									"tosca.test.invalidtype",
-    									"tosca.nodes.Storage.ObjectStorage",
-    									"tosca.nodes.Storage.BlockStorage"};
+
+    private UnsupportedType() {
+    }
+
+    private static final String[] UNSUPPORTED_TYPES = {
+            "tosca.test.invalidtype",
+            "tosca.nodes.Storage.ObjectStorage",
+            "tosca.nodes.Storage.BlockStorage"};
 
     public static boolean validateType(String entityType) {
-    	for(String ust: unsupportedTypes) {
-    		if(ust.equals(entityType)) {
+        for (String ust : UNSUPPORTED_TYPES) {
+            if (ust.equals(entityType)) {
                 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE251", String.format(
-                		"UnsupportedTypeError: Entity type \"%s\" is not supported",entityType))); 
-    			return true;
-    		}
-    	}
+                        "UnsupportedTypeError: Entity type \"%s\" is not supported", entityType)));
+                return true;
+            }
+        }
         return false;
     }
 }

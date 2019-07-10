@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,21 +24,22 @@ import org.onap.sdc.toscaparser.api.common.ValidationIssueCollector;
 
 public class ThreadLocalsHolder {
 
-    private static final ThreadLocal<ValidationIssueCollector> exceptionCollectorThreadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<ValidationIssueCollector> EXCEPTION_COLLECTOR_THREAD_LOCAL = new ThreadLocal<>();
 
-    private ThreadLocalsHolder(){}
+    private ThreadLocalsHolder() {
+    }
 
     public static ValidationIssueCollector getCollector() {
-        return exceptionCollectorThreadLocal.get();
+        return EXCEPTION_COLLECTOR_THREAD_LOCAL.get();
     }
 
     public static void setCollector(ValidationIssueCollector validationIssueCollector) {
         cleanup();
-        exceptionCollectorThreadLocal.set(validationIssueCollector);
+        EXCEPTION_COLLECTOR_THREAD_LOCAL.set(validationIssueCollector);
     }
 
-    public static void cleanup(){
-        exceptionCollectorThreadLocal.remove();
+    public static void cleanup() {
+        EXCEPTION_COLLECTOR_THREAD_LOCAL.remove();
     }
 
 }

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,12 +27,12 @@ import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 public class PropertyDef {
-	
-	private static final String PROPERTY_KEYNAME_DEFAULT = "default";
-	private static final String PROPERTY_KEYNAME_REQUIRED = "required";
-	private static final String PROPERTY_KEYNAME_STATUS = "status";
-	private static final String VALID_PROPERTY_KEYNAMES[] = {
-			PROPERTY_KEYNAME_DEFAULT,
+
+    private static final String PROPERTY_KEYNAME_DEFAULT = "default";
+    private static final String PROPERTY_KEYNAME_REQUIRED = "required";
+    private static final String PROPERTY_KEYNAME_STATUS = "status";
+    private static final String VALID_PROPERTY_KEYNAMES[] = {
+            PROPERTY_KEYNAME_DEFAULT,
             PROPERTY_KEYNAME_REQUIRED,
             PROPERTY_KEYNAME_STATUS};
 
@@ -41,122 +41,120 @@ public class PropertyDef {
     private static final String VALID_REQUIRED_VALUES[] = {"true", "false"};
 
     private static final String PROPERTY_STATUS_SUPPORTED = "supported";
-	private static final String PROPERTY_STATUS_EXPERIMENTAL = "experimental";
-	private static final String VALID_STATUS_VALUES[] = {
-			PROPERTY_STATUS_SUPPORTED, PROPERTY_STATUS_EXPERIMENTAL};
+    private static final String PROPERTY_STATUS_EXPERIMENTAL = "experimental";
+    private static final String VALID_STATUS_VALUES[] = {
+            PROPERTY_STATUS_SUPPORTED, PROPERTY_STATUS_EXPERIMENTAL};
 
-	private static final String PROPERTY_STATUS_DEFAULT = PROPERTY_STATUS_SUPPORTED;
-	
-	private String name;
-	private Object value;
-	private LinkedHashMap<String,Object> schema;
-	private String _status;
-	private boolean _required;
+    private static final String PROPERTY_STATUS_DEFAULT = PROPERTY_STATUS_SUPPORTED;
 
-	public PropertyDef(String pdName, Object pdValue, 
-						LinkedHashMap<String,Object>  pdSchema) {
-		name = pdName;
-		value = pdValue;
-		schema = pdSchema;
+    private String name;
+    private Object value;
+    private LinkedHashMap<String, Object> schema;
+    private String _status;
+    private boolean _required;
+
+    public PropertyDef(String pdName, Object pdValue,
+                       LinkedHashMap<String, Object> pdSchema) {
+        name = pdName;
+        value = pdValue;
+        schema = pdSchema;
         _status = PROPERTY_STATUS_DEFAULT;
         _required = PROPERTY_REQUIRED_DEFAULT;
 
-        if(schema != null) {
-        	// Validate required 'type' property exists
-        	if(schema.get("type") == null) {
-        		//msg = (_('Schema definition of "%(pname)s" must have a "type" '
-	            //         'attribute.') % dict(pname=self.name))
-	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE131", String.format(
-	            		"InvalidSchemaError: Schema definition of \"%s\" must have a \"type\" attribute",name))); 
-        	}
-	        _loadRequiredAttrFromSchema();
-	        _loadStatusAttrFromSchema();
+        if (schema != null) {
+            // Validate required 'type' property exists
+            if (schema.get("type") == null) {
+                //msg = (_('Schema definition of "%(pname)s" must have a "type" '
+                //         'attribute.') % dict(pname=self.name))
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE131", String.format(
+                        "InvalidSchemaError: Schema definition of \"%s\" must have a \"type\" attribute", name)));
+            }
+            _loadRequiredAttrFromSchema();
+            _loadStatusAttrFromSchema();
         }
-	}
+    }
 
-	public Object getDefault() {
-		if(schema != null) {
-			for(Map.Entry<String,Object> me: schema.entrySet()) {
-				if(me.getKey().equals(PROPERTY_KEYNAME_DEFAULT)) {
-					return me.getValue();
-				}
-			}
-		}
-		return null;
-	}
+    public Object getDefault() {
+        if (schema != null) {
+            for (Map.Entry<String, Object> me : schema.entrySet()) {
+                if (me.getKey().equals(PROPERTY_KEYNAME_DEFAULT)) {
+                    return me.getValue();
+                }
+            }
+        }
+        return null;
+    }
 
-	public boolean isRequired() {
-		return _required;
-	}
+    public boolean isRequired() {
+        return _required;
+    }
 
-	private void _loadRequiredAttrFromSchema() {
+    private void _loadRequiredAttrFromSchema() {
         // IF 'required' keyname exists verify it's a boolean,
         // if so override default
-		Object val = schema.get(PROPERTY_KEYNAME_REQUIRED);
-		if(val != null) {
-			if(val instanceof Boolean) {
-				_required = (boolean)val;
-			}
-			else {
+        Object val = schema.get(PROPERTY_KEYNAME_REQUIRED);
+        if (val != null) {
+            if (val instanceof Boolean) {
+                _required = (boolean) val;
+            } else {
                 //valid_values = ', '.join(self.VALID_REQUIRED_VALUES)
                 //attr = self.PROPERTY_KEYNAME_REQUIRED
                 //TOSCAException.generate_inv_schema_property_error(self,
                 //                                                  attr,
                 //                                                  value,
                 //                                                  valid_values)
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE132", String.format(
-						"Schema definition of \"%s\" has \"required\" attribute with an invalid value",
-						name))); 
-			}
-		}
-	}
-	
-	public String getStatus() {
-		return _status;
-	}
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE132", String.format(
+                        "Schema definition of \"%s\" has \"required\" attribute with an invalid value",
+                        name)));
+            }
+        }
+    }
 
-	private void _loadStatusAttrFromSchema() {
+    public String getStatus() {
+        return _status;
+    }
+
+    private void _loadStatusAttrFromSchema() {
         // IF 'status' keyname exists verify it's a boolean,
         // if so override default
-		String sts = (String)schema.get(PROPERTY_KEYNAME_STATUS);
-		if(sts != null) {
-			boolean bFound = false;
-			for(String vsv: VALID_STATUS_VALUES) {
-				if(vsv.equals(sts)) {
-					bFound = true;
-					break;
-				}
-			}
-			if(bFound) {
-				_status = sts;
-			}
-			else {
+        String sts = (String) schema.get(PROPERTY_KEYNAME_STATUS);
+        if (sts != null) {
+            boolean bFound = false;
+            for (String vsv : VALID_STATUS_VALUES) {
+                if (vsv.equals(sts)) {
+                    bFound = true;
+                    break;
+                }
+            }
+            if (bFound) {
+                _status = sts;
+            } else {
                 //valid_values = ', '.join(self.VALID_STATUS_VALUES)
                 //attr = self.PROPERTY_KEYNAME_STATUS
                 //TOSCAException.generate_inv_schema_property_error(self,
                 //                                                  attr,
                 //                                                  value,
                 //                                                  valid_values)
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE006", String.format(
-						"Schema definition of \"%s\" has \"status\" attribute with an invalid value",
-						name)));
-			}
-		}
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public LinkedHashMap<String,Object> getSchema() {
-		return schema;
-	}
-	
-	public Object getPDValue() {
-		// there's getValue in EntityType...
-		return value;
-	}
-	
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE006", String.format(
+                        "Schema definition of \"%s\" has \"status\" attribute with an invalid value",
+                        name)));
+            }
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public LinkedHashMap<String, Object> getSchema() {
+        return schema;
+    }
+
+    public Object getPDValue() {
+        // there's getValue in EntityType...
+        return value;
+    }
+
 }
 /*python
 

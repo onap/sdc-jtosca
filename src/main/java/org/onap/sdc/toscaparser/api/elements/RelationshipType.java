@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,56 +27,56 @@ import java.util.LinkedHashMap;
 
 public class RelationshipType extends StatefulEntityType {
 
-	private static final String DERIVED_FROM = "derived_from";
-	private static final String VALID_TARGET_TYPES = "valid_target_types";
-	private static final String INTERFACES = "interfaces";
-	private static final String ATTRIBUTES = "attributes";
-	private static final String PROPERTIES = "properties";
-	private static final String DESCRIPTION = "description";
-	private static final String VERSION = "version";
-	private static final String CREDENTIAL = "credential";
-	
-	private static final String SECTIONS[] = {
-			DERIVED_FROM, VALID_TARGET_TYPES, INTERFACES, 
-			ATTRIBUTES, PROPERTIES, DESCRIPTION, VERSION, CREDENTIAL};
-	
-	private String capabilityName;
-	private LinkedHashMap<String,Object> customDef;
+    private static final String DERIVED_FROM = "derived_from";
+    private static final String VALID_TARGET_TYPES = "valid_target_types";
+    private static final String INTERFACES = "interfaces";
+    private static final String ATTRIBUTES = "attributes";
+    private static final String PROPERTIES = "properties";
+    private static final String DESCRIPTION = "description";
+    private static final String VERSION = "version";
+    private static final String CREDENTIAL = "credential";
 
-	public RelationshipType(String _type, String _capabilityName, LinkedHashMap<String,Object> _customDef) {
-		super(_type,RELATIONSHIP_PREFIX,_customDef);
-		capabilityName = _capabilityName;
-		customDef = _customDef;
-	}
-	
-	public RelationshipType getParentType() {
+    private static final String[] SECTIONS = {
+            DERIVED_FROM, VALID_TARGET_TYPES, INTERFACES,
+            ATTRIBUTES, PROPERTIES, DESCRIPTION, VERSION, CREDENTIAL};
+
+    private String capabilityName;
+    private LinkedHashMap<String, Object> customDef;
+
+    public RelationshipType(String type, String capabilityName, LinkedHashMap<String, Object> customDef) {
+        super(type, RELATIONSHIP_PREFIX, customDef);
+        this.capabilityName = capabilityName;
+        this.customDef = customDef;
+    }
+
+    public RelationshipType getParentType() {
         // Return a relationship this reletionship is derived from.'''
         String prel = derivedFrom(defs);
-        if(prel != null) {
-            return new RelationshipType(prel,null,customDef);
+        if (prel != null) {
+            return new RelationshipType(prel, null, customDef);
         }
         return null;
-	}
-	
-	public Object getValidTargetTypes() {
-		return entityValue(defs,"valid_target_types");
-	}
-	
-	private void _validateKeys() {
-        for(String key:  defs.keySet()) {
-        	boolean bFound = false;
-        	for(int i=0; i< SECTIONS.length; i++) {
-        		if(key.equals(SECTIONS[i])) {
-        			bFound = true;
-        			break;
-        		}
-        	}
-        	if(!bFound) {
+    }
+
+    public Object getValidTargetTypes() {
+        return entityValue(defs, "valid_target_types");
+    }
+
+    private void validateKeys() {
+        for (String key : defs.keySet()) {
+            boolean bFound = false;
+            for (String section : SECTIONS) {
+                if (key.equals(section)) {
+                    bFound = true;
+                    break;
+                }
+            }
+            if (!bFound) {
                 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE133", String.format(
-                        "UnknownFieldError: Relationshiptype \"%s\" has unknown field \"%s\"",type,key))); 
-        	}
+                        "UnknownFieldError: Relationshiptype \"%s\" has unknown field \"%s\"", type, key)));
+            }
         }
-	}
+    }
 }
 
 /*python

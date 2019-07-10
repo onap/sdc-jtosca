@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@
 
 package org.onap.sdc.toscaparser.api;
 
-import java.util.Map;
 
 public class RequirementAssignment {
 
@@ -49,6 +48,7 @@ public class RequirementAssignment {
 
     /**
      * Get the name for requirement assignment.
+     *
      * @return the name for requirement assignment.
      */
     public String getName() {
@@ -57,6 +57,7 @@ public class RequirementAssignment {
 
     /**
      * Set the name for requirement
+     *
      * @param name - the name for requirement to set
      */
     public void setName(String name) {
@@ -65,6 +66,7 @@ public class RequirementAssignment {
 
     /**
      * Get the node name for requirement assignment.
+     *
      * @return the node name for requirement
      */
     public String getNodeTemplateName() {
@@ -73,6 +75,7 @@ public class RequirementAssignment {
 
     /**
      * Set the node name for requirement
+     *
      * @param nodeName - the node name for requirement to set
      */
     public void setNodeTemplateName(String nodeName) {
@@ -81,6 +84,7 @@ public class RequirementAssignment {
 
     /**
      * Get the capability name for requirement assignment.
+     *
      * @return the capability name for requirement
      */
     public String getCapabilityName() {
@@ -89,6 +93,7 @@ public class RequirementAssignment {
 
     /**
      * Set the capability name for requirement assignment.
+     *
      * @param capabilityName - the capability name for requirement to set
      */
     public void setCapabilityName(String capabilityName) {
@@ -97,6 +102,7 @@ public class RequirementAssignment {
 
     /**
      * Get the relationship object for requirement
+     *
      * @return the relationship object for requirement
      */
     public Object getRelationship() {

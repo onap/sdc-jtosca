@@ -5,9 +5,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -55,58 +55,58 @@ import org.yaml.snakeyaml.Yaml;
 
 public class ToscaTemplate extends Object {
 
-	public static final int MAX_LEVELS = 20;
-	private static Logger log = LoggerFactory.getLogger(ToscaTemplate.class.getName());
+    public static final int MAX_LEVELS = 20;
+    private static Logger log = LoggerFactory.getLogger(ToscaTemplate.class.getName());
 
-	// TOSCA template key names
-	private static final String DEFINITION_VERSION = "tosca_definitions_version"; 
-	private static final String DEFAULT_NAMESPACE = "tosca_default_namespace"; 
-	private static final String TEMPLATE_NAME = "template_name";
-	private static final String TOPOLOGY_TEMPLATE = "topology_template"; 
-	private static final String TEMPLATE_AUTHOR = "template_author"; 
-	private static final String TEMPLATE_VERSION = "template_version";
-	private static final String DESCRIPTION = "description"; 
-	private static final String IMPORTS = "imports";
-	private static final String DSL_DEFINITIONS = "dsl_definitions"; 
-	private static final String NODE_TYPES = "node_types";
-	private static final String RELATIONSHIP_TYPES = "relationship_types";
-	private static final String RELATIONSHIP_TEMPLATES = "relationship_templates";
-	private static final String CAPABILITY_TYPES = "capability_types";
-	private static final String ARTIFACT_TYPES = "artifact_types"; 
-	private static final String DATA_TYPES = "data_types";
-	private static final String INTERFACE_TYPES = "interface_types"; 
-	private static final String POLICY_TYPES = "policy_types"; 
-	private static final String GROUP_TYPES = "group_types"; 
-	private static final String REPOSITORIES = "repositories";
-	
-	private static String SECTIONS[] = {
-			DEFINITION_VERSION, DEFAULT_NAMESPACE, TEMPLATE_NAME,
+    // TOSCA template key names
+    private static final String DEFINITION_VERSION = "tosca_definitions_version";
+    private static final String DEFAULT_NAMESPACE = "tosca_default_namespace";
+    private static final String TEMPLATE_NAME = "template_name";
+    private static final String TOPOLOGY_TEMPLATE = "topology_template";
+    private static final String TEMPLATE_AUTHOR = "template_author";
+    private static final String TEMPLATE_VERSION = "template_version";
+    private static final String DESCRIPTION = "description";
+    private static final String IMPORTS = "imports";
+    private static final String DSL_DEFINITIONS = "dsl_definitions";
+    private static final String NODE_TYPES = "node_types";
+    private static final String RELATIONSHIP_TYPES = "relationship_types";
+    private static final String RELATIONSHIP_TEMPLATES = "relationship_templates";
+    private static final String CAPABILITY_TYPES = "capability_types";
+    private static final String ARTIFACT_TYPES = "artifact_types";
+    private static final String DATA_TYPES = "data_types";
+    private static final String INTERFACE_TYPES = "interface_types";
+    private static final String POLICY_TYPES = "policy_types";
+    private static final String GROUP_TYPES = "group_types";
+    private static final String REPOSITORIES = "repositories";
+
+    private static String SECTIONS[] = {
+            DEFINITION_VERSION, DEFAULT_NAMESPACE, TEMPLATE_NAME,
             TOPOLOGY_TEMPLATE, TEMPLATE_AUTHOR, TEMPLATE_VERSION,
             DESCRIPTION, IMPORTS, DSL_DEFINITIONS, NODE_TYPES,
             RELATIONSHIP_TYPES, RELATIONSHIP_TEMPLATES,
             CAPABILITY_TYPES, ARTIFACT_TYPES, DATA_TYPES,
             INTERFACE_TYPES, POLICY_TYPES, GROUP_TYPES, REPOSITORIES
-	};
+    };
 
-	// Sections that are specific to individual template definitions
-	private static final String METADATA = "metadata";
-	private static ArrayList<String> SPECIAL_SECTIONS;
-	
+    // Sections that are specific to individual template definitions
+    private static final String METADATA = "metadata";
+    private static ArrayList<String> SPECIAL_SECTIONS;
+
     private ExtTools exttools = new ExtTools();
 
     private ArrayList<String> VALID_TEMPLATE_VERSIONS;
-    private LinkedHashMap<String,ArrayList<String>> ADDITIONAL_SECTIONS;
+    private LinkedHashMap<String, ArrayList<String>> ADDITIONAL_SECTIONS;
 
-	private boolean isFile;
-	private String path;
-	private String inputPath;
-	private String rootPath;
-	private LinkedHashMap<String,Object> parsedParams;
-	private boolean resolveGetInput;
-	private LinkedHashMap<String,Object> tpl;
+    private boolean isFile;
+    private String path;
+    private String inputPath;
+    private String rootPath;
+    private LinkedHashMap<String, Object> parsedParams;
+    private boolean resolveGetInput;
+    private LinkedHashMap<String, Object> tpl;
     private String version;
     private ArrayList<Object> imports;
-    private LinkedHashMap<String,Object> relationshipTypes;
+    private LinkedHashMap<String, Object> relationshipTypes;
     private Metadata metaData;
     private String description;
     private TopologyTemplate topologyTemplate;
@@ -115,117 +115,113 @@ public class ToscaTemplate extends Object {
     private ArrayList<RelationshipTemplate> relationshipTemplates;
     private ArrayList<NodeTemplate> nodeTemplates;
     private ArrayList<Output> outputs;
-	private ArrayList<Policy> policies;
-	private ArrayList<Group> groups;
-    private ConcurrentHashMap<String,Object> nestedToscaTplsWithTopology;
+    private ArrayList<Policy> policies;
+    private ArrayList<Group> groups;
+    private ConcurrentHashMap<String, Object> nestedToscaTplsWithTopology;
     private ArrayList<TopologyTemplate> nestedToscaTemplatesWithTopology;
     private ToscaGraph graph;
     private String csarTempDir;
     private int nestingLoopCounter;
-	private LinkedHashMap<String, LinkedHashMap<String, Object>> metaProperties;
-	private Set<String> processedImports;
-	private LinkedHashMap<String,Object> customDefsFinal = new LinkedHashMap<>();
-	private HashSet<DataType> dataTypes;
+    private LinkedHashMap<String, LinkedHashMap<String, Object>> metaProperties;
+    private Set<String> processedImports;
+    private LinkedHashMap<String, Object> customDefsFinal = new LinkedHashMap<>();
+    private HashSet<DataType> dataTypes;
 
-	public ToscaTemplate(String _path,
-						LinkedHashMap<String,Object> _parsedParams,
-						boolean aFile,
-						LinkedHashMap<String,Object> yamlDictTpl) throws JToscaException {
-		init(_path, _parsedParams, aFile, yamlDictTpl, true);
-	}
+    public ToscaTemplate(String _path,
+                         LinkedHashMap<String, Object> _parsedParams,
+                         boolean aFile,
+                         LinkedHashMap<String, Object> yamlDictTpl) throws JToscaException {
+        init(_path, _parsedParams, aFile, yamlDictTpl, true);
+    }
 
-	public ToscaTemplate(String _path,
-						 LinkedHashMap<String,Object> _parsedParams,
-						 boolean aFile,
-						 LinkedHashMap<String,Object> yamlDictTpl, boolean resolveGetInput) throws JToscaException {
-		init(_path, _parsedParams, aFile, yamlDictTpl, resolveGetInput);
-	}
+    public ToscaTemplate(String _path,
+                         LinkedHashMap<String, Object> _parsedParams,
+                         boolean aFile,
+                         LinkedHashMap<String, Object> yamlDictTpl, boolean resolveGetInput) throws JToscaException {
+        init(_path, _parsedParams, aFile, yamlDictTpl, resolveGetInput);
+    }
 
-	@SuppressWarnings("unchecked")
-	private void init(String _path,
-					  LinkedHashMap<String, Object> _parsedParams,
-					  boolean aFile,
-					  LinkedHashMap<String, Object> yamlDictTpl, boolean _resolveGetInput) throws JToscaException {
+    @SuppressWarnings("unchecked")
+    private void init(String _path,
+                      LinkedHashMap<String, Object> _parsedParams,
+                      boolean aFile,
+                      LinkedHashMap<String, Object> yamlDictTpl, boolean _resolveGetInput) throws JToscaException {
 
-		ThreadLocalsHolder.setCollector(new ValidationIssueCollector());
+        ThreadLocalsHolder.setCollector(new ValidationIssueCollector());
 
-		VALID_TEMPLATE_VERSIONS = new ArrayList<>();
-		VALID_TEMPLATE_VERSIONS.add("tosca_simple_yaml_1_0");
-		VALID_TEMPLATE_VERSIONS.add("tosca_simple_yaml_1_1");
-	    VALID_TEMPLATE_VERSIONS.addAll(exttools.getVersions());
-		ADDITIONAL_SECTIONS = new LinkedHashMap<>();
-		SPECIAL_SECTIONS = new ArrayList<>();
-		SPECIAL_SECTIONS.add(METADATA);
-		ADDITIONAL_SECTIONS.put("tosca_simple_yaml_1_0",SPECIAL_SECTIONS);
-		ADDITIONAL_SECTIONS.put("tosca_simple_yaml_1_1",SPECIAL_SECTIONS);
-	    ADDITIONAL_SECTIONS.putAll(exttools.getSections());
+        VALID_TEMPLATE_VERSIONS = new ArrayList<>();
+        VALID_TEMPLATE_VERSIONS.add("tosca_simple_yaml_1_0");
+        VALID_TEMPLATE_VERSIONS.add("tosca_simple_yaml_1_1");
+        VALID_TEMPLATE_VERSIONS.addAll(exttools.getVersions());
+        ADDITIONAL_SECTIONS = new LinkedHashMap<>();
+        SPECIAL_SECTIONS = new ArrayList<>();
+        SPECIAL_SECTIONS.add(METADATA);
+        ADDITIONAL_SECTIONS.put("tosca_simple_yaml_1_0", SPECIAL_SECTIONS);
+        ADDITIONAL_SECTIONS.put("tosca_simple_yaml_1_1", SPECIAL_SECTIONS);
+        ADDITIONAL_SECTIONS.putAll(exttools.getSections());
 
-		//long startTime = System.nanoTime();
-		
-		
-		isFile = aFile;
-		inputPath = null;
-		path = null;
-		tpl = null;
-		csarTempDir = null;
-		nestedToscaTplsWithTopology = new ConcurrentHashMap<>();
-		nestedToscaTemplatesWithTopology = new ArrayList<TopologyTemplate>();
-		resolveGetInput = _resolveGetInput;
-		metaProperties = new LinkedHashMap<>();
+        //long startTime = System.nanoTime();
 
-		if(_path != null && !_path.isEmpty()) {
-			// save the original input path
-			inputPath = _path;
-			// get the actual path (will change with CSAR)
-			path = _getPath(_path);
-			// load the YAML template
-			if (path != null && !path.isEmpty()) {
-				try (InputStream input = new FileInputStream(new File(path));){
-					//System.out.println("Loading YAML file " + path);
-					log.debug("ToscaTemplate Loading YAMEL file {}", path);
-					Yaml yaml = new Yaml();
-					Object data = yaml.load(input);
-					this.tpl = (LinkedHashMap<String,Object>) data;
-				} 
-				catch (FileNotFoundException e) {
-					log.error("ToscaTemplate - Exception loading yaml: {}", e.getMessage());
-					log.error("Exception", e);
-					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE275",
-							"ToscaTemplate - Exception loading yaml: -> " + e.getMessage()));
-					return;
-				}
-				catch(Exception e) {
-					log.error("ToscaTemplate - Error loading yaml, aborting -> ", e.getMessage());
-					log.error("Exception", e);
-					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE275",
-							"ToscaTemplate - Error loading yaml, aborting -> " + e.getMessage()));
-					return;
-				}
-				
-		        if(yamlDictTpl != null) {
-		            //msg = (_('Both path and yaml_dict_tpl arguments were '
-		            //         'provided. Using path and ignoring yaml_dict_tpl.'))
-		            //log.info(msg)
-		            log.debug("ToscaTemplate - Both path and yaml_dict_tpl arguments were provided. Using path and ignoring yaml_dict_tpl");
-		        }
-			} else {
-				// no input to process...
-				_abort();
-			}
-		} 
-		else {
-			if(yamlDictTpl != null) {
+
+        isFile = aFile;
+        inputPath = null;
+        path = null;
+        tpl = null;
+        csarTempDir = null;
+        nestedToscaTplsWithTopology = new ConcurrentHashMap<>();
+        nestedToscaTemplatesWithTopology = new ArrayList<TopologyTemplate>();
+        resolveGetInput = _resolveGetInput;
+        metaProperties = new LinkedHashMap<>();
+
+        if (_path != null && !_path.isEmpty()) {
+            // save the original input path
+            inputPath = _path;
+            // get the actual path (will change with CSAR)
+            path = _getPath(_path);
+            // load the YAML template
+            if (path != null && !path.isEmpty()) {
+                try (InputStream input = new FileInputStream(new File(path));) {
+                    //System.out.println("Loading YAML file " + path);
+                    log.debug("ToscaTemplate Loading YAMEL file {}", path);
+                    Yaml yaml = new Yaml();
+                    Object data = yaml.load(input);
+                    this.tpl = (LinkedHashMap<String, Object>) data;
+                } catch (FileNotFoundException e) {
+                    log.error("ToscaTemplate - Exception loading yaml: {}", e.getMessage());
+                    log.error("Exception", e);
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE275",
+                            "ToscaTemplate - Exception loading yaml: -> " + e.getMessage()));
+                    return;
+                } catch (Exception e) {
+                    log.error("ToscaTemplate - Error loading yaml, aborting -> ", e.getMessage());
+                    log.error("Exception", e);
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE275",
+                            "ToscaTemplate - Error loading yaml, aborting -> " + e.getMessage()));
+                    return;
+                }
+
+                if (yamlDictTpl != null) {
+                    //msg = (_('Both path and yaml_dict_tpl arguments were '
+                    //         'provided. Using path and ignoring yaml_dict_tpl.'))
+                    //log.info(msg)
+                    log.debug("ToscaTemplate - Both path and yaml_dict_tpl arguments were provided. Using path and ignoring yaml_dict_tpl");
+                }
+            } else {
+                // no input to process...
+                _abort();
+            }
+        } else {
+            if (yamlDictTpl != null) {
                 tpl = yamlDictTpl;
-			}
-            else {
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE244", 
-	                    "ValueError: No path or yaml_dict_tpl was provided. There is nothing to parse")); 
-				log.debug("ToscaTemplate ValueError: No path or yaml_dict_tpl was provided. There is nothing to parse");
+            } else {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE244",
+                        "ValueError: No path or yaml_dict_tpl was provided. There is nothing to parse"));
+                log.debug("ToscaTemplate ValueError: No path or yaml_dict_tpl was provided. There is nothing to parse");
 
-			}
-		}
+            }
+        }
 
-        if(tpl != null) {
+        if (tpl != null) {
             parsedParams = _parsedParams;
             _validateField();
             this.rootPath = path;
@@ -235,10 +231,10 @@ public class ToscaTemplate extends Object {
             this.metaData = _tplMetaData();
             this.relationshipTypes = _tplRelationshipTypes();
             this.description = _tplDescription();
-			this.dataTypes = getTopologyDataTypes();
-			this.topologyTemplate = _topologyTemplate();
+            this.dataTypes = getTopologyDataTypes();
+            this.topologyTemplate = _topologyTemplate();
             this.repositories = _tplRepositories();
-            if(topologyTemplate.getTpl() != null) {
+            if (topologyTemplate.getTpl() != null) {
                 this.inputs = _inputs();
                 this.relationshipTemplates = _relationshipTemplates();
                 this.nodeTemplates = _nodeTemplates();
@@ -246,422 +242,419 @@ public class ToscaTemplate extends Object {
                 this.policies = _policies();
                 this.groups = _groups();
 //                _handleNestedToscaTemplatesWithTopology();
-				_handleNestedToscaTemplatesWithTopology(topologyTemplate);
+                _handleNestedToscaTemplatesWithTopology(topologyTemplate);
                 graph = new ToscaGraph(nodeTemplates);
             }
         }
 
-        if(csarTempDir != null) {
-        	CSAR.deleteDir(new File(csarTempDir));
-        	csarTempDir = null;
+        if (csarTempDir != null) {
+            CSAR.deleteDir(new File(csarTempDir));
+            csarTempDir = null;
         }
-        
-		verifyTemplate();
 
-	}
-	
-	private void _abort() throws JToscaException {
-		// print out all exceptions caught
-		verifyTemplate();
-		throw new JToscaException("jtosca aborting", JToscaErrorCodes.PATH_NOT_VALID.getValue());
-	}
-	
-	private TopologyTemplate _topologyTemplate() {
-		return new TopologyTemplate(
-				_tplTopologyTemplate(),
-				_getAllCustomDefs(imports),
-				relationshipTypes,
-				parsedParams,
-				null,
-				resolveGetInput);
-	}
+        verifyTemplate();
 
-	private ArrayList<Input> _inputs() {
-		return topologyTemplate.getInputs();
-	}
+    }
 
-	private ArrayList<NodeTemplate> _nodeTemplates() {
-		return topologyTemplate.getNodeTemplates();
-	}
+    private void _abort() throws JToscaException {
+        // print out all exceptions caught
+        verifyTemplate();
+        throw new JToscaException("jtosca aborting", JToscaErrorCodes.PATH_NOT_VALID.getValue());
+    }
 
-	private ArrayList<RelationshipTemplate> _relationshipTemplates() {
-		return topologyTemplate.getRelationshipTemplates();
-	}
+    private TopologyTemplate _topologyTemplate() {
+        return new TopologyTemplate(
+                _tplTopologyTemplate(),
+                _getAllCustomDefs(imports),
+                relationshipTypes,
+                parsedParams,
+                null,
+                resolveGetInput);
+    }
 
-	private ArrayList<Output> _outputs() {
-		return topologyTemplate.getOutputs();
-	}
+    private ArrayList<Input> _inputs() {
+        return topologyTemplate.getInputs();
+    }
 
-	private String _tplVersion() {
-		return (String)tpl.get(DEFINITION_VERSION);
-	}
+    private ArrayList<NodeTemplate> _nodeTemplates() {
+        return topologyTemplate.getNodeTemplates();
+    }
 
-	@SuppressWarnings("unchecked")
-	private Metadata _tplMetaData() {
-		Object mdo = tpl.get(METADATA);
-		if(mdo instanceof LinkedHashMap) {
-			return new Metadata((Map<String, Object>)mdo);
-		}
-		else {
-			return null;
-		}
-	}
+    private ArrayList<RelationshipTemplate> _relationshipTemplates() {
+        return topologyTemplate.getRelationshipTemplates();
+    }
 
-	private String _tplDescription() {
-		return (String)tpl.get(DESCRIPTION);
-	}
+    private ArrayList<Output> _outputs() {
+        return topologyTemplate.getOutputs();
+    }
 
-	@SuppressWarnings("unchecked")
-	private ArrayList<Object> _tplImports() {
-		return (ArrayList<Object>)tpl.get(IMPORTS);
-	}
+    private String _tplVersion() {
+        return (String) tpl.get(DEFINITION_VERSION);
+    }
 
-	@SuppressWarnings("unchecked")
-	private ArrayList<Repository> _tplRepositories() {
-		LinkedHashMap<String,Object> repositories = 
-				(LinkedHashMap<String,Object>)tpl.get(REPOSITORIES);
-		ArrayList<Repository> reposit = new ArrayList<>();
-		if(repositories != null) {
-			for(Map.Entry<String,Object> me: repositories.entrySet()) {
-				Repository reposits = new Repository(me.getKey(),me.getValue());
-				reposit.add(reposits);
-			}
-		}
-		return reposit;
-	}
+    @SuppressWarnings("unchecked")
+    private Metadata _tplMetaData() {
+        Object mdo = tpl.get(METADATA);
+        if (mdo instanceof LinkedHashMap) {
+            return new Metadata((Map<String, Object>) mdo);
+        } else {
+            return null;
+        }
+    }
 
-	private LinkedHashMap<String,Object> _tplRelationshipTypes() {
-		return (LinkedHashMap<String,Object>)_getCustomTypes(RELATIONSHIP_TYPES,null);
-	}
+    private String _tplDescription() {
+        return (String) tpl.get(DESCRIPTION);
+    }
 
-	@SuppressWarnings("unchecked")
-	private LinkedHashMap<String,Object> _tplTopologyTemplate() {
-		return (LinkedHashMap<String,Object>)tpl.get(TOPOLOGY_TEMPLATE);
-	}
+    @SuppressWarnings("unchecked")
+    private ArrayList<Object> _tplImports() {
+        return (ArrayList<Object>) tpl.get(IMPORTS);
+    }
 
-	private ArrayList<Policy> _policies() {
-		return topologyTemplate.getPolicies();
-	}
-	
-	private ArrayList<Group> _groups() {
-		return topologyTemplate.getGroups();
-	}
+    @SuppressWarnings("unchecked")
+    private ArrayList<Repository> _tplRepositories() {
+        LinkedHashMap<String, Object> repositories =
+                (LinkedHashMap<String, Object>) tpl.get(REPOSITORIES);
+        ArrayList<Repository> reposit = new ArrayList<>();
+        if (repositories != null) {
+            for (Map.Entry<String, Object> me : repositories.entrySet()) {
+                Repository reposits = new Repository(me.getKey(), me.getValue());
+                reposit.add(reposits);
+            }
+        }
+        return reposit;
+    }
 
-	/**
-	 * Read datatypes field
-	 * @return return list of datatypes.
-	 */
-	@SuppressWarnings("unchecked")
-	private HashSet<DataType> getTopologyDataTypes(){
-		LinkedHashMap<String,Object> value =
-				(LinkedHashMap<String,Object>)tpl.get(DATA_TYPES);
-		HashSet<DataType> datatypes = new HashSet<>();
-		if(value != null) {
-			customDefsFinal.putAll(value);
-			for(Map.Entry<String,Object> me: value.entrySet()) {
-				DataType datatype = new DataType(me.getKey(), value);
-				datatypes.add(datatype);
-			}
-		}
+    private LinkedHashMap<String, Object> _tplRelationshipTypes() {
+        return (LinkedHashMap<String, Object>) _getCustomTypes(RELATIONSHIP_TYPES, null);
+    }
 
+    @SuppressWarnings("unchecked")
+    private LinkedHashMap<String, Object> _tplTopologyTemplate() {
+        return (LinkedHashMap<String, Object>) tpl.get(TOPOLOGY_TEMPLATE);
+    }
 
-		return datatypes;
-	}
+    private ArrayList<Policy> _policies() {
+        return topologyTemplate.getPolicies();
+    }
 
-	/**
-	 * This method is used to get consolidated custom definitions from all imports
-	 * It is logically divided in two parts to handle imports; map and list formats.
-	 * Before processing the imports; it sorts them to make sure the current directory imports are
-	 * being processed first and then others. Once sorted; it processes each import one by one in
-	 * recursive manner.
-	 * To avoid cyclic dependency among imports; this method uses a set to keep track of all
-	 * imports which are already processed and filters the imports which occurs more than once.
-	 *
-	 * @param alImports all imports which needs to be processed
-	 * @return the linked hash map containing all import definitions
-	 */
+    private ArrayList<Group> _groups() {
+        return topologyTemplate.getGroups();
+    }
 
-	@SuppressWarnings("unchecked")
-	private LinkedHashMap<String,Object> _getAllCustomDefs(Object alImports) {
+    /**
+     * Read datatypes field
+     *
+     * @return return list of datatypes.
+     */
+    @SuppressWarnings("unchecked")
+    private HashSet<DataType> getTopologyDataTypes() {
+        LinkedHashMap<String, Object> value =
+                (LinkedHashMap<String, Object>) tpl.get(DATA_TYPES);
+        HashSet<DataType> datatypes = new HashSet<>();
+        if (value != null) {
+            customDefsFinal.putAll(value);
+            for (Map.Entry<String, Object> me : value.entrySet()) {
+                DataType datatype = new DataType(me.getKey(), value);
+                datatypes.add(datatype);
+            }
+        }
 
 
-		String types[] = {
-				IMPORTS, NODE_TYPES, CAPABILITY_TYPES, RELATIONSHIP_TYPES,
-				DATA_TYPES, INTERFACE_TYPES, POLICY_TYPES, GROUP_TYPES
-		};
+        return datatypes;
+    }
 
-		List<Map<String, Object>> imports = (List<Map<String, Object>>) alImports;
-		if (imports != null && !imports.isEmpty()) {
-			if (imports.get(0) instanceof LinkedHashMap) {
-				imports = sortImports(imports);
+    /**
+     * This method is used to get consolidated custom definitions from all imports
+     * It is logically divided in two parts to handle imports; map and list formats.
+     * Before processing the imports; it sorts them to make sure the current directory imports are
+     * being processed first and then others. Once sorted; it processes each import one by one in
+     * recursive manner.
+     * To avoid cyclic dependency among imports; this method uses a set to keep track of all
+     * imports which are already processed and filters the imports which occurs more than once.
+     *
+     * @param alImports all imports which needs to be processed
+     * @return the linked hash map containing all import definitions
+     */
 
-				for (Map<String, Object> map : imports) {
-					List<Map<String, Object>> singleImportList = new ArrayList<>();
-					singleImportList.add(map);
+    @SuppressWarnings("unchecked")
+    private LinkedHashMap<String, Object> _getAllCustomDefs(Object alImports) {
 
-					Map<String, String> importNameDetails = getValidFileNameForImportReference(singleImportList);
-					singleImportList = filterImportsForRecursion(singleImportList, importNameDetails);
 
-					if(!singleImportList.get(0).isEmpty()){
-						LinkedHashMap<String, Object> customDefs = _getCustomTypes(types, new ArrayList<>(singleImportList));
-						processedImports.add(importNameDetails.get("importFileName"));
+        String types[] = {
+                IMPORTS, NODE_TYPES, CAPABILITY_TYPES, RELATIONSHIP_TYPES,
+                DATA_TYPES, INTERFACE_TYPES, POLICY_TYPES, GROUP_TYPES
+        };
 
-						if (customDefs != null) {
-							customDefsFinal.putAll(customDefs);
+        List<Map<String, Object>> imports = (List<Map<String, Object>>) alImports;
+        if (imports != null && !imports.isEmpty()) {
+            if (imports.get(0) instanceof LinkedHashMap) {
+                imports = sortImports(imports);
 
-							if (customDefs.get(IMPORTS) != null) {
-								resetPathForRecursiveImports(importNameDetails.get("importRelativeName"));
-								LinkedHashMap<String, Object> importDefs = _getAllCustomDefs(customDefs.get(IMPORTS));
-								customDefsFinal.putAll(importDefs);
-							}
-						}
-					}
-				}
-			} else {
-				LinkedHashMap<String, Object> customDefs = _getCustomTypes(types, new ArrayList<>(imports));
-				if (customDefs != null) {
-					customDefsFinal.putAll(customDefs);
+                for (Map<String, Object> map : imports) {
+                    List<Map<String, Object>> singleImportList = new ArrayList<>();
+                    singleImportList.add(map);
 
-					if (customDefs.get(IMPORTS) != null) {
-						LinkedHashMap<String, Object> importDefs = _getAllCustomDefs(customDefs.get(IMPORTS));
-						customDefsFinal.putAll(importDefs);
-					}
-				}
-			}
-		}
+                    Map<String, String> importNameDetails = getValidFileNameForImportReference(singleImportList);
+                    singleImportList = filterImportsForRecursion(singleImportList, importNameDetails);
 
-		// As imports are not custom_types, remove from the dict
-		customDefsFinal.remove(IMPORTS);
+                    if (!singleImportList.get(0).isEmpty()) {
+                        LinkedHashMap<String, Object> customDefs = _getCustomTypes(types, new ArrayList<>(singleImportList));
+                        processedImports.add(importNameDetails.get("importFileName"));
 
-		return customDefsFinal;
-	}
+                        if (customDefs != null) {
+                            customDefsFinal.putAll(customDefs);
 
-	/**
-	 * This method is used to sort the imports in order so that same directory
-	 * imports will be processed first
-	 *
-	 * @param customImports the custom imports
-	 * @return the sorted list of imports
-	 */
-	private List<Map<String, Object>> sortImports(List<Map<String, Object>> customImports){
-		List<Map<String, Object>> finalList1 = new ArrayList<>();
-		List<Map<String, Object>> finalList2 = new ArrayList<>();
-		Iterator<Map<String, Object>> itr = customImports.iterator();
-		while(itr.hasNext()) {
-			Map<String, Object> innerMap = itr.next();
-			if (innerMap.toString().contains("../")) {
-				finalList2.add(innerMap);
-				itr.remove();
-			}
-			else if (innerMap.toString().contains("/")) {
-				finalList1.add(innerMap);
-				itr.remove();
-			}
-		}
+                            if (customDefs.get(IMPORTS) != null) {
+                                resetPathForRecursiveImports(importNameDetails.get("importRelativeName"));
+                                LinkedHashMap<String, Object> importDefs = _getAllCustomDefs(customDefs.get(IMPORTS));
+                                customDefsFinal.putAll(importDefs);
+                            }
+                        }
+                    }
+                }
+            } else {
+                LinkedHashMap<String, Object> customDefs = _getCustomTypes(types, new ArrayList<>(imports));
+                if (customDefs != null) {
+                    customDefsFinal.putAll(customDefs);
 
-		customImports.addAll(finalList1);
-		customImports.addAll(finalList2);
-		return customImports;
-	}
+                    if (customDefs.get(IMPORTS) != null) {
+                        LinkedHashMap<String, Object> importDefs = _getAllCustomDefs(customDefs.get(IMPORTS));
+                        customDefsFinal.putAll(importDefs);
+                    }
+                }
+            }
+        }
 
-	/**
-	 * This method is used to reset PATH variable after processing of current import file is done
-	 * This is required because of relative path nature of imports present in files.
-	 *
-	 * @param currImportRelativeName the current import relative name
-	 */
-	private void resetPathForRecursiveImports(String currImportRelativeName){
-		path = getPath(path, currImportRelativeName);
-	}
+        // As imports are not custom_types, remove from the dict
+        customDefsFinal.remove(IMPORTS);
 
-	/**
-	 * This is a recursive method which starts from current import and then recursively finds a
-	 * valid path relative to current import file name.
-	 * By doing this it handles all nested hierarchy of imports defined in CSARs
-	 *
-	 * @param path           the path
-	 * @param importFileName the import file name
-	 * @return the string containing updated path value
-	 */
-	private String getPath(String path, String importFileName){
-		String tempFullPath = (Paths.get(path).toAbsolutePath().getParent()
-				.toString() + File.separator + importFileName.replace("../", "")).replace('\\', '/');
-		String tempPartialPath = (Paths.get(path).toAbsolutePath().getParent().toString()).replace('\\', '/');
-		if(Files.exists(Paths.get(tempFullPath)))
-			return tempFullPath;
-		else
-			return getPath(tempPartialPath, importFileName);
-	}
+        return customDefsFinal;
+    }
 
-	/**
-	 * This method is used to get full path name for the file which needs to be processed. It helps
-	 * in situation where files are present in different directory and are references as relative
-	 * paths.
-	 *
-	 * @param customImports the custom imports
-	 * @return the map containing import file full and relative paths
-	 */
-	private Map<String, String> getValidFileNameForImportReference(List<Map<String, Object>> customImports){
-		String importFileName;
-		Map<String, String> retMap = new HashMap<>();
-		for (Map<String, Object> map1 : customImports) {
-			for (Map.Entry<String, Object> entry : map1.entrySet()) {
-				Map innerMostMap = (Map) entry.getValue();
-				Iterator<Map.Entry<String, String>> it = innerMostMap.entrySet().iterator();
-				while (it.hasNext()) {
-					Map.Entry<String, String> val = it.next();
-					if(val.getValue().contains("/")){
-						importFileName = (Paths.get(rootPath).toAbsolutePath().getParent().toString() + File
-								.separator + val.getValue().replace("../", "")).replace('\\', '/');
-					}
-					else {
-						importFileName = (Paths.get(path).toAbsolutePath().getParent().toString() + File
-								.separator + val.getValue().replace("../", "")).replace('\\', '/');
-					}
-					retMap.put("importFileName", importFileName);
-					retMap.put("importRelativeName", val.getValue());
-				}
-			}
-		}
-		return retMap;
-	}
+    /**
+     * This method is used to sort the imports in order so that same directory
+     * imports will be processed first
+     *
+     * @param customImports the custom imports
+     * @return the sorted list of imports
+     */
+    private List<Map<String, Object>> sortImports(List<Map<String, Object>> customImports) {
+        List<Map<String, Object>> finalList1 = new ArrayList<>();
+        List<Map<String, Object>> finalList2 = new ArrayList<>();
+        Iterator<Map<String, Object>> itr = customImports.iterator();
+        while (itr.hasNext()) {
+            Map<String, Object> innerMap = itr.next();
+            if (innerMap.toString().contains("../")) {
+                finalList2.add(innerMap);
+                itr.remove();
+            } else if (innerMap.toString().contains("/")) {
+                finalList1.add(innerMap);
+                itr.remove();
+            }
+        }
 
-	/**
-	 * This method is used to filter the imports which already gets processed in previous step.
-	 * It handles the use case of cyclic dependency in imports which may cause Stack Overflow
-	 * exception
-	 *
-	 * @param customImports     the custom imports
-	 * @param importNameDetails the import name details
-	 * @return the list containing filtered imports
-	 */
-	private List<Map<String, Object>> filterImportsForRecursion(List<Map<String, Object>>
-																																	customImports, Map<String,
-			String> importNameDetails){
-		for (Map<String, Object> map1 : customImports) {
-			for (Map.Entry<String, Object> entry : map1.entrySet()) {
-				Map innerMostMap = (Map) entry.getValue();
-				Iterator<Map.Entry<String, String>> it = innerMostMap.entrySet().iterator();
-				while (it.hasNext()) {
-					it.next();
-					if (processedImports.contains(importNameDetails.get("importFileName"))) {
-						it.remove();
-					}
-				}
-			}
-		}
+        customImports.addAll(finalList1);
+        customImports.addAll(finalList2);
+        return customImports;
+    }
 
-		// Remove Empty elements
-		Iterator<Map<String, Object>> itr = customImports.iterator();
-		while(itr.hasNext()) {
-			Map innerMap = itr.next();
-			Predicate<Map> predicate = p-> p.values().isEmpty();
-			innerMap.values().removeIf(predicate);
-		}
+    /**
+     * This method is used to reset PATH variable after processing of current import file is done
+     * This is required because of relative path nature of imports present in files.
+     *
+     * @param currImportRelativeName the current import relative name
+     */
+    private void resetPathForRecursiveImports(String currImportRelativeName) {
+        path = getPath(path, currImportRelativeName);
+    }
 
-		return customImports;
-	}
+    /**
+     * This is a recursive method which starts from current import and then recursively finds a
+     * valid path relative to current import file name.
+     * By doing this it handles all nested hierarchy of imports defined in CSARs
+     *
+     * @param path           the path
+     * @param importFileName the import file name
+     * @return the string containing updated path value
+     */
+    private String getPath(String path, String importFileName) {
+        String tempFullPath = (Paths.get(path).toAbsolutePath().getParent()
+                .toString() + File.separator + importFileName.replace("../", "")).replace('\\', '/');
+        String tempPartialPath = (Paths.get(path).toAbsolutePath().getParent().toString()).replace('\\', '/');
+        if (Files.exists(Paths.get(tempFullPath)))
+            return tempFullPath;
+        else
+            return getPath(tempPartialPath, importFileName);
+    }
 
-	@SuppressWarnings("unchecked")
-	private LinkedHashMap<String,Object> _getCustomTypes(Object typeDefinitions,ArrayList<Object> alImports) {
-		
+    /**
+     * This method is used to get full path name for the file which needs to be processed. It helps
+     * in situation where files are present in different directory and are references as relative
+     * paths.
+     *
+     * @param customImports the custom imports
+     * @return the map containing import file full and relative paths
+     */
+    private Map<String, String> getValidFileNameForImportReference(List<Map<String, Object>> customImports) {
+        String importFileName;
+        Map<String, String> retMap = new HashMap<>();
+        for (Map<String, Object> map1 : customImports) {
+            for (Map.Entry<String, Object> entry : map1.entrySet()) {
+                Map innerMostMap = (Map) entry.getValue();
+                Iterator<Map.Entry<String, String>> it = innerMostMap.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<String, String> val = it.next();
+                    if (val.getValue().contains("/")) {
+                        importFileName = (Paths.get(rootPath).toAbsolutePath().getParent().toString() + File
+                                .separator + val.getValue().replace("../", "")).replace('\\', '/');
+                    } else {
+                        importFileName = (Paths.get(path).toAbsolutePath().getParent().toString() + File
+                                .separator + val.getValue().replace("../", "")).replace('\\', '/');
+                    }
+                    retMap.put("importFileName", importFileName);
+                    retMap.put("importRelativeName", val.getValue());
+                }
+            }
+        }
+        return retMap;
+    }
+
+    /**
+     * This method is used to filter the imports which already gets processed in previous step.
+     * It handles the use case of cyclic dependency in imports which may cause Stack Overflow
+     * exception
+     *
+     * @param customImports     the custom imports
+     * @param importNameDetails the import name details
+     * @return the list containing filtered imports
+     */
+    private List<Map<String, Object>> filterImportsForRecursion(List<Map<String, Object>>
+                                                                        customImports, Map<String,
+            String> importNameDetails) {
+        for (Map<String, Object> map1 : customImports) {
+            for (Map.Entry<String, Object> entry : map1.entrySet()) {
+                Map innerMostMap = (Map) entry.getValue();
+                Iterator<Map.Entry<String, String>> it = innerMostMap.entrySet().iterator();
+                while (it.hasNext()) {
+                    it.next();
+                    if (processedImports.contains(importNameDetails.get("importFileName"))) {
+                        it.remove();
+                    }
+                }
+            }
+        }
+
+        // Remove Empty elements
+        Iterator<Map<String, Object>> itr = customImports.iterator();
+        while (itr.hasNext()) {
+            Map innerMap = itr.next();
+            Predicate<Map> predicate = p -> p.values().isEmpty();
+            innerMap.values().removeIf(predicate);
+        }
+
+        return customImports;
+    }
+
+    @SuppressWarnings("unchecked")
+    private LinkedHashMap<String, Object> _getCustomTypes(Object typeDefinitions, ArrayList<Object> alImports) {
+
         // Handle custom types defined in imported template files
         // This method loads the custom type definitions referenced in "imports"
         // section of the TOSCA YAML template.
-		
-		LinkedHashMap<String,Object> customDefs = new LinkedHashMap<String,Object>();
+
+        LinkedHashMap<String, Object> customDefs = new LinkedHashMap<String, Object>();
         ArrayList<String> typeDefs = new ArrayList<String>();
-        if(typeDefinitions  instanceof String[]) {
-        	for(String s: (String[])typeDefinitions) {
-        		typeDefs.add(s);
-        	}
-        }
-        else {
-        	typeDefs.add((String)typeDefinitions);
+        if (typeDefinitions instanceof String[]) {
+            for (String s : (String[]) typeDefinitions) {
+                typeDefs.add(s);
+            }
+        } else {
+            typeDefs.add((String) typeDefinitions);
         }
 
-        if(alImports == null) {
+        if (alImports == null) {
             alImports = _tplImports();
         }
 
-        if(alImports != null) {
-        	ImportsLoader customService = new ImportsLoader(alImports,path,typeDefs,tpl);
-        	ArrayList<LinkedHashMap<String,Object>> nestedToscaTpls = customService.getNestedToscaTpls();
-        	_updateNestedToscaTplsWithTopology(nestedToscaTpls);
+        if (alImports != null) {
+            ImportsLoader customService = new ImportsLoader(alImports, path, typeDefs, tpl);
+            ArrayList<LinkedHashMap<String, Object>> nestedToscaTpls = customService.getNestedToscaTpls();
+            _updateNestedToscaTplsWithTopology(nestedToscaTpls);
 
-        	customDefs = customService.getCustomDefs();
-        	if(customDefs == null) {
-        		return null;
-        	}
+            customDefs = customService.getCustomDefs();
+            if (customDefs == null) {
+                return null;
+            }
         }
 
         //Handle custom types defined in current template file
-        for(String td: typeDefs) {
-        	if(!td.equals(IMPORTS)) {
-        		LinkedHashMap<String,Object>  innerCustomTypes = (LinkedHashMap<String,Object> )tpl.get(td);
-        		if(innerCustomTypes != null) {
-        			customDefs.putAll(innerCustomTypes);
-        		}
-        	}
+        for (String td : typeDefs) {
+            if (!td.equals(IMPORTS)) {
+                LinkedHashMap<String, Object> innerCustomTypes = (LinkedHashMap<String, Object>) tpl.get(td);
+                if (innerCustomTypes != null) {
+                    customDefs.putAll(innerCustomTypes);
+                }
+            }
         }
         return customDefs;
-	}
+    }
 
-	private void _updateNestedToscaTplsWithTopology(ArrayList<LinkedHashMap<String,Object>> nestedToscaTpls) {
-		for(LinkedHashMap<String,Object> ntpl: nestedToscaTpls) {
-			// there is just one key:value pair in ntpl
-			for(Map.Entry<String,Object> me: ntpl.entrySet()) {
-				String fileName = me.getKey();
-				@SuppressWarnings("unchecked")
-				LinkedHashMap<String,Object> toscaTpl = (LinkedHashMap<String,Object>)me.getValue();
-				if(toscaTpl.get(TOPOLOGY_TEMPLATE) != null) {
-					if(nestedToscaTplsWithTopology.get(fileName) == null) {
-						nestedToscaTplsWithTopology.putAll(ntpl);
-					}
-				}
-			}
-		}
-	}
+    private void _updateNestedToscaTplsWithTopology(ArrayList<LinkedHashMap<String, Object>> nestedToscaTpls) {
+        for (LinkedHashMap<String, Object> ntpl : nestedToscaTpls) {
+            // there is just one key:value pair in ntpl
+            for (Map.Entry<String, Object> me : ntpl.entrySet()) {
+                String fileName = me.getKey();
+                @SuppressWarnings("unchecked")
+                LinkedHashMap<String, Object> toscaTpl = (LinkedHashMap<String, Object>) me.getValue();
+                if (toscaTpl.get(TOPOLOGY_TEMPLATE) != null) {
+                    if (nestedToscaTplsWithTopology.get(fileName) == null) {
+                        nestedToscaTplsWithTopology.putAll(ntpl);
+                    }
+                }
+            }
+        }
+    }
 
-	// multi level nesting - RECURSIVE
-	@SuppressWarnings("unchecked")
-	private void _handleNestedToscaTemplatesWithTopology(TopologyTemplate tt) {
-		if(++nestingLoopCounter > MAX_LEVELS) {
-			log.error("ToscaTemplate - _handleNestedToscaTemplatesWithTopology - Nested Topologies Loop: too many levels, aborting");
-			return;
-		}
-		// Reset Processed Imports for nested templates
-		this.processedImports = new HashSet<>();
-		for(Map.Entry<String,Object> me: nestedToscaTplsWithTopology.entrySet()) {
-			LinkedHashMap<String,Object> toscaTpl = 
-							(LinkedHashMap<String,Object>)me.getValue();
-			for(NodeTemplate nt: tt.getNodeTemplates()) {
-				if(_isSubMappedNode(nt,toscaTpl)) {
-					parsedParams = _getParamsForNestedTemplate(nt);
-					ArrayList<Object> alim = (ArrayList<Object>)toscaTpl.get(IMPORTS);
-					LinkedHashMap<String,Object> topologyTpl = 
-							(LinkedHashMap<String,Object>)toscaTpl.get(TOPOLOGY_TEMPLATE);
-					TopologyTemplate topologyWithSubMapping = 
-						new TopologyTemplate(topologyTpl,
-											 _getAllCustomDefs(alim),
-											 relationshipTypes, 
-											 parsedParams,
-											 nt,
-											 resolveGetInput);
-					nt.setOriginComponentTemplate(topologyWithSubMapping);
-					if(topologyWithSubMapping.getSubstitutionMappings() != null) {
+    // multi level nesting - RECURSIVE
+    @SuppressWarnings("unchecked")
+    private void _handleNestedToscaTemplatesWithTopology(TopologyTemplate tt) {
+        if (++nestingLoopCounter > MAX_LEVELS) {
+            log.error("ToscaTemplate - _handleNestedToscaTemplatesWithTopology - Nested Topologies Loop: too many levels, aborting");
+            return;
+        }
+        // Reset Processed Imports for nested templates
+        this.processedImports = new HashSet<>();
+        for (Map.Entry<String, Object> me : nestedToscaTplsWithTopology.entrySet()) {
+            LinkedHashMap<String, Object> toscaTpl =
+                    (LinkedHashMap<String, Object>) me.getValue();
+            for (NodeTemplate nt : tt.getNodeTemplates()) {
+                if (_isSubMappedNode(nt, toscaTpl)) {
+                    parsedParams = _getParamsForNestedTemplate(nt);
+                    ArrayList<Object> alim = (ArrayList<Object>) toscaTpl.get(IMPORTS);
+                    LinkedHashMap<String, Object> topologyTpl =
+                            (LinkedHashMap<String, Object>) toscaTpl.get(TOPOLOGY_TEMPLATE);
+                    TopologyTemplate topologyWithSubMapping =
+                            new TopologyTemplate(topologyTpl,
+                                    _getAllCustomDefs(alim),
+                                    relationshipTypes,
+                                    parsedParams,
+                                    nt,
+                                    resolveGetInput);
+                    nt.setOriginComponentTemplate(topologyWithSubMapping);
+                    if (topologyWithSubMapping.getSubstitutionMappings() != null) {
                         // Record nested topology templates in top level template
                         //nestedToscaTemplatesWithTopology.add(topologyWithSubMapping);
                         // Set substitution mapping object for mapped node
                         nt.setSubMappingToscaTemplate(
-                        		topologyWithSubMapping.getSubstitutionMappings());
+                                topologyWithSubMapping.getSubstitutionMappings());
                         _handleNestedToscaTemplatesWithTopology(topologyWithSubMapping);
-					}
-				}
-			}
-		}
-	}
-	
+                    }
+                }
+            }
+        }
+    }
+
 //	private void _handleNestedToscaTemplatesWithTopology() {
 //		for(Map.Entry<String,Object> me: nestedToscaTplsWithTopology.entrySet()) {
 //			String fname = me.getKey();
@@ -692,150 +685,145 @@ public class ToscaTemplate extends Object {
 //		}
 //	}
 
-	private void _validateField() {
-		String sVersion = _tplVersion();
-		if(sVersion == null) {
-			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE245", String.format(
-					"MissingRequiredField: Template is missing required field \"%s\"",DEFINITION_VERSION))); 
-		}
-		else {
-			_validateVersion(sVersion);
-			this.version = sVersion;
-		}
-		
-		for (String sKey : tpl.keySet()) {
-			boolean bFound = false;
-			for (String sSection: SECTIONS) {
-				if(sKey.equals(sSection)) {
-					bFound = true;
-					break;
-				}
-			}
-			// check ADDITIONAL_SECTIONS
-			if(!bFound) {
-				if(ADDITIONAL_SECTIONS.get(version) != null &&
-						ADDITIONAL_SECTIONS.get(version).contains(sKey)) {
-					bFound = true;
-				}
-			}
-			if(!bFound) {
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE246", String.format(
-						"UnknownFieldError: Template contains unknown field \"%s\"",
-						sKey))); 
-			}
-		}
-	}
+    private void _validateField() {
+        String sVersion = _tplVersion();
+        if (sVersion == null) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE245", String.format(
+                    "MissingRequiredField: Template is missing required field \"%s\"", DEFINITION_VERSION)));
+        } else {
+            _validateVersion(sVersion);
+            this.version = sVersion;
+        }
 
-	private void _validateVersion(String sVersion) {
-		boolean bFound = false;
-		for(String vtv: VALID_TEMPLATE_VERSIONS) {
-			if(sVersion.equals(vtv)) {
-				bFound = true;
-				break;
-			}
-		}
-		if(!bFound) {
-			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE247", String.format(
-				"InvalidTemplateVersion: \"%s\" is invalid. Valid versions are %s",
-				sVersion,VALID_TEMPLATE_VERSIONS.toString()))); 
-		}
-		else if ((!sVersion.equals("tosca_simple_yaml_1_0") && !sVersion.equals("tosca_simple_yaml_1_1"))) {
-			EntityType.updateDefinitions(sVersion);
+        for (String sKey : tpl.keySet()) {
+            boolean bFound = false;
+            for (String sSection : SECTIONS) {
+                if (sKey.equals(sSection)) {
+                    bFound = true;
+                    break;
+                }
+            }
+            // check ADDITIONAL_SECTIONS
+            if (!bFound) {
+                if (ADDITIONAL_SECTIONS.get(version) != null &&
+                        ADDITIONAL_SECTIONS.get(version).contains(sKey)) {
+                    bFound = true;
+                }
+            }
+            if (!bFound) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE246", String.format(
+                        "UnknownFieldError: Template contains unknown field \"%s\"",
+                        sKey)));
+            }
+        }
+    }
 
-		}
-	}
+    private void _validateVersion(String sVersion) {
+        boolean bFound = false;
+        for (String vtv : VALID_TEMPLATE_VERSIONS) {
+            if (sVersion.equals(vtv)) {
+                bFound = true;
+                break;
+            }
+        }
+        if (!bFound) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE247", String.format(
+                    "InvalidTemplateVersion: \"%s\" is invalid. Valid versions are %s",
+                    sVersion, VALID_TEMPLATE_VERSIONS.toString())));
+        } else if ((!sVersion.equals("tosca_simple_yaml_1_0") && !sVersion.equals("tosca_simple_yaml_1_1"))) {
+            EntityType.updateDefinitions(sVersion);
 
-	private String _getPath(String _path) throws JToscaException {
-		if (_path.toLowerCase().endsWith(".yaml") || _path.toLowerCase().endsWith(".yml")) {
-			return _path;
-		} 
-		else if (_path.toLowerCase().endsWith(".zip") || _path.toLowerCase().endsWith(".csar")) {
-			// a CSAR archive
-			CSAR csar = new CSAR(_path, isFile);
-			if (csar.validate()) {
-				try {
-					csar.decompress();
-					metaProperties = csar.getMetaProperties();
-				} 
-				catch (IOException e) {
-					log.error("ToscaTemplate - _getPath - IOException trying to decompress {}", _path);
-					return null;
-				}
-				isFile = true; // the file has been decompressed locally
-				csar.cleanup();
-				csarTempDir = csar.getTempDir();
-				return csar.getTempDir() + File.separator + csar.getMainTemplate();
-			}
-		} 
-		else {
-			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE248", "ValueError: " + _path + " is not a valid file")); 
-			return null;
-		}
-		return null;
-	}
+        }
+    }
 
-	private void verifyTemplate() throws JToscaException {
-		//Criticals
-		int validationIssuesCaught = ThreadLocalsHolder.getCollector().validationIssuesCaught();
-		if (validationIssuesCaught > 0) {
-			List<String> validationIssueStrings = ThreadLocalsHolder.getCollector().getValidationIssueReport();
-			log.trace("####################################################################################################");
-			log.trace("ToscaTemplate - verifyTemplate - {} Parsing Critical{} occurred...", validationIssuesCaught, (validationIssuesCaught > 1 ? "s" : ""));
-			for (String s : validationIssueStrings) {
-				log.trace("{}. CSAR name - {}", s, inputPath);
-			}
-			log.trace("####################################################################################################");
-		}
-		
-	}
+    private String _getPath(String _path) throws JToscaException {
+        if (_path.toLowerCase().endsWith(".yaml") || _path.toLowerCase().endsWith(".yml")) {
+            return _path;
+        } else if (_path.toLowerCase().endsWith(".zip") || _path.toLowerCase().endsWith(".csar")) {
+            // a CSAR archive
+            CSAR csar = new CSAR(_path, isFile);
+            if (csar.validate()) {
+                try {
+                    csar.decompress();
+                    metaProperties = csar.getMetaProperties();
+                } catch (IOException e) {
+                    log.error("ToscaTemplate - _getPath - IOException trying to decompress {}", _path);
+                    return null;
+                }
+                isFile = true; // the file has been decompressed locally
+                csar.cleanup();
+                csarTempDir = csar.getTempDir();
+                return csar.getTempDir() + File.separator + csar.getMainTemplate();
+            }
+        } else {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE248", "ValueError: " + _path + " is not a valid file"));
+            return null;
+        }
+        return null;
+    }
 
-	public String getPath() {
-		return path;
-	}
+    private void verifyTemplate() throws JToscaException {
+        //Criticals
+        int validationIssuesCaught = ThreadLocalsHolder.getCollector().validationIssuesCaught();
+        if (validationIssuesCaught > 0) {
+            List<String> validationIssueStrings = ThreadLocalsHolder.getCollector().getValidationIssueReport();
+            log.trace("####################################################################################################");
+            log.trace("ToscaTemplate - verifyTemplate - {} Parsing Critical{} occurred...", validationIssuesCaught, (validationIssuesCaught > 1 ? "s" : ""));
+            for (String s : validationIssueStrings) {
+                log.trace("{}. CSAR name - {}", s, inputPath);
+            }
+            log.trace("####################################################################################################");
+        }
 
-	public String getVersion() {
-		return version;
-	}
-	
-	public String getDescription() {
-		return description;
-	}
-	
-	public TopologyTemplate getTopologyTemplate() {
-		return topologyTemplate;
-	}
-	
-	public Metadata getMetaData() {
-		return metaData;
-	}
-	
-	public ArrayList<Input> getInputs() {
-		if(inputs != null){
-			inputs.stream().forEach(Input::resetAnnotaions);
-		}
-		return inputs;
-	}
-	
-	public ArrayList<Output> getOutputs() {
-		return outputs;
-	}
-	
-	public ArrayList<Policy> getPolicies() {
-		return policies;
-	}
-	
-	public ArrayList<Group> getGroups() {
-		return groups;
-	}
-	
-	public ArrayList<NodeTemplate> getNodeTemplates() {
-		return nodeTemplates;
-	}
+    }
 
-	public LinkedHashMap<String, Object> getMetaProperties(String propertiesFile) {
-		return metaProperties.get(propertiesFile);
-	}
-	
+    public String getPath() {
+        return path;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public TopologyTemplate getTopologyTemplate() {
+        return topologyTemplate;
+    }
+
+    public Metadata getMetaData() {
+        return metaData;
+    }
+
+    public ArrayList<Input> getInputs() {
+        if (inputs != null) {
+            inputs.stream().forEach(Input::resetAnnotaions);
+        }
+        return inputs;
+    }
+
+    public ArrayList<Output> getOutputs() {
+        return outputs;
+    }
+
+    public ArrayList<Policy> getPolicies() {
+        return policies;
+    }
+
+    public ArrayList<Group> getGroups() {
+        return groups;
+    }
+
+    public ArrayList<NodeTemplate> getNodeTemplates() {
+        return nodeTemplates;
+    }
+
+    public LinkedHashMap<String, Object> getMetaProperties(String propertiesFile) {
+        return metaProperties.get(propertiesFile);
+    }
+
 //	private boolean _isSubMappedNode(NodeTemplate nt,LinkedHashMap<String,Object> toscaTpl) {
 //		// Return True if the nodetemple is substituted
 //		if(nt != null && nt.getSubMappingToscaTemplate() == null &&
@@ -846,105 +834,105 @@ public class ToscaTemplate extends Object {
 //		return false;
 //	}
 
-	private boolean _isSubMappedNode(NodeTemplate nt, LinkedHashMap<String,Object> toscaTpl) {
-		// Return True if the nodetemple is substituted
-		if(nt != null && nt.getSubMappingToscaTemplate() == null &&
-				getSubMappingNodeType(toscaTpl).equals(nt.getType()) &&
-				nt.getInterfaces().size() < 1) {
-			return true;
-		}
-		return false;
-	}
+    private boolean _isSubMappedNode(NodeTemplate nt, LinkedHashMap<String, Object> toscaTpl) {
+        // Return True if the nodetemple is substituted
+        if (nt != null && nt.getSubMappingToscaTemplate() == null &&
+                getSubMappingNodeType(toscaTpl).equals(nt.getType()) &&
+                nt.getInterfaces().size() < 1) {
+            return true;
+        }
+        return false;
+    }
 
-	private LinkedHashMap<String,Object> _getParamsForNestedTemplate(NodeTemplate nt) {
-		// Return total params for nested_template
-		LinkedHashMap<String,Object> pparams;
-		if(parsedParams != null) {
-			pparams = parsedParams;
-		}
-		else {
-			pparams = new LinkedHashMap<String,Object>();
-		}
-		if(nt != null) {
-			for(String pname: nt.getProperties().keySet()) {
-				pparams.put(pname,nt.getPropertyValue(pname));
-			}
-		}
-		return pparams;
-	}
+    private LinkedHashMap<String, Object> _getParamsForNestedTemplate(NodeTemplate nt) {
+        // Return total params for nested_template
+        LinkedHashMap<String, Object> pparams;
+        if (parsedParams != null) {
+            pparams = parsedParams;
+        } else {
+            pparams = new LinkedHashMap<String, Object>();
+        }
+        if (nt != null) {
+            for (String pname : nt.getProperties().keySet()) {
+                pparams.put(pname, nt.getPropertyValue(pname));
+            }
+        }
+        return pparams;
+    }
 
-	@SuppressWarnings("unchecked")
-	private String getSubMappingNodeType(LinkedHashMap<String,Object> toscaTpl) {
-		// Return substitution mappings node type
-		if(toscaTpl != null) {
-			return TopologyTemplate.getSubMappingNodeType(
-					(LinkedHashMap<String,Object>)toscaTpl.get(TOPOLOGY_TEMPLATE));
-		}
-		return null;
-	}
+    @SuppressWarnings("unchecked")
+    private String getSubMappingNodeType(LinkedHashMap<String, Object> toscaTpl) {
+        // Return substitution mappings node type
+        if (toscaTpl != null) {
+            return TopologyTemplate.getSubMappingNodeType(
+                    (LinkedHashMap<String, Object>) toscaTpl.get(TOPOLOGY_TEMPLATE));
+        }
+        return null;
+    }
 
-	public boolean hasNestedTemplates() {
+    public boolean hasNestedTemplates() {
         // Return True if the tosca template has nested templates
         return nestedToscaTemplatesWithTopology != null &&
-        		nestedToscaTemplatesWithTopology.size() >= 1;
-		
-	}
-	
-	public ArrayList<TopologyTemplate> getNestedTemplates() {
-		return nestedToscaTemplatesWithTopology;
-	}
+                nestedToscaTemplatesWithTopology.size() >= 1;
 
-	public ConcurrentHashMap<String, Object> getNestedTopologyTemplates() {
-		return nestedToscaTplsWithTopology;
-	}
+    }
 
-	/**
-	 * Get datatypes.
-	 * @return return list of datatypes.
-	 */
-	public HashSet<DataType> getDataTypes() {
-		return dataTypes;
-	}
+    public ArrayList<TopologyTemplate> getNestedTemplates() {
+        return nestedToscaTemplatesWithTopology;
+    }
 
-	@Override
-	public String toString() {
-		return "ToscaTemplate{" +
-				"exttools=" + exttools +
-				", VALID_TEMPLATE_VERSIONS=" + VALID_TEMPLATE_VERSIONS +
-				", ADDITIONAL_SECTIONS=" + ADDITIONAL_SECTIONS +
-				", isFile=" + isFile +
-				", path='" + path + '\'' +
-				", inputPath='" + inputPath + '\'' +
-				", parsedParams=" + parsedParams +
-				", tpl=" + tpl +
-				", version='" + version + '\'' +
-				", imports=" + imports +
-				", relationshipTypes=" + relationshipTypes +
-				", metaData=" + metaData +
-				", description='" + description + '\'' +
-				", topologyTemplate=" + topologyTemplate +
-				", repositories=" + repositories +
-				", inputs=" + inputs +
-				", relationshipTemplates=" + relationshipTemplates +
-				", nodeTemplates=" + nodeTemplates +
-				", outputs=" + outputs +
-				", policies=" + policies +
-				", nestedToscaTplsWithTopology=" + nestedToscaTplsWithTopology +
-				", nestedToscaTemplatesWithTopology=" + nestedToscaTemplatesWithTopology +
-				", graph=" + graph +
-				", csarTempDir='" + csarTempDir + '\'' +
-				", nestingLoopCounter=" + nestingLoopCounter +
-				", dataTypes=" + dataTypes +
-				'}';
-	}
+    public ConcurrentHashMap<String, Object> getNestedTopologyTemplates() {
+        return nestedToscaTplsWithTopology;
+    }
 
-	public List<Input> getInputs(boolean annotationsRequired) {
-		if(inputs != null && annotationsRequired){
-			inputs.stream().forEach(Input::parseAnnotations);
-			return inputs;
-		}
-		return getInputs();
-	}
+    /**
+     * Get datatypes.
+     *
+     * @return return list of datatypes.
+     */
+    public HashSet<DataType> getDataTypes() {
+        return dataTypes;
+    }
+
+    @Override
+    public String toString() {
+        return "ToscaTemplate{" +
+                "exttools=" + exttools +
+                ", VALID_TEMPLATE_VERSIONS=" + VALID_TEMPLATE_VERSIONS +
+                ", ADDITIONAL_SECTIONS=" + ADDITIONAL_SECTIONS +
+                ", isFile=" + isFile +
+                ", path='" + path + '\'' +
+                ", inputPath='" + inputPath + '\'' +
+                ", parsedParams=" + parsedParams +
+                ", tpl=" + tpl +
+                ", version='" + version + '\'' +
+                ", imports=" + imports +
+                ", relationshipTypes=" + relationshipTypes +
+                ", metaData=" + metaData +
+                ", description='" + description + '\'' +
+                ", topologyTemplate=" + topologyTemplate +
+                ", repositories=" + repositories +
+                ", inputs=" + inputs +
+                ", relationshipTemplates=" + relationshipTemplates +
+                ", nodeTemplates=" + nodeTemplates +
+                ", outputs=" + outputs +
+                ", policies=" + policies +
+                ", nestedToscaTplsWithTopology=" + nestedToscaTplsWithTopology +
+                ", nestedToscaTemplatesWithTopology=" + nestedToscaTemplatesWithTopology +
+                ", graph=" + graph +
+                ", csarTempDir='" + csarTempDir + '\'' +
+                ", nestingLoopCounter=" + nestingLoopCounter +
+                ", dataTypes=" + dataTypes +
+                '}';
+    }
+
+    public List<Input> getInputs(boolean annotationsRequired) {
+        if (inputs != null && annotationsRequired) {
+            inputs.stream().forEach(Input::parseAnnotations);
+            return inputs;
+        }
+        return getInputs();
+    }
 }
 
 /*python

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,44 +23,45 @@ package org.onap.sdc.toscaparser.api.elements.constraints;
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
+import java.util.Collections;
+
 public class Length extends Constraint {
-	// Constraint class for "length"
-	
-	// Constrains the property or parameter to a value of a given length.
+    // Constraint class for "length"
 
-	@Override
-	protected void _setValues() {
+    // Constrains the property or parameter to a value of a given length.
 
-		constraintKey = LENGTH;
+    @Override
+    protected void setValues() {
 
-		validTypes.add("Integer");
-		
-		validPropTypes.add(Schema.STRING);
-		
-	}
-	
-	public Length(String name,String type,Object c) {
-		super(name,type,c);
-		
-		if(!validTypes.contains(constraintValue.getClass().getSimpleName())) {
-	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE109", "InvalidSchemaError: The property \"length\" expects an integer"));
-		}
-	}
-	
-	@Override
-	protected boolean _isValid(Object value) {
-	    if(value instanceof String && constraintValue instanceof Integer &&
-	    		((String)value).length() == (Integer)constraintValue) {
-	        return true;
-	    }
-		return false;
-	}
+        setConstraintKey(LENGTH);
+        addValidTypes(Collections.singletonList("Integer"));
 
-	@Override
-	protected String _errMsg(Object value) {
-	    return String.format("Length of value \"%s\" of property \"%s\" must be equal to \"%s\"",
-	    					 value.toString(),propertyName,constraintValue.toString());
-	}
+        validPropTypes.add(Schema.STRING);
+
+    }
+
+    public Length(String name, String type, Object c) {
+        super(name, type, c);
+
+        if (!validTypes.contains(constraintValue.getClass().getSimpleName())) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE109", "InvalidSchemaError: The property \"length\" expects an integer"));
+        }
+    }
+
+    @Override
+    protected boolean isValid(Object value) {
+        if (value instanceof String && constraintValue instanceof Integer &&
+                ((String) value).length() == (Integer) constraintValue) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected String errMsg(Object value) {
+        return String.format("Length of value \"%s\" of property \"%s\" must be equal to \"%s\"",
+                value.toString(), propertyName, constraintValue.toString());
+    }
 
 }
 

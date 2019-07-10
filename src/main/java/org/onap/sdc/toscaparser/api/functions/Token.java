@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,39 +46,38 @@ public class Token extends Function {
 
     //Example:
 
-   // [ get_attribute: [ my_server, data_endpoint, ip_address ], ':', 1 ]
+    // [ get_attribute: [ my_server, data_endpoint, ip_address ], ':', 1 ]
 
 
-	public Token(TopologyTemplate ttpl, Object context, String name, ArrayList<Object> args) {
-		super(ttpl,context,name,args);
-	}
-	
-	@Override
-	public Object result() {
-		return this;
-	}
+    public Token(TopologyTemplate ttpl, Object context, String name, ArrayList<Object> args) {
+        super(ttpl, context, name, args);
+    }
 
-	@Override
-	void validate() {
-        if(args.size() < 3) {
-            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE180", 
-                "ValueError: Invalid arguments for function \"token\". " +
-                "Expected at least three arguments")); 
-        }
-        else {
-            if(!(args.get(1) instanceof String) || 
-               ((String)args.get(1)).length() != 1) {
-                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE181", 
+    @Override
+    public Object result() {
+        return this;
+    }
+
+    @Override
+    void validate() {
+        if (args.size() < 3) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE180",
                     "ValueError: Invalid arguments for function \"token\". " +
-                    "Expected single char value as second argument")); 
+                            "Expected at least three arguments"));
+        } else {
+            if (!(args.get(1) instanceof String) ||
+                    ((String) args.get(1)).length() != 1) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE181",
+                        "ValueError: Invalid arguments for function \"token\". " +
+                                "Expected single char value as second argument"));
             }
-            if(!(args.get(2) instanceof Integer)) {
-                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE182", 
-                    "ValueError: Invalid arguments for function \"token\"" +
-                    "Expected integer value as third argument")); 
-        	}
-		}
-	}
+            if (!(args.get(2) instanceof Integer)) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE182",
+                        "ValueError: Invalid arguments for function \"token\"" +
+                                "Expected integer value as third argument"));
+            }
+        }
+    }
 
 }
 

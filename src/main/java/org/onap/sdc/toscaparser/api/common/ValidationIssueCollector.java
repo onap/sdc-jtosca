@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,10 +26,11 @@ import java.util.*;
 
 public class ValidationIssueCollector {
 
-    private Map<String,JToscaValidationIssue> validationIssues = new HashMap<String,JToscaValidationIssue>();
+    private Map<String, JToscaValidationIssue> validationIssues = new HashMap<String, JToscaValidationIssue>();
+
     public void appendValidationIssue(JToscaValidationIssue issue) {
 
-        validationIssues.put(issue.getMessage(),issue);
+        validationIssues.put(issue.getMessage(), issue);
 
     }
 
@@ -37,13 +38,14 @@ public class ValidationIssueCollector {
         List<String> report = new ArrayList<>();
         if (!validationIssues.isEmpty()) {
             for (JToscaValidationIssue exception : validationIssues.values()) {
-                report.add("["+exception.getCode()+"]: "+ exception.getMessage());
+                report.add("[" + exception.getCode() + "]: " + exception.getMessage());
             }
         }
 
         return report;
     }
-    public Map<String,JToscaValidationIssue> getValidationIssues() {
+
+    public Map<String, JToscaValidationIssue> getValidationIssues() {
         return validationIssues;
     }
 
@@ -51,5 +53,5 @@ public class ValidationIssueCollector {
     public int validationIssuesCaught() {
         return validationIssues.size();
     }
-    
+
 }

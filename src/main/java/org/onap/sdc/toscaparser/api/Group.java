@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,96 +30,97 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Group extends EntityTemplate {
-	
-	private static final String TYPE = "type";
-	private static final String METADATA = "metadata";
-	private static final String DESCRIPTION = "description";
-	private static final String PROPERTIES = "properties";
-	private static final String MEMBERS = "members";
-	private static final String INTERFACES = "interfaces";
-	private static final String SECTIONS[] = {
-			TYPE, METADATA, DESCRIPTION, PROPERTIES, MEMBERS, INTERFACES};
 
-	private String name;
-	LinkedHashMap<String,Object> tpl; 
-	ArrayList<NodeTemplate> memberNodes;
-	LinkedHashMap<String,Object> customDef;
-	Metadata metaData;
+    private static final String TYPE = "type";
+    private static final String METADATA = "metadata";
+    private static final String DESCRIPTION = "description";
+    private static final String PROPERTIES = "properties";
+    private static final String MEMBERS = "members";
+    private static final String INTERFACES = "interfaces";
+    private static final String[] SECTIONS = {
+            TYPE, METADATA, DESCRIPTION, PROPERTIES, MEMBERS, INTERFACES};
+
+    private String name;
+    private LinkedHashMap<String, Object> tpl;
+    private ArrayList<NodeTemplate> memberNodes;
+    private LinkedHashMap<String, Object> customDef;
+    private Metadata metaData;
 
 
-	public Group(String _name, LinkedHashMap<String, Object> _templates,
-				 ArrayList<NodeTemplate> _memberNodes,
-				 LinkedHashMap<String, Object> _customDef){
-		this(_name, _templates, _memberNodes, _customDef, null);
-	}
+    public Group(String name, LinkedHashMap<String, Object> templates,
+                 ArrayList<NodeTemplate> memberNodes,
+                 LinkedHashMap<String, Object> customDef) {
+        this(name, templates, memberNodes, customDef, null);
+    }
 
-	public Group(String _name, LinkedHashMap<String, Object> _templates, 
-					ArrayList<NodeTemplate> _memberNodes,
-					LinkedHashMap<String, Object> _customDef, NodeTemplate parentNodeTemplate) {
-		super(_name, _templates, "group_type", _customDef, parentNodeTemplate);
+    public Group(String name, LinkedHashMap<String, Object> templates,
+                 ArrayList<NodeTemplate> memberNodes,
+                 LinkedHashMap<String, Object> customDef, NodeTemplate parentNodeTemplate) {
+        super(name, templates, "group_type", customDef, parentNodeTemplate);
 
-		name = _name;
-        tpl = _templates;
-        if(tpl.get(METADATA) != null) {
-        	Object metadataObject = tpl.get(METADATA);
-        	ValidateUtils.validateMap(metadataObject);
-        	metaData = new Metadata((Map<String,Object>)metadataObject);
+        this.name = name;
+        tpl = templates;
+        if (tpl.get(METADATA) != null) {
+            Object metadataObject = tpl.get(METADATA);
+            ValidateUtils.validateMap(metadataObject);
+            metaData = new Metadata((Map<String, Object>) metadataObject);
         }
-        memberNodes = _memberNodes;
-        _validateKeys();
+        this.memberNodes = memberNodes;
+        validateKeys();
         getCapabilities();
-	}
+    }
 
-	public Metadata getMetadata() {
-		return metaData;
-	}
-	
-	public ArrayList<String> getMembers() {
-		return (ArrayList<String>)entityTpl.get("members");
-	}
- 
-	public String getDescription() {
-		return (String)entityTpl.get("description");
-		
-	}
+    public Metadata getMetadata() {
+        return metaData;
+    }
 
-	public ArrayList<NodeTemplate> getMemberNodes() {
-		return memberNodes;
-	}
+    public ArrayList<String> getMembers() {
+        return (ArrayList<String>) entityTpl.get("members");
+    }
 
-	private void _validateKeys() {
-		for(String key: entityTpl.keySet()) {
-    		boolean bFound = false;
-    		for(String sect: SECTIONS) {
-    			if(key.equals(sect)) {
-    				bFound = true;
-    				break;
-    			}
-    		}
-    		if(!bFound) {
+    public String getDescription() {
+        return (String) entityTpl.get("description");
+
+    }
+
+    public ArrayList<NodeTemplate> getMemberNodes() {
+        return memberNodes;
+    }
+
+    private void validateKeys() {
+        for (String key : entityTpl.keySet()) {
+            boolean bFound = false;
+            for (String sect : SECTIONS) {
+                if (key.equals(sect)) {
+                    bFound = true;
+                    break;
+                }
+            }
+            if (!bFound) {
                 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE183", String.format(
                         "UnknownFieldError: Groups \"%s\" contains unknown field \"%s\"",
-                        name,key))); 
-    		}
-		}
-	}
+                        name, key)));
+            }
+        }
+    }
 
-	@Override
-	public String toString() {
-		return "Group{" +
-				"name='" + name + '\'' +
-				", tpl=" + tpl +
-				", memberNodes=" + memberNodes +
-				", customDef=" + customDef +
-				", metaData=" + metaData +
-				'}';
-	}
-	
-	public int compareTo(Group other){
-		if(this.equals(other))
-			return 0;
-		return this.getName().compareTo(other.getName()) == 0 ? this.getType().compareTo(other.getType()) : this.getName().compareTo(other.getName());
-	}
+    @Override
+    public String toString() {
+        return "Group{"
+                + "name='" + name + '\''
+                + ", tpl=" + tpl
+                + ", memberNodes=" + memberNodes
+                + ", customDef=" + customDef
+                + ", metaData=" + metaData
+                + '}';
+    }
+
+    public int compareTo(Group other) {
+        if (this.equals(other)) {
+            return 0;
+        }
+        return this.getName().compareTo(other.getName()) == 0 ? this.getType().compareTo(other.getType()) : this.getName().compareTo(other.getName());
+    }
 }
 
 /*python

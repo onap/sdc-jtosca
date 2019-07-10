@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,30 +52,30 @@ public class JToscaMetadataParse {
         File file = new File(fileStr);
         ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
         int validationIssuesCaught = ThreadLocalsHolder.getCollector().validationIssuesCaught();
-        assertTrue(validationIssuesCaught == 0 );
+        assertTrue(validationIssuesCaught == 0);
     }
-    
+
     @Test
     public void testEmptyCsar() throws JToscaException {
         String fileStr = JToscaMetadataParse.class.getClassLoader().getResource("csars/emptyCsar.csar").getFile();
         File file = new File(fileStr);
         try {
-        	ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
+            ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
         } catch (JToscaException e) {
-        	assertTrue(e.getCode().equals(JToscaErrorCodes.INVALID_CSAR_FORMAT.getValue()));
-		}
+            assertTrue(e.getCode().equals(JToscaErrorCodes.INVALID_CSAR_FORMAT.getValue()));
+        }
         int validationIssuesCaught = ThreadLocalsHolder.getCollector().validationIssuesCaught();
-        assertTrue(validationIssuesCaught == 0 );
+        assertTrue(validationIssuesCaught == 0);
     }
-    
+
     @Test
     public void testEmptyPath() throws JToscaException {
         String fileStr = JToscaMetadataParse.class.getClassLoader().getResource("").getFile();
         File file = new File(fileStr);
         try {
-        	ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);        	
-        }catch (JToscaException e) {
-        	assertTrue(e.getCode().equals(JToscaErrorCodes.PATH_NOT_VALID.getValue()));
-		}
+            ToscaTemplate toscaTemplate = new ToscaTemplate(file.getAbsolutePath(), null, true, null);
+        } catch (JToscaException e) {
+            assertTrue(e.getCode().equals(JToscaErrorCodes.PATH_NOT_VALID.getValue()));
+        }
     }
 }

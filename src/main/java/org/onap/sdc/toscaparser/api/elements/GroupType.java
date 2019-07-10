@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,151 +29,150 @@ import java.util.Map;
 
 public class GroupType extends StatefulEntityType {
 
-	private static final String DERIVED_FROM = "derived_from";
-	private static final String VERSION = "version";
-	private static final String METADATA = "metadata";
-	private static final String DESCRIPTION = "description";
-	private static final String PROPERTIES = "properties";
-	private static final String MEMBERS = "members";
-	private static final String INTERFACES = "interfaces";
+    private static final String DERIVED_FROM = "derived_from";
+    private static final String VERSION = "version";
+    private static final String METADATA = "metadata";
+    private static final String DESCRIPTION = "description";
+    private static final String PROPERTIES = "properties";
+    private static final String MEMBERS = "members";
+    private static final String INTERFACES = "interfaces";
 
-	private static final String SECTIONS[] = {
-			DERIVED_FROM, VERSION, METADATA, DESCRIPTION, PROPERTIES, MEMBERS, INTERFACES};
-	
-	private String groupType;
-	private LinkedHashMap<String,Object> customDef;
-	private String groupDescription;
-	private String groupVersion;
-	//private LinkedHashMap<String,Object> groupProperties;
-	//private ArrayList<String> groupMembers;
-	private LinkedHashMap<String,Object> metaData;
+    private static final String[] SECTIONS = {
+            DERIVED_FROM, VERSION, METADATA, DESCRIPTION, PROPERTIES, MEMBERS, INTERFACES};
 
-	@SuppressWarnings("unchecked")
-	public GroupType(String _grouptype,LinkedHashMap<String,Object> _customDef) {
-		super(_grouptype,GROUP_PREFIX,_customDef);
-		
-		groupType = _grouptype;
-		customDef = _customDef;
-		_validateFields();
-		if(defs != null) {
-			groupDescription = (String)defs.get(DESCRIPTION);
-			groupVersion = (String)defs.get(VERSION);
-			//groupProperties = (LinkedHashMap<String,Object>)defs.get(PROPERTIES);
-			//groupMembers = (ArrayList<String>)defs.get(MEMBERS);
-			Object mdo = defs.get(METADATA);
-			if(mdo instanceof LinkedHashMap) {
-				metaData = (LinkedHashMap<String,Object>)mdo;	
-			}
-			else {
-				metaData = null;
-			}
-			
-			if(metaData != null) {
-				_validateMetadata(metaData);
-			}
-		}
-	}
-		
-	public GroupType getParentType() {
+    private String groupType;
+    private LinkedHashMap<String, Object> customDef;
+    private String groupDescription;
+    private String groupVersion;
+    //private LinkedHashMap<String,Object> groupProperties;
+    //private ArrayList<String> groupMembers;
+    private LinkedHashMap<String, Object> metaData;
+
+    @SuppressWarnings("unchecked")
+    public GroupType(String groupType, LinkedHashMap<String, Object> customDef) {
+        super(groupType, GROUP_PREFIX, customDef);
+
+        this.groupType = groupType;
+        this.customDef = customDef;
+        validateFields();
+        if (defs != null) {
+            groupDescription = (String) defs.get(DESCRIPTION);
+            groupVersion = (String) defs.get(VERSION);
+            //groupProperties = (LinkedHashMap<String,Object>)defs.get(PROPERTIES);
+            //groupMembers = (ArrayList<String>)defs.get(MEMBERS);
+            Object mdo = defs.get(METADATA);
+            if (mdo instanceof LinkedHashMap) {
+                metaData = (LinkedHashMap<String, Object>) mdo;
+            } else {
+                metaData = null;
+            }
+
+            if (metaData != null) {
+                validateMetadata(metaData);
+            }
+        }
+    }
+
+    public GroupType getParentType() {
         // Return a group statefulentity of this entity is derived from.
-        if(defs == null) {
+        if (defs == null) {
             return null;
         }
         String pgroupEntity = derivedFrom(defs);
-        if(pgroupEntity != null) {
-            return new GroupType(pgroupEntity,customDef);
+        if (pgroupEntity != null) {
+            return new GroupType(pgroupEntity, customDef);
         }
         return null;
-	}
-	
-	public String getDescription() {
-		return groupDescription;
-	}
+    }
 
-	public String getVersion() {
-		return groupVersion;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public LinkedHashMap<String,Object> getInterfaces() {
-		Object ifo = getValue(INTERFACES,null,false);
-		if(ifo instanceof LinkedHashMap) {
-			return (LinkedHashMap<String, Object>)ifo;
-		}
-		return new LinkedHashMap<String,Object>();
-	}
-	
-	private void _validateFields() {
-		if(defs != null) {
-			for(String name: defs.keySet()) {
-				boolean bFound = false;
-				for(String sect: SECTIONS) {
-					if(name.equals(sect)) {
-						bFound = true;
-						break;
-					}
-				}
-				if(!bFound) {
-                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE120", String.format(
-                        "UnknownFieldError: Group Type \"%s\" contains unknown field \"%s\"",
-                        groupType,name))); 
-				}
-			}
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void _validateMetadata(LinkedHashMap<String,Object> metadata) {
-		String mtt = (String) metadata.get("type");
-		if(mtt != null && !mtt.equals("map") && !mtt.equals("tosca:map")) {
-            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE121", String.format(
-                "InvalidTypeError: \"%s\" defined in group for metadata is invalid",
-                mtt))); 
-		}
-		for(String entrySchema: metadata.keySet()) {
-			Object estob = metadata.get(entrySchema);
-			if(estob instanceof LinkedHashMap) {
-				String est = (String)((LinkedHashMap<String,Object>)estob).get("type");
-				if(!est.equals("string")) {
-	                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE122", String.format(
-	                    "InvalidTypeError: \"%s\" defined in group for metadata \"%s\" is invalid",
-	                    est,entrySchema))); 
-				}
-			}
-		}
-	}
- 
-	public String getType() {
-		return groupType;
-	}
-	
+    public String getDescription() {
+        return groupDescription;
+    }
+
+    public String getVersion() {
+        return groupVersion;
+    }
+
     @SuppressWarnings("unchecked")
-	public ArrayList<CapabilityTypeDef> getCapabilitiesObjects() {
+    public LinkedHashMap<String, Object> getInterfaces() {
+        Object ifo = getValue(INTERFACES, null, false);
+        if (ifo instanceof LinkedHashMap) {
+            return (LinkedHashMap<String, Object>) ifo;
+        }
+        return new LinkedHashMap<String, Object>();
+    }
+
+    private void validateFields() {
+        if (defs != null) {
+            for (String name : defs.keySet()) {
+                boolean bFound = false;
+                for (String sect : SECTIONS) {
+                    if (name.equals(sect)) {
+                        bFound = true;
+                        break;
+                    }
+                }
+                if (!bFound) {
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE120", String.format(
+                            "UnknownFieldError: Group Type \"%s\" contains unknown field \"%s\"",
+                            groupType, name)));
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void validateMetadata(LinkedHashMap<String, Object> metadata) {
+        String mtt = (String) metadata.get("type");
+        if (mtt != null && !mtt.equals("map") && !mtt.equals("tosca:map")) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE121", String.format(
+                    "InvalidTypeError: \"%s\" defined in group for metadata is invalid",
+                    mtt)));
+        }
+        for (String entrySchema : metadata.keySet()) {
+            Object estob = metadata.get(entrySchema);
+            if (estob instanceof LinkedHashMap) {
+                String est = (String) ((LinkedHashMap<String, Object>) estob).get("type");
+                if (!est.equals("string")) {
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE122", String.format(
+                            "InvalidTypeError: \"%s\" defined in group for metadata \"%s\" is invalid",
+                            est, entrySchema)));
+                }
+            }
+        }
+    }
+
+    public String getType() {
+        return groupType;
+    }
+
+    @SuppressWarnings("unchecked")
+    public ArrayList<CapabilityTypeDef> getCapabilitiesObjects() {
         // Return a list of capability objects
-		ArrayList<CapabilityTypeDef> typecapabilities = new ArrayList<>();
-		LinkedHashMap<String,Object> caps = (LinkedHashMap<String,Object>)getValue(CAPABILITIES, null, true);
-        if(caps != null) {
+        ArrayList<CapabilityTypeDef> typecapabilities = new ArrayList<>();
+        LinkedHashMap<String, Object> caps = (LinkedHashMap<String, Object>) getValue(CAPABILITIES, null, true);
+        if (caps != null) {
             // 'cname' is symbolic name of the capability
             // 'cvalue' is a dict { 'type': <capability type name> }
-        	for(Map.Entry<String,Object> me: caps.entrySet()) {
-        		String cname = me.getKey();
-        		LinkedHashMap<String,String> cvalue = (LinkedHashMap<String,String>)me.getValue();
-        		String ctype = cvalue.get("type");
-        		CapabilityTypeDef cap = new CapabilityTypeDef(cname,ctype,type,customDef);
-        		typecapabilities.add(cap);
-        	}
+            for (Map.Entry<String, Object> me : caps.entrySet()) {
+                String cname = me.getKey();
+                LinkedHashMap<String, String> cvalue = (LinkedHashMap<String, String>) me.getValue();
+                String ctype = cvalue.get("type");
+                CapabilityTypeDef cap = new CapabilityTypeDef(cname, ctype, type, customDef);
+                typecapabilities.add(cap);
+            }
         }
         return typecapabilities;
-	}
- 
-	public LinkedHashMap<String,CapabilityTypeDef> getCapabilities() {
+    }
+
+    public LinkedHashMap<String, CapabilityTypeDef> getCapabilities() {
         // Return a dictionary of capability name-objects pairs
-		LinkedHashMap<String,CapabilityTypeDef> caps = new LinkedHashMap<>();
-		for(CapabilityTypeDef ctd: getCapabilitiesObjects()) {
-			caps.put(ctd.getName(),ctd);
-		}
-		return caps;
-	}
+        LinkedHashMap<String, CapabilityTypeDef> caps = new LinkedHashMap<>();
+        for (CapabilityTypeDef ctd : getCapabilitiesObjects()) {
+            caps.put(ctd.getName(), ctd);
+        }
+        return caps;
+    }
 
 }
 

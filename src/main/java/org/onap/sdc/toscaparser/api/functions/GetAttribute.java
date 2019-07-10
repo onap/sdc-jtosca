@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,272 +39,272 @@ import org.onap.sdc.toscaparser.api.elements.StatefulEntityType;
 import org.onap.sdc.toscaparser.api.elements.constraints.Schema;
 
 public class GetAttribute extends Function {
-	// Get an attribute value of an entity defined in the service template
+    // Get an attribute value of an entity defined in the service template
 
-	// Node template attributes values are set in runtime and therefore its the
-	// responsibility of the Tosca engine to implement the evaluation of
-	// get_attribute functions.
+    // Node template attributes values are set in runtime and therefore its the
+    // responsibility of the Tosca engine to implement the evaluation of
+    // get_attribute functions.
 
-	// Arguments:
+    // Arguments:
 
-	// * Node template name | HOST.
-	// * Attribute name.
+    // * Node template name | HOST.
+    // * Attribute name.
 
-	// If the HOST keyword is passed as the node template name argument the
-	// function will search each node template along the HostedOn relationship
-	// chain until a node which contains the attribute is found.
+    // If the HOST keyword is passed as the node template name argument the
+    // function will search each node template along the HostedOn relationship
+    // chain until a node which contains the attribute is found.
 
-	// Examples:
+    // Examples:
 
-	// * { get_attribute: [ server, private_address ] }
-	// * { get_attribute: [ HOST, private_address ] }
-	// * { get_attribute: [ HOST, private_address, 0 ] }
-	// * { get_attribute: [ HOST, private_address, 0, some_prop] }
+    // * { get_attribute: [ server, private_address ] }
+    // * { get_attribute: [ HOST, private_address ] }
+    // * { get_attribute: [ HOST, private_address, 0 ] }
+    // * { get_attribute: [ HOST, private_address, 0, some_prop] }
 
-	public GetAttribute(TopologyTemplate ttpl, Object context, String name, ArrayList<Object> args) {
-		super(ttpl, context, name, args);
-	}
+    public GetAttribute(TopologyTemplate ttpl, Object context, String name, ArrayList<Object> args) {
+        super(ttpl, context, name, args);
+    }
 
-	@Override
-	void validate() {
-		if (args.size() < 2) {
-			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE146",
-					"ValueError: Illegal arguments for function \"get_attribute\". Expected arguments: \"node-template-name\", \"req-or-cap\" (optional), \"property name.\""));
-			return;
-		} else if (args.size() == 2) {
-			_findNodeTemplateContainingAttribute();
-		} else {
-			NodeTemplate nodeTpl = _findNodeTemplate((String) args.get(0));
-			if (nodeTpl == null) {
-				return;
-			}
-			int index = 2;
-			AttributeDef attr = nodeTpl.getTypeDefinition().getAttributeDefValue((String) args.get(1));
-			if (attr != null) {
-				// found
-			} else {
-				index = 3;
-				// then check the req or caps
-				if (!(args.get(1) instanceof String) || !(args.get(2) instanceof String)) {
-					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE146", "ValueError: Illegal arguments for function \"get_attribute\". Expected a String argument"));
-				}
+    @Override
+    void validate() {
+        if (args.size() < 2) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE146",
+                    "ValueError: Illegal arguments for function \"get_attribute\". Expected arguments: \"node-template-name\", \"req-or-cap\" (optional), \"property name.\""));
+            return;
+        } else if (args.size() == 2) {
+            _findNodeTemplateContainingAttribute();
+        } else {
+            NodeTemplate nodeTpl = _findNodeTemplate((String) args.get(0));
+            if (nodeTpl == null) {
+                return;
+            }
+            int index = 2;
+            AttributeDef attr = nodeTpl.getTypeDefinition().getAttributeDefValue((String) args.get(1));
+            if (attr != null) {
+                // found
+            } else {
+                index = 3;
+                // then check the req or caps
+                if (!(args.get(1) instanceof String) || !(args.get(2) instanceof String)) {
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE146", "ValueError: Illegal arguments for function \"get_attribute\". Expected a String argument"));
+                }
 
-				attr = _findReqOrCapAttribute(args.get(1).toString(), args.get(2).toString());
-				if (attr == null) {
-					return;
-				}
-			}
+                attr = _findReqOrCapAttribute(args.get(1).toString(), args.get(2).toString());
+                if (attr == null) {
+                    return;
+                }
+            }
 
 
-			String valueType = (String) attr.getSchema().get("type");
-			if (args.size() > index) {
-				for (Object elem : args.subList(index, args.size())) {
-					if (valueType.equals("list")) {
-						if (!(elem instanceof Integer)) {
-							ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE147", String.format(
-									"ValueError: Illegal arguments for function \"get_attribute\" \"%s\". Expected positive integer argument",
-									elem.toString())));
-						}
-						Object ob = attr.getSchema().get("entry_schema");
-						valueType = (String)
-								((LinkedHashMap<String, Object>) ob).get("type");
-					} else if (valueType.equals("map")) {
-						Object ob = attr.getSchema().get("entry_schema");
-						valueType = (String)
-								((LinkedHashMap<String, Object>) ob).get("type");
-					} else {
-						boolean bFound = false;
-						for (String p : Schema.PROPERTY_TYPES) {
-							if (p.equals(valueType)) {
-								bFound = true;
-								break;
-							}
-						}
-						if (bFound) {
-							ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE148", String.format(
-									"ValueError: 'Illegal arguments for function \"get_attribute\". Unexpected attribute/index value \"%s\"",
-									elem)));
-							return;
-						} else {  // It is a complex type
-							DataType dataType = new DataType(valueType, null);
-							LinkedHashMap<String, PropertyDef> props =
-									dataType.getAllProperties();
-							PropertyDef prop = props.get((String) elem);
-							if (prop != null) {
-								valueType = (String) prop.getSchema().get("type");
-							} else {
-								ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE149", String.format(
-										"KeyError: Illegal arguments for function \"get_attribute\". Attribute name \"%s\" not found in \"%\"",
-										elem, valueType)));
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+            String valueType = (String) attr.getSchema().get("type");
+            if (args.size() > index) {
+                for (Object elem : args.subList(index, args.size())) {
+                    if (valueType.equals("list")) {
+                        if (!(elem instanceof Integer)) {
+                            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE147", String.format(
+                                    "ValueError: Illegal arguments for function \"get_attribute\" \"%s\". Expected positive integer argument",
+                                    elem.toString())));
+                        }
+                        Object ob = attr.getSchema().get("entry_schema");
+                        valueType = (String)
+                                ((LinkedHashMap<String, Object>) ob).get("type");
+                    } else if (valueType.equals("map")) {
+                        Object ob = attr.getSchema().get("entry_schema");
+                        valueType = (String)
+                                ((LinkedHashMap<String, Object>) ob).get("type");
+                    } else {
+                        boolean bFound = false;
+                        for (String p : Schema.PROPERTY_TYPES) {
+                            if (p.equals(valueType)) {
+                                bFound = true;
+                                break;
+                            }
+                        }
+                        if (bFound) {
+                            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE148", String.format(
+                                    "ValueError: 'Illegal arguments for function \"get_attribute\". Unexpected attribute/index value \"%s\"",
+                                    elem)));
+                            return;
+                        } else {  // It is a complex type
+                            DataType dataType = new DataType(valueType, null);
+                            LinkedHashMap<String, PropertyDef> props =
+                                    dataType.getAllProperties();
+                            PropertyDef prop = props.get((String) elem);
+                            if (prop != null) {
+                                valueType = (String) prop.getSchema().get("type");
+                            } else {
+                                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE149", String.format(
+                                        "KeyError: Illegal arguments for function \"get_attribute\". Attribute name \"%s\" not found in \"%\"",
+                                        elem, valueType)));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	@Override
-	public Object result() {
-		return this;
-	}
+    @Override
+    public Object result() {
+        return this;
+    }
 
-	private NodeTemplate getReferencedNodeTemplate() {
-		// Gets the NodeTemplate instance the get_attribute function refers to
+    private NodeTemplate getReferencedNodeTemplate() {
+        // Gets the NodeTemplate instance the get_attribute function refers to
 
-		// If HOST keyword was used as the node template argument, the node
-		// template which contains the attribute along the HostedOn relationship
-		// chain will be returned.
+        // If HOST keyword was used as the node template argument, the node
+        // template which contains the attribute along the HostedOn relationship
+        // chain will be returned.
 
-		return _findNodeTemplateContainingAttribute();
+        return _findNodeTemplateContainingAttribute();
 
-	}
+    }
 
-	// Attributes can be explicitly created as part of the type definition
-	// or a property name can be implicitly used as an attribute name 
-	private NodeTemplate _findNodeTemplateContainingAttribute() {
-		NodeTemplate nodeTpl = _findNodeTemplate((String) args.get(0));
-		if (nodeTpl != null &&
-				!_attributeExistsInType(nodeTpl.getTypeDefinition()) &&
-				!nodeTpl.getProperties().keySet().contains(getAttributeName())) {
-			ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE150", String.format(
-					"KeyError: Attribute \"%s\" was not found in node template \"%s\"",
-					getAttributeName(), nodeTpl.getName())));
-		}
-		return nodeTpl;
-	}
+    // Attributes can be explicitly created as part of the type definition
+    // or a property name can be implicitly used as an attribute name
+    private NodeTemplate _findNodeTemplateContainingAttribute() {
+        NodeTemplate nodeTpl = _findNodeTemplate((String) args.get(0));
+        if (nodeTpl != null &&
+                !_attributeExistsInType(nodeTpl.getTypeDefinition()) &&
+                !nodeTpl.getProperties().keySet().contains(getAttributeName())) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE150", String.format(
+                    "KeyError: Attribute \"%s\" was not found in node template \"%s\"",
+                    getAttributeName(), nodeTpl.getName())));
+        }
+        return nodeTpl;
+    }
 
-	private boolean _attributeExistsInType(StatefulEntityType typeDefinition) {
-		LinkedHashMap<String, AttributeDef> attrsDef = typeDefinition.getAttributesDef();
-		return attrsDef.get(getAttributeName()) != null;
-	}
+    private boolean _attributeExistsInType(StatefulEntityType typeDefinition) {
+        LinkedHashMap<String, AttributeDef> attrsDef = typeDefinition.getAttributesDef();
+        return attrsDef.get(getAttributeName()) != null;
+    }
 
-	private NodeTemplate _findHostContainingAttribute(String nodeTemplateName) {
-		NodeTemplate nodeTemplate = _findNodeTemplate(nodeTemplateName);
-		if (nodeTemplate != null) {
-			LinkedHashMap<String, Object> hostedOnRel =
-					(LinkedHashMap<String, Object>) EntityType.TOSCA_DEF.get(HOSTED_ON);
-			for (RequirementAssignment r : nodeTemplate.getRequirements().getAll()) {
-				String targetName = r.getNodeTemplateName();
-				NodeTemplate targetNode = _findNodeTemplate(targetName);
-				NodeType targetType = (NodeType) targetNode.getTypeDefinition();
-				for (CapabilityTypeDef capability : targetType.getCapabilitiesObjects()) {
+    private NodeTemplate _findHostContainingAttribute(String nodeTemplateName) {
+        NodeTemplate nodeTemplate = _findNodeTemplate(nodeTemplateName);
+        if (nodeTemplate != null) {
+            LinkedHashMap<String, Object> hostedOnRel =
+                    (LinkedHashMap<String, Object>) EntityType.TOSCA_DEF.get(HOSTED_ON);
+            for (RequirementAssignment r : nodeTemplate.getRequirements().getAll()) {
+                String targetName = r.getNodeTemplateName();
+                NodeTemplate targetNode = _findNodeTemplate(targetName);
+                NodeType targetType = (NodeType) targetNode.getTypeDefinition();
+                for (CapabilityTypeDef capability : targetType.getCapabilitiesObjects()) {
 //							if(((ArrayList<String>)hostedOnRel.get("valid_target_types")).contains(capability.getType())) {
-					if (capability.inheritsFrom((ArrayList<String>) hostedOnRel.get("valid_target_types"))) {
-						if (_attributeExistsInType(targetType)) {
-							return targetNode;
-						}
-						return _findHostContainingAttribute(targetName);
-					}
-				}
-			}
-		}
-		return null;
-	}
+                    if (capability.inheritsFrom((ArrayList<String>) hostedOnRel.get("valid_target_types"))) {
+                        if (_attributeExistsInType(targetType)) {
+                            return targetNode;
+                        }
+                        return _findHostContainingAttribute(targetName);
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
 
-	private NodeTemplate _findNodeTemplate(String nodeTemplateName) {
-		if (nodeTemplateName.equals(HOST)) {
-			// Currently this is the only way to tell whether the function
-			// is used within the outputs section of the TOSCA template.
-			if (context instanceof ArrayList) {
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE151",
-						"ValueError: \"get_attribute: [ HOST, ... ]\" is not allowed in \"outputs\" section of the TOSCA template"));
-				return null;
-			}
-			NodeTemplate nodeTpl = _findHostContainingAttribute(SELF);
-			if (nodeTpl == null) {
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE152", String.format(
-						"ValueError: \"get_attribute: [ HOST, ... ]\" was used in " +
-								"node template \"%s\" but \"%s\" was not found in " +
-								"the relationship chain", ((NodeTemplate) context).getName(), HOSTED_ON)));
-				return null;
-			}
-			return nodeTpl;
-		}
-		if (nodeTemplateName.equals(TARGET)) {
-			if (!(((EntityTemplate) context).getTypeDefinition() instanceof RelationshipType)) {
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE153",
-						"KeyError: \"TARGET\" keyword can only be used in context " +
-								" to \"Relationships\" target node"));
-				return null;
-			}
-			return ((RelationshipTemplate) context).getTarget();
-		}
-		if (nodeTemplateName.equals(SOURCE)) {
-			if (!(((EntityTemplate) context).getTypeDefinition() instanceof RelationshipType)) {
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE154",
-						"KeyError: \"SOURCE\" keyword can only be used in context " +
-								" to \"Relationships\" source node"));
-				return null;
-			}
-			return ((RelationshipTemplate) context).getTarget();
-		}
-		String name;
-		if (nodeTemplateName.equals(SELF) && !(context instanceof ArrayList)) {
-			name = ((NodeTemplate) context).getName();
-		} else {
-			name = nodeTemplateName;
-		}
-		for (NodeTemplate nt : toscaTpl.getNodeTemplates()) {
-			if (nt.getName().equals(name)) {
-				return nt;
-			}
-		}
-		ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE155", String.format(
-				"KeyError: Node template \"%s\" was not found", nodeTemplateName)));
-		return null;
-	}
+    private NodeTemplate _findNodeTemplate(String nodeTemplateName) {
+        if (nodeTemplateName.equals(HOST)) {
+            // Currently this is the only way to tell whether the function
+            // is used within the outputs section of the TOSCA template.
+            if (context instanceof ArrayList) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE151",
+                        "ValueError: \"get_attribute: [ HOST, ... ]\" is not allowed in \"outputs\" section of the TOSCA template"));
+                return null;
+            }
+            NodeTemplate nodeTpl = _findHostContainingAttribute(SELF);
+            if (nodeTpl == null) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE152", String.format(
+                        "ValueError: \"get_attribute: [ HOST, ... ]\" was used in " +
+                                "node template \"%s\" but \"%s\" was not found in " +
+                                "the relationship chain", ((NodeTemplate) context).getName(), HOSTED_ON)));
+                return null;
+            }
+            return nodeTpl;
+        }
+        if (nodeTemplateName.equals(TARGET)) {
+            if (!(((EntityTemplate) context).getTypeDefinition() instanceof RelationshipType)) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE153",
+                        "KeyError: \"TARGET\" keyword can only be used in context " +
+                                " to \"Relationships\" target node"));
+                return null;
+            }
+            return ((RelationshipTemplate) context).getTarget();
+        }
+        if (nodeTemplateName.equals(SOURCE)) {
+            if (!(((EntityTemplate) context).getTypeDefinition() instanceof RelationshipType)) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE154",
+                        "KeyError: \"SOURCE\" keyword can only be used in context " +
+                                " to \"Relationships\" source node"));
+                return null;
+            }
+            return ((RelationshipTemplate) context).getTarget();
+        }
+        String name;
+        if (nodeTemplateName.equals(SELF) && !(context instanceof ArrayList)) {
+            name = ((NodeTemplate) context).getName();
+        } else {
+            name = nodeTemplateName;
+        }
+        for (NodeTemplate nt : toscaTpl.getNodeTemplates()) {
+            if (nt.getName().equals(name)) {
+                return nt;
+            }
+        }
+        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE155", String.format(
+                "KeyError: Node template \"%s\" was not found", nodeTemplateName)));
+        return null;
+    }
 
-	public AttributeDef _findReqOrCapAttribute(String reqOrCap, String attrName) {
+    public AttributeDef _findReqOrCapAttribute(String reqOrCap, String attrName) {
 
-		NodeTemplate nodeTpl = _findNodeTemplate((String) args.get(0));
-		// Find attribute in node template's requirements
-		for (RequirementAssignment r : nodeTpl.getRequirements().getAll()) {
-			String nodeName = r.getNodeTemplateName();
-			if (r.getName().equals(reqOrCap)) {
-				NodeTemplate nodeTemplate = _findNodeTemplate(nodeName);
-				return _getCapabilityAttribute(nodeTemplate, r.getName(), attrName);
-			}
-		}
-		// If requirement was not found, look in node template's capabilities
-		return _getCapabilityAttribute(nodeTpl, reqOrCap, attrName);
-	}
+        NodeTemplate nodeTpl = _findNodeTemplate((String) args.get(0));
+        // Find attribute in node template's requirements
+        for (RequirementAssignment r : nodeTpl.getRequirements().getAll()) {
+            String nodeName = r.getNodeTemplateName();
+            if (r.getName().equals(reqOrCap)) {
+                NodeTemplate nodeTemplate = _findNodeTemplate(nodeName);
+                return _getCapabilityAttribute(nodeTemplate, r.getName(), attrName);
+            }
+        }
+        // If requirement was not found, look in node template's capabilities
+        return _getCapabilityAttribute(nodeTpl, reqOrCap, attrName);
+    }
 
-	private AttributeDef _getCapabilityAttribute(NodeTemplate nodeTemplate,
-												 String capabilityName,
-												 String attrName) {
-		// Gets a node template capability attribute
-		CapabilityAssignment cap = nodeTemplate.getCapabilities().getCapabilityByName(capabilityName);
+    private AttributeDef _getCapabilityAttribute(NodeTemplate nodeTemplate,
+                                                 String capabilityName,
+                                                 String attrName) {
+        // Gets a node template capability attribute
+        CapabilityAssignment cap = nodeTemplate.getCapabilities().getCapabilityByName(capabilityName);
 
-		if (cap != null) {
-			AttributeDef attribute = null;
-			LinkedHashMap<String, AttributeDef> attrs =
-					cap.getDefinition().getAttributesDef();
-			if (attrs != null && attrs.keySet().contains(attrName)) {
-				attribute = attrs.get(attrName);
-			}
-			if (attribute == null) {
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE156", String.format(
-						"KeyError: Attribute \"%s\" was not found in capability \"%s\" of node template \"%s\" referenced from node template \"%s\"",
-						attrName, capabilityName, nodeTemplate.getName(), ((NodeTemplate) context).getName())));
-			}
-			return attribute;
-		}
-		String msg = String.format(
-				"Requirement/CapabilityAssignment \"%s\" referenced from node template \"%s\" was not found in node template \"%s\"",
-				capabilityName, ((NodeTemplate) context).getName(), nodeTemplate.getName());
-		ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE157", "KeyError: " + msg));
-		return null;
-	}
+        if (cap != null) {
+            AttributeDef attribute = null;
+            LinkedHashMap<String, AttributeDef> attrs =
+                    cap.getDefinition().getAttributesDef();
+            if (attrs != null && attrs.keySet().contains(attrName)) {
+                attribute = attrs.get(attrName);
+            }
+            if (attribute == null) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE156", String.format(
+                        "KeyError: Attribute \"%s\" was not found in capability \"%s\" of node template \"%s\" referenced from node template \"%s\"",
+                        attrName, capabilityName, nodeTemplate.getName(), ((NodeTemplate) context).getName())));
+            }
+            return attribute;
+        }
+        String msg = String.format(
+                "Requirement/CapabilityAssignment \"%s\" referenced from node template \"%s\" was not found in node template \"%s\"",
+                capabilityName, ((NodeTemplate) context).getName(), nodeTemplate.getName());
+        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE157", "KeyError: " + msg));
+        return null;
+    }
 
-	String getNodeTemplateName() {
-		return (String) args.get(0);
-	}
+    String getNodeTemplateName() {
+        return (String) args.get(0);
+    }
 
-	String getAttributeName() {
-		return (String) args.get(1);
-	}
+    String getAttributeName() {
+        return (String) args.get(1);
+    }
 
 }
 

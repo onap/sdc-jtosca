@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,66 +24,66 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 public class DataType extends StatefulEntityType {
-	
-	LinkedHashMap<String,Object> customDef; 
-	
-	public DataType(String _dataTypeName,LinkedHashMap<String,Object> _customDef) {
-		super(_dataTypeName,DATATYPE_NETWORK_PREFIX,_customDef);
-		
-		customDef = _customDef;
-	}
-	
-	public DataType getParentType() {
+
+    LinkedHashMap<String, Object> customDef;
+
+    public DataType(String _dataTypeName, LinkedHashMap<String, Object> _customDef) {
+        super(_dataTypeName, DATATYPE_NETWORK_PREFIX, _customDef);
+
+        customDef = _customDef;
+    }
+
+    public DataType getParentType() {
         // Return a datatype this datatype is derived from
-		if(defs != null) {
-			String ptype = derivedFrom(defs);
-	        if(ptype != null) {
-	            return new DataType(ptype,customDef);
-	        }
-		}
+        if (defs != null) {
+            String ptype = derivedFrom(defs);
+            if (ptype != null) {
+                return new DataType(ptype, customDef);
+            }
+        }
         return null;
-	}
+    }
 
-	public String getValueType() {
+    public String getValueType() {
         // Return 'type' section in the datatype schema
-		if(defs != null) {
-			return (String)entityValue(defs,"type");
-		}
-		return null;
-	}
+        if (defs != null) {
+            return (String) entityValue(defs, "type");
+        }
+        return null;
+    }
 
-	public ArrayList<PropertyDef> getAllPropertiesObjects() {
+    public ArrayList<PropertyDef> getAllPropertiesObjects() {
         //Return all properties objects defined in type and parent type
-		ArrayList<PropertyDef> propsDef = getPropertiesDefObjects();
+        ArrayList<PropertyDef> propsDef = getPropertiesDefObjects();
         DataType ptype = getParentType();
-        while(ptype != null) {
+        while (ptype != null) {
             propsDef.addAll(ptype.getPropertiesDefObjects());
             ptype = ptype.getParentType();
         }
         return propsDef;
-	}
-	
-	public LinkedHashMap<String,PropertyDef> getAllProperties() {
-        // Return a dictionary of all property definition name-object pairs
-		LinkedHashMap<String,PropertyDef> pno = new LinkedHashMap<>();
-		for(PropertyDef pd: getAllPropertiesObjects()) {
-			pno.put(pd.getName(),pd);
-		}
-        return pno;
-	}
+    }
 
-	public Object getAllPropertyValue(String name) {
+    public LinkedHashMap<String, PropertyDef> getAllProperties() {
+        // Return a dictionary of all property definition name-object pairs
+        LinkedHashMap<String, PropertyDef> pno = new LinkedHashMap<>();
+        for (PropertyDef pd : getAllPropertiesObjects()) {
+            pno.put(pd.getName(), pd);
+        }
+        return pno;
+    }
+
+    public Object getAllPropertyValue(String name) {
         // Return the value of a given property name
-		LinkedHashMap<String,PropertyDef> propsDef = getAllProperties();
-        if(propsDef != null && propsDef.get(name) != null) {
+        LinkedHashMap<String, PropertyDef> propsDef = getAllProperties();
+        if (propsDef != null && propsDef.get(name) != null) {
             return propsDef.get(name).getPDValue();
         }
         return null;
-	}
-	
-	public LinkedHashMap<String,Object> getDefs() {
-		return defs;
-	}
+    }
+
+    public LinkedHashMap<String, Object> getDefs() {
+        return defs;
+    }
 
 }
 

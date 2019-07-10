@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,121 +28,119 @@ import java.util.LinkedHashMap;
 
 public class Triggers extends EntityTemplate {
 
-	private static final String DESCRIPTION = "description";
-	private static final String EVENT = "event_type";
-	private static final String SCHEDULE = "schedule";
-	private static final String TARGET_FILTER = "target_filter";
-	private static final String CONDITION = "condition";
-	private static final String ACTION = "action";
+    private static final String DESCRIPTION = "description";
+    private static final String EVENT = "event_type";
+    private static final String SCHEDULE = "schedule";
+    private static final String TARGET_FILTER = "target_filter";
+    private static final String CONDITION = "condition";
+    private static final String ACTION = "action";
 
-	private static final String SECTIONS[] = {
-		DESCRIPTION, EVENT, SCHEDULE, TARGET_FILTER, CONDITION, ACTION
-	};
+    private static final String[] SECTIONS = {
+            DESCRIPTION, EVENT, SCHEDULE, TARGET_FILTER, CONDITION, ACTION
+    };
 
-	private static final String METER_NAME = "meter_name";
-	private static final String CONSTRAINT = "constraint";
-	private static final String PERIOD = "period";
-	private static final String EVALUATIONS = "evaluations";
-	private static final String METHOD = "method";
-	private static final String THRESHOLD = "threshold";
-	private static final String COMPARISON_OPERATOR = "comparison_operator";
-	
-	private static final String CONDITION_KEYNAMES[] = {
-		METER_NAME,	CONSTRAINT, PERIOD, EVALUATIONS, METHOD, THRESHOLD, COMPARISON_OPERATOR
-	};
+    private static final String METER_NAME = "meter_name";
+    private static final String CONSTRAINT = "constraint";
+    private static final String PERIOD = "period";
+    private static final String EVALUATIONS = "evaluations";
+    private static final String METHOD = "method";
+    private static final String THRESHOLD = "threshold";
+    private static final String COMPARISON_OPERATOR = "comparison_operator";
 
-	private String name;
-	private LinkedHashMap<String,Object> triggerTpl;
+    private static final String[] CONDITION_KEYNAMES = {
+            METER_NAME, CONSTRAINT, PERIOD, EVALUATIONS, METHOD, THRESHOLD, COMPARISON_OPERATOR
+    };
 
-	public Triggers(String _name,LinkedHashMap<String,Object> _triggerTpl) {
-		super(); // dummy. don't want super
-	    name = _name;
-	    triggerTpl = _triggerTpl;
-	    _validateKeys();
-	    _validateCondition();
-	    _validateInput();
-	}
+    private String name;
+    private LinkedHashMap<String, Object> triggerTpl;
 
-	public String getDescription() {
-		return (String)triggerTpl.get("description");
-	}
+    public Triggers(String name, LinkedHashMap<String, Object> triggerTpl) {
+        super(); // dummy. don't want super
+        this.name = name;
+        this.triggerTpl = triggerTpl;
+        validateKeys();
+        validateCondition();
+        validateInput();
+    }
 
-	public String getEvent() {
-		return (String)triggerTpl.get("event_type");
-	}
- 
-	public LinkedHashMap<String,Object> getSchedule() {
-		return (LinkedHashMap<String,Object>)triggerTpl.get("schedule");
-	}
- 
-	public LinkedHashMap<String,Object> getTargetFilter() {
-		return (LinkedHashMap<String,Object>)triggerTpl.get("target_filter");
-	}
- 
-	public LinkedHashMap<String,Object> getCondition() {
-		return (LinkedHashMap<String,Object>)triggerTpl.get("condition");
-	}
- 
-	public LinkedHashMap<String,Object> getAction() {
-		return (LinkedHashMap<String,Object>)triggerTpl.get("action");
-	}
- 
-	private void _validateKeys() {	
-		for(String key: triggerTpl.keySet()) {
-			boolean bFound = false;
-			for(int i=0; i<SECTIONS.length; i++) {
-				if(key.equals(SECTIONS[i])) {
-					bFound = true;
-					break;
-				}
-			}
-			if(!bFound) {
-	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE249", String.format(
-	                    "UnknownFieldError: Triggers \"%s\" contains unknown field \"%s\"",
-	                    name,key))); 
-			}
-		}
-	}
+    public String getDescription() {
+        return (String) triggerTpl.get("description");
+    }
 
-	private void _validateCondition() {	
-		for(String key: getCondition().keySet()) {
-			boolean bFound = false;
-			for(int i=0; i<CONDITION_KEYNAMES.length; i++) {
-				if(key.equals(CONDITION_KEYNAMES[i])) {
-					bFound = true;
-					break;
-				}
-			}
-			if(!bFound) {
-	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE250", String.format(
-	                    "UnknownFieldError: Triggers \"%s\" contains unknown field \"%s\"",
-	                    name,key))); 
-			}
-		}
-	}
-	
-	private void _validateInput() {
-		for(String key: getCondition().keySet()) {
-			Object value = getCondition().get(key);
-			if(key.equals(PERIOD) || key.equals(EVALUATIONS)) {
-				ValidateUtils.validateInteger(value);
-			}
-			else if(key.equals(THRESHOLD)) {
-				ValidateUtils.validateNumeric(value);
-			}
-			else if(key.equals(METER_NAME) || key.equals(METHOD)) {
-				ValidateUtils.validateString(value);
-			}
-		}
-	}
+    public String getEvent() {
+        return (String) triggerTpl.get("event_type");
+    }
 
-	@Override
-	public String toString() {
-		return "Triggers{" +
-				"name='" + name + '\'' +
-				", triggerTpl=" + triggerTpl +
-				'}';
-	}
+    public LinkedHashMap<String, Object> getSchedule() {
+        return (LinkedHashMap<String, Object>) triggerTpl.get("schedule");
+    }
+
+    public LinkedHashMap<String, Object> getTargetFilter() {
+        return (LinkedHashMap<String, Object>) triggerTpl.get("target_filter");
+    }
+
+    public LinkedHashMap<String, Object> getCondition() {
+        return (LinkedHashMap<String, Object>) triggerTpl.get("condition");
+    }
+
+    public LinkedHashMap<String, Object> getAction() {
+        return (LinkedHashMap<String, Object>) triggerTpl.get("action");
+    }
+
+    private void validateKeys() {
+        for (String key : triggerTpl.keySet()) {
+            boolean bFound = false;
+            for (int i = 0; i < SECTIONS.length; i++) {
+                if (key.equals(SECTIONS[i])) {
+                    bFound = true;
+                    break;
+                }
+            }
+            if (!bFound) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE249", String.format(
+                        "UnknownFieldError: Triggers \"%s\" contains unknown field \"%s\"",
+                        name, key)));
+            }
+        }
+    }
+
+    private void validateCondition() {
+        for (String key : getCondition().keySet()) {
+            boolean bFound = false;
+            for (int i = 0; i < CONDITION_KEYNAMES.length; i++) {
+                if (key.equals(CONDITION_KEYNAMES[i])) {
+                    bFound = true;
+                    break;
+                }
+            }
+            if (!bFound) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE250", String.format(
+                        "UnknownFieldError: Triggers \"%s\" contains unknown field \"%s\"",
+                        name, key)));
+            }
+        }
+    }
+
+    private void validateInput() {
+        for (String key : getCondition().keySet()) {
+            Object value = getCondition().get(key);
+            if (key.equals(PERIOD) || key.equals(EVALUATIONS)) {
+                ValidateUtils.validateInteger(value);
+            } else if (key.equals(THRESHOLD)) {
+                ValidateUtils.validateNumeric(value);
+            } else if (key.equals(METER_NAME) || key.equals(METHOD)) {
+                ValidateUtils.validateString(value);
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Triggers{"
+                + "name='" + name + '\''
+                + ", triggerTpl=" + triggerTpl
+                + '}';
+    }
 }
 
 /*python

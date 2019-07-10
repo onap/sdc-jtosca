@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,16 +38,16 @@ public class PortSpec {
     private static final String SOURCE_RANGE = "source_range";
     private static final String TARGET = "target";
     private static final String TARGET_RANGE = "target_range";
-    
+
     private static final String PROPERTY_NAMES[] = {
-        PROTOCOL, SOURCE, SOURCE_RANGE,
-        TARGET, TARGET_RANGE
+            PROTOCOL, SOURCE, SOURCE_RANGE,
+            TARGET, TARGET_RANGE
     };
-	
+
     // todo(TBD) May want to make this a subclass of DataType
     // and change init method to set PortSpec's properties
     public PortSpec() {
-    	
+
     }
 
     // The following additional requirements MUST be tested:
@@ -59,47 +59,44 @@ public class PortSpec {
     // 3) A valid PortSpec MUST have a value for the target property that is
     //    within the numeric range specified by the property target_range
     //    when target_range is specified.
-	public static void  validateAdditionalReq(Object _properties,
-											  String propName,
-											  LinkedHashMap<String,Object> custom_def) {
-		
+    public static void validateAdditionalReq(Object _properties,
+                                             String propName,
+                                             LinkedHashMap<String, Object> custom_def) {
+
         try {
-        	LinkedHashMap<String,Object> properties = (LinkedHashMap<String,Object>)_properties;
+            LinkedHashMap<String, Object> properties = (LinkedHashMap<String, Object>) _properties;
             Object source = properties.get(PortSpec.SOURCE);
             Object sourceRange = properties.get(PortSpec.SOURCE_RANGE);
             Object target = properties.get(PortSpec.TARGET);
             Object targetRange = properties.get(PortSpec.TARGET_RANGE);
 
             // verify one of the specified values is set
-            if(source == null && sourceRange == null && 
-                    target == null && targetRange == null) { 
+            if (source == null && sourceRange == null &&
+                    target == null && targetRange == null) {
                 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE129", String.format(
-                    "InvalidTypeAdditionalRequirementsError: Additional requirements for type \"%s\" not met",
-                    TYPE_URI))); 
+                        "InvalidTypeAdditionalRequirementsError: Additional requirements for type \"%s\" not met",
+                        TYPE_URI)));
             }
             // Validate source value is in specified range
-            if(source != null &&  sourceRange != null) {
-                ValidateUtils.validateValueInRange(source,sourceRange,SOURCE);
-            }
-            else {
+            if (source != null && sourceRange != null) {
+                ValidateUtils.validateValueInRange(source, sourceRange, SOURCE);
+            } else {
                 DataEntity portdef = new DataEntity("PortDef", source, null, SOURCE);
                 portdef.validate();
             }
             // Validate target value is in specified range
-            if(target != null &&  targetRange != null) {
-                ValidateUtils.validateValueInRange(target,targetRange,SOURCE);
-            }
-            else {
+            if (target != null && targetRange != null) {
+                ValidateUtils.validateValueInRange(target, targetRange, SOURCE);
+            } else {
                 DataEntity portdef = new DataEntity("PortDef", source, null, TARGET);
                 portdef.validate();
             }
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE130", String.format(
-                "ValueError: \"%s\" do not meet requirements for type \"%s\"", 
-                _properties.toString(),SHORTNAME))); 
+                    "ValueError: \"%s\" do not meet requirements for type \"%s\"",
+                    _properties.toString(), SHORTNAME)));
         }
- 	}
+    }
 
 }
 

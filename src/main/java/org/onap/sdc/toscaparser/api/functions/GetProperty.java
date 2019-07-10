@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,14 +20,14 @@
 
 package org.onap.sdc.toscaparser.api.functions;
 
-import org.onap.sdc.toscaparser.api.*;
-import org.onap.sdc.toscaparser.api.elements.CapabilityTypeDef;
+import org.onap.sdc.toscaparser.api.CapabilityAssignment;
+import org.onap.sdc.toscaparser.api.NodeTemplate;
+import org.onap.sdc.toscaparser.api.Property;
+import org.onap.sdc.toscaparser.api.RelationshipTemplate;
+import org.onap.sdc.toscaparser.api.RequirementAssignment;
+import org.onap.sdc.toscaparser.api.TopologyTemplate;
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-
-import org.onap.sdc.toscaparser.api.*;
+import org.onap.sdc.toscaparser.api.elements.CapabilityTypeDef;
 import org.onap.sdc.toscaparser.api.elements.EntityType;
 import org.onap.sdc.toscaparser.api.elements.NodeType;
 import org.onap.sdc.toscaparser.api.elements.PropertyDef;
@@ -35,340 +35,331 @@ import org.onap.sdc.toscaparser.api.elements.RelationshipType;
 import org.onap.sdc.toscaparser.api.elements.StatefulEntityType;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
 public class GetProperty extends Function {
-	// Get a property value of an entity defined in the same service template
+    // Get a property value of an entity defined in the same service template
 
-	// Arguments:
+    // Arguments:
 
-	// * Node template name | SELF | HOST | SOURCE | TARGET.
-	// * Requirement or capability name (optional).
-	// * Property name.
+    // * Node template name | SELF | HOST | SOURCE | TARGET.
+    // * Requirement or capability name (optional).
+    // * Property name.
 
-	// If requirement or capability name is specified, the behavior is as follows:
-	// The req or cap name is first looked up in the specified node template's
-	// requirements.
-	// If found, it would search for a matching capability
-	// of an other node template and get its property as specified in function
-	// arguments.
-	// Otherwise, the req or cap name would be looked up in the specified
-	// node template's capabilities and if found, it would return  the property of
-	// the capability as specified in function arguments.
+    // If requirement or capability name is specified, the behavior is as follows:
+    // The req or cap name is first looked up in the specified node template's
+    // requirements.
+    // If found, it would search for a matching capability
+    // of an other node template and get its property as specified in function
+    // arguments.
+    // Otherwise, the req or cap name would be looked up in the specified
+    // node template's capabilities and if found, it would return  the property of
+    // the capability as specified in function arguments.
 
-	// Examples:
+    // Examples:
 
-	// * { get_property: [ mysql_server, port ] }
-	// * { get_property: [ SELF, db_port ] }
-	// * { get_property: [ SELF, database_endpoint, port ] }
-	// * { get_property: [ SELF, database_endpoint, port, 1 ] }
+    // * { get_property: [ mysql_server, port ] }
+    // * { get_property: [ SELF, db_port ] }
+    // * { get_property: [ SELF, database_endpoint, port ] }
+    // * { get_property: [ SELF, database_endpoint, port, 1 ] }
 
-	
-	public GetProperty(TopologyTemplate ttpl, Object context, String name, ArrayList<Object> args) {
-		super(ttpl,context,name,args);
-	}
-	
-	@Override
-	void validate() { 
-		if(args.size() < 2) {
-	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE167", 
-		        "ValueError: Illegal arguments for function \"get_property\". Expected arguments: \"node-template-name\", \"req-or-cap\" (optional), \"property name.\"")); 
-		        return;
-		}
-	    if(args.size() == 2) {
-	        Property foundProp = _findProperty((String)args.get(1));
-	        if(foundProp == null) {
-	            return;
-	        }
-	        Object prop = foundProp.getValue();
-	        if(prop instanceof Function) {
-	            getFunction(toscaTpl,context, prop, toscaTpl.getResolveGetInput());
-	        }
-	    }
-	    else if(args.size() >= 3) {
-	        // do not use _find_property to avoid raise KeyError
-	        // if the prop is not found
-	        // First check if there is property with this name
-	        NodeTemplate nodeTpl = _findNodeTemplate((String)args.get(0));
-	        LinkedHashMap<String,Property> props;
-	        if(nodeTpl != null) {
-	        	props = nodeTpl.getProperties();
-	        }
-	        else {
-	        	props = new LinkedHashMap<>();
-	        }
-	        int index = 2;
-	        Object propertyValue;
-	        if(props.get(args.get(1)) != null) {
-	        	propertyValue = ((Property)props.get(args.get(1))).getValue();
-	        }
-	        else {
-	        	index = 3;
-	            // then check the req or caps
-	            propertyValue = _findReqOrCapProperty((String)args.get(1),(String)args.get(2));
-	        }
-	        	
-	        if(args.size() > index) {
-	        	for(Object elem: args.subList(index,args.size()-1)) {
-	        		if(propertyValue instanceof ArrayList) {
-	                   int intElem = (int)elem;
-	                    propertyValue = _getIndexValue(propertyValue,intElem);
-	        		}
-	        		else {
-	                    propertyValue = _getAttributeValue(propertyValue,(String)elem);
-	        		}
-	        	}
-	        }
-	    }
-	}
-	
-	@SuppressWarnings("unchecked")
-	private Object _findReqOrCapProperty(String reqOrCap,String propertyName) {
-        NodeTemplate nodeTpl = _findNodeTemplate((String)args.get(0));
-        if(nodeTpl == null) {
-        	return null;
+
+    public GetProperty(TopologyTemplate ttpl, Object context, String name, ArrayList<Object> args) {
+        super(ttpl, context, name, args);
+    }
+
+    @Override
+    void validate() {
+        if (args.size() < 2) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE167",
+                    "ValueError: Illegal arguments for function \"get_property\". Expected arguments: \"node-template-name\", \"req-or-cap\" (optional), \"property name.\""));
+            return;
         }
-	    // look for property in node template's requirements
-	    for(RequirementAssignment req: nodeTpl.getRequirements().getAll()) {
-			String nodeName = req.getNodeTemplateName();
-			if(req.getName().equals(reqOrCap)) {
-				NodeTemplate nodeTemplate = _findNodeTemplate(nodeName);
-				return _getCapabilityProperty(nodeTemplate,req.getName(),propertyName,true);
-			}
-	    }	    	
-		// If requirement was not found, look in node template's capabilities
-		return _getCapabilityProperty(nodeTpl,reqOrCap,propertyName,true);
-	}
-	
-	private Object _getCapabilityProperty(NodeTemplate nodeTemplate,
-											String capabilityName,
-											String propertyName,
-											boolean throwErrors) {
-		
-	    // Gets a node template capability property
-		Object property = null;
-		CapabilityAssignment cap = nodeTemplate.getCapabilities().getCapabilityByName(capabilityName);
-		if(cap != null) {
-			LinkedHashMap<String,Property> props = cap.getProperties();
-	        if(props != null && props.get(propertyName) != null) {
-	            property = ((Property)props.get(propertyName)).getValue();
-	        }
-	        if(property == null && throwErrors) {
-	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE168", String.format(
-	                "KeyError: Property \"%s\" was not found in capability \"%s\" of node template \"%s\" referenced from node template \"%s\"",
-	                propertyName,capabilityName,nodeTemplate.getName(),((NodeTemplate)context).getName()))); 
-	        }
-    		return property;
-		}
-		if(throwErrors) {
-		    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE169", String.format(
-		    	"KeyError: Requirement/CapabilityAssignment \"%s\" referenced from node template \"%s\" was not found in node template \"%s\"",
-		    	capabilityName,((NodeTemplate)context).getName(),nodeTemplate.getName()))); 
-		}
-		
-		return null;
-	}
-	
-	private Property _findProperty(String propertyName) {
-        NodeTemplate nodeTpl = _findNodeTemplate((String)args.get(0));
-        if(nodeTpl == null) {
-        	return null;
+        if (args.size() == 2) {
+            Property foundProp = _findProperty((String) args.get(1));
+            if (foundProp == null) {
+                return;
+            }
+            Object prop = foundProp.getValue();
+            if (prop instanceof Function) {
+                getFunction(toscaTpl, context, prop, toscaTpl.getResolveGetInput());
+            }
+        } else if (args.size() >= 3) {
+            // do not use _find_property to avoid raise KeyError
+            // if the prop is not found
+            // First check if there is property with this name
+            NodeTemplate nodeTpl = _findNodeTemplate((String) args.get(0));
+            LinkedHashMap<String, Property> props;
+            if (nodeTpl != null) {
+                props = nodeTpl.getProperties();
+            } else {
+                props = new LinkedHashMap<>();
+            }
+            int index = 2;
+            Object propertyValue;
+            if (props.get(args.get(1)) != null) {
+                propertyValue = ((Property) props.get(args.get(1))).getValue();
+            } else {
+                index = 3;
+                // then check the req or caps
+                propertyValue = _findReqOrCapProperty((String) args.get(1), (String) args.get(2));
+            }
+
+            if (args.size() > index) {
+                for (Object elem : args.subList(index, args.size() - 1)) {
+                    if (propertyValue instanceof ArrayList) {
+                        int intElem = (int) elem;
+                        propertyValue = _getIndexValue(propertyValue, intElem);
+                    } else {
+                        propertyValue = _getAttributeValue(propertyValue, (String) elem);
+                    }
+                }
+            }
         }
-        LinkedHashMap<String,Property> props = nodeTpl.getProperties();
-		Property found = props.get(propertyName);
-		if(found == null) {
-	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE170", String.format(
-		        "KeyError: Property \"%s\" was not found in node template \"%s\"",
-		        propertyName,nodeTpl.getName()))); 
-		}
-		return found;
-	}
-	
-	private NodeTemplate _findNodeTemplate(String nodeTemplateName) {
-		if(nodeTemplateName.equals(SELF)) {
-			return (NodeTemplate)context;
-		}
-	    // enable the HOST value in the function
-	    if(nodeTemplateName.equals(HOST)) {
-	        NodeTemplate node = _findHostContainingProperty(null);
-	        if(node == null) {
-	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE171", String.format(
-		            "KeyError: Property \"%s\" was not found in capability \"%s\" of node template \"%s\" referenced from node template \"%s\"",
-		            (String)args.get(2),(String)args.get(1),((NodeTemplate)context).getName()))); 
-	            return null;
-	        }
-	        return node;
-	    }
-	    if(nodeTemplateName.equals(TARGET)) {
-	    	if(!(((RelationshipTemplate)context).getTypeDefinition() instanceof RelationshipType)) {
-	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE172", 
-		            "KeyError: \"TARGET\" keyword can only be used in context to \"Relationships\" target node")); 
-	            return null;
-	    	}
-	    	return ((RelationshipTemplate)context).getTarget();
-	    }
-	    if(nodeTemplateName.equals(SOURCE)) {
-	    	if(!(((RelationshipTemplate)context).getTypeDefinition() instanceof RelationshipType)) {
-	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE173", 
-		            "KeyError: \"SOURCE\" keyword can only be used in context to \"Relationships\" target node")); 
-	            return null;
-	    	}
-	    	return ((RelationshipTemplate)context).getSource();
-	    }		
-	    if(toscaTpl.getNodeTemplates() == null) {
-	        return null;
-	    }
-	    for(NodeTemplate nodeTemplate: toscaTpl.getNodeTemplates()) {
-	        if(nodeTemplate.getName().equals(nodeTemplateName)) {
-	            return nodeTemplate;
-	        }
-	    }
-	    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE174", String.format(
-	        "KeyError: Node template \"%s\" was not found. Referenced from Node Template \"%s\"", 
-	        nodeTemplateName,((NodeTemplate)context).getName()))); 
-	    
-	    return null;
-	}
+    }
 
-	@SuppressWarnings("rawtypes")
-	private Object _getIndexValue(Object value,int index) {
-		if(value instanceof ArrayList) {
-			if(index < ((ArrayList)value).size()) {
-				return ((ArrayList)value).get(index);
-			}
-			else {
-	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE175", String.format(
-		            "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must have an element with index %d",
-		            args.get(2),args.get(1),((NodeTemplate)context).getName(),index))); 
+    @SuppressWarnings("unchecked")
+    private Object _findReqOrCapProperty(String reqOrCap, String propertyName) {
+        NodeTemplate nodeTpl = _findNodeTemplate((String) args.get(0));
+        if (nodeTpl == null) {
+            return null;
+        }
+        // look for property in node template's requirements
+        for (RequirementAssignment req : nodeTpl.getRequirements().getAll()) {
+            String nodeName = req.getNodeTemplateName();
+            if (req.getName().equals(reqOrCap)) {
+                NodeTemplate nodeTemplate = _findNodeTemplate(nodeName);
+                return _getCapabilityProperty(nodeTemplate, req.getName(), propertyName, true);
+            }
+        }
+        // If requirement was not found, look in node template's capabilities
+        return _getCapabilityProperty(nodeTpl, reqOrCap, propertyName, true);
+    }
 
-			}
-		}
-		else {
+    private Object _getCapabilityProperty(NodeTemplate nodeTemplate,
+                                          String capabilityName,
+                                          String propertyName,
+                                          boolean throwErrors) {
+
+        // Gets a node template capability property
+        Object property = null;
+        CapabilityAssignment cap = nodeTemplate.getCapabilities().getCapabilityByName(capabilityName);
+        if (cap != null) {
+            LinkedHashMap<String, Property> props = cap.getProperties();
+            if (props != null && props.get(propertyName) != null) {
+                property = ((Property) props.get(propertyName)).getValue();
+            }
+            if (property == null && throwErrors) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE168", String.format(
+                        "KeyError: Property \"%s\" was not found in capability \"%s\" of node template \"%s\" referenced from node template \"%s\"",
+                        propertyName, capabilityName, nodeTemplate.getName(), ((NodeTemplate) context).getName())));
+            }
+            return property;
+        }
+        if (throwErrors) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE169", String.format(
+                    "KeyError: Requirement/CapabilityAssignment \"%s\" referenced from node template \"%s\" was not found in node template \"%s\"",
+                    capabilityName, ((NodeTemplate) context).getName(), nodeTemplate.getName())));
+        }
+
+        return null;
+    }
+
+    private Property _findProperty(String propertyName) {
+        NodeTemplate nodeTpl = _findNodeTemplate((String) args.get(0));
+        if (nodeTpl == null) {
+            return null;
+        }
+        LinkedHashMap<String, Property> props = nodeTpl.getProperties();
+        Property found = props.get(propertyName);
+        if (found == null) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE170", String.format(
+                    "KeyError: Property \"%s\" was not found in node template \"%s\"",
+                    propertyName, nodeTpl.getName())));
+        }
+        return found;
+    }
+
+    private NodeTemplate _findNodeTemplate(String nodeTemplateName) {
+        if (nodeTemplateName.equals(SELF)) {
+            return (NodeTemplate) context;
+        }
+        // enable the HOST value in the function
+        if (nodeTemplateName.equals(HOST)) {
+            NodeTemplate node = _findHostContainingProperty(null);
+            if (node == null) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE171", String.format(
+                        "KeyError: Property \"%s\" was not found in capability \"%s\" of node template \"%s\" referenced from node template \"%s\"",
+                        (String) args.get(2), (String) args.get(1), ((NodeTemplate) context).getName())));
+                return null;
+            }
+            return node;
+        }
+        if (nodeTemplateName.equals(TARGET)) {
+            if (!(((RelationshipTemplate) context).getTypeDefinition() instanceof RelationshipType)) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE172",
+                        "KeyError: \"TARGET\" keyword can only be used in context to \"Relationships\" target node"));
+                return null;
+            }
+            return ((RelationshipTemplate) context).getTarget();
+        }
+        if (nodeTemplateName.equals(SOURCE)) {
+            if (!(((RelationshipTemplate) context).getTypeDefinition() instanceof RelationshipType)) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE173",
+                        "KeyError: \"SOURCE\" keyword can only be used in context to \"Relationships\" target node"));
+                return null;
+            }
+            return ((RelationshipTemplate) context).getSource();
+        }
+        if (toscaTpl.getNodeTemplates() == null) {
+            return null;
+        }
+        for (NodeTemplate nodeTemplate : toscaTpl.getNodeTemplates()) {
+            if (nodeTemplate.getName().equals(nodeTemplateName)) {
+                return nodeTemplate;
+            }
+        }
+        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE174", String.format(
+                "KeyError: Node template \"%s\" was not found. Referenced from Node Template \"%s\"",
+                nodeTemplateName, ((NodeTemplate) context).getName())));
+
+        return null;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Object _getIndexValue(Object value, int index) {
+        if (value instanceof ArrayList) {
+            if (index < ((ArrayList) value).size()) {
+                return ((ArrayList) value).get(index);
+            } else {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE175", String.format(
+                        "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must have an element with index %d",
+                        args.get(2), args.get(1), ((NodeTemplate) context).getName(), index)));
+
+            }
+        } else {
             ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE176", String.format(
-		            "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must be a list",
-		            args.get(2),args.get(1),((NodeTemplate)context).getName()))); 
-		}
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Object _getAttributeValue(Object value,String attribute) {
-	    if(value instanceof LinkedHashMap) {
-	    	Object ov = ((LinkedHashMap<String,Object>)value).get(attribute);
-	    	if(ov != null) {
-	            return ov;
-	    	}
-	        else {
-	            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE177", String.format(
-	                "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must have an attribute named \"%s\"",
-		            args.get(2),args.get(1),((NodeTemplate)context).getName(),attribute))); 
-	        }
-	    }
-	    else {
-            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE178", String.format(
-	                "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must be a dict",
-		            args.get(2),args.get(1),((NodeTemplate)context).getName()))); 
-	    }
-	    return null;
-	}
-
-	// Add this functions similar to get_attribute case
-	private NodeTemplate _findHostContainingProperty(String nodeTemplateName) {
-		if(nodeTemplateName == null) {
-			nodeTemplateName = SELF;
-		}
-	    NodeTemplate nodeTemplate = _findNodeTemplate(nodeTemplateName);
-	    LinkedHashMap<String,Object> hostedOnRel = (LinkedHashMap<String,Object>)
-	    												EntityType.TOSCA_DEF.get(HOSTED_ON);
-	    for(RequirementAssignment requirement: nodeTemplate.getRequirements().getAll()) {
-			String targetName = requirement.getNodeTemplateName();
-			NodeTemplate targetNode = _findNodeTemplate(targetName);
-			NodeType targetType = (NodeType)targetNode.getTypeDefinition();
-			for(CapabilityTypeDef capDef: targetType.getCapabilitiesObjects()) {
-				if(capDef.inheritsFrom((ArrayList<String>)hostedOnRel.get("valid_target_types"))) {
-					if(_propertyExistsInType(targetType)) {
-						return targetNode;
-					}
-					// If requirement was not found, look in node
-					// template's capabilities
-					if(args.size() > 2 &&
-						_getCapabilityProperty(targetNode,(String)args.get(1),(String)args.get(2),false) != null) {
-						return targetNode;
-					}
-
-					return _findHostContainingProperty(targetName);
-				}
-			}
-
-	    }
-	    return null;
-	}
-	
-	private boolean _propertyExistsInType(StatefulEntityType typeDefinition) {
-        LinkedHashMap<String,PropertyDef> propsDef = typeDefinition.getPropertiesDef();
-        return propsDef.keySet().contains((String)args.get(1)); 
-	}
-
-	@Override
-	public Object result() {
-        Object propertyValue;
-		if(args.size() >= 3) {
-	        // First check if there is property with this name
-	        NodeTemplate nodeTpl = _findNodeTemplate((String)args.get(0));
-	        LinkedHashMap<String,Property> props;
-	        if(nodeTpl != null) {
-	        	props = nodeTpl.getProperties();
-	        }
-	        else {
-	        	props = new LinkedHashMap<>();
-	        }
-	        int index = 2;
-	        if(props.get(args.get(1)) != null) {
-	        	propertyValue = ((Property)props.get(args.get(1))).getValue();
-	        }
-	        else {
-	        	index = 3;
-	            // then check the req or caps
-	            propertyValue = _findReqOrCapProperty((String)args.get(1),(String)args.get(2));
-	        }
-	        	
-	        if(args.size() > index) {
-	        	for(Object elem: args.subList(index,args.size()-1)) {
-	        		if(propertyValue instanceof ArrayList) {
-	                   int intElem = (int)elem;
-	                    propertyValue = _getIndexValue(propertyValue,intElem);
-	        		}
-	        		else {
-	                    propertyValue = _getAttributeValue(propertyValue,(String)elem);
-	        		}
-	        	}
-	        }
-		}
-		else {
-			propertyValue = _findProperty((String)args.get(1)).getValue();
-		}
-        if(propertyValue instanceof Function) {
-            return ((Function)propertyValue).result();
+                    "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must be a list",
+                    args.get(2), args.get(1), ((NodeTemplate) context).getName())));
         }
-        return getFunction(toscaTpl,context,propertyValue, toscaTpl.getResolveGetInput());
-	}
+        return null;
+    }
 
-	public String getNodeTemplateName() {
-		return (String)args.get(0);
-	}
+    @SuppressWarnings("unchecked")
+    private Object _getAttributeValue(Object value, String attribute) {
+        if (value instanceof LinkedHashMap) {
+            Object ov = ((LinkedHashMap<String, Object>) value).get(attribute);
+            if (ov != null) {
+                return ov;
+            } else {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE177", String.format(
+                        "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must have an attribute named \"%s\"",
+                        args.get(2), args.get(1), ((NodeTemplate) context).getName(), attribute)));
+            }
+        } else {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE178", String.format(
+                    "KeyError: Property \"%s\" found in capability \"%s\" referenced from node template \"%s\" must be a dict",
+                    args.get(2), args.get(1), ((NodeTemplate) context).getName())));
+        }
+        return null;
+    }
 
-	public String getPropertyName() {
-		if(args.size() > 2) {
-			return (String)args.get(2);
-		}
-		return (String)args.get(1);
-	}
+    // Add this functions similar to get_attribute case
+    private NodeTemplate _findHostContainingProperty(String nodeTemplateName) {
+        if (nodeTemplateName == null) {
+            nodeTemplateName = SELF;
+        }
+        NodeTemplate nodeTemplate = _findNodeTemplate(nodeTemplateName);
+        LinkedHashMap<String, Object> hostedOnRel = (LinkedHashMap<String, Object>)
+                EntityType.TOSCA_DEF.get(HOSTED_ON);
+        for (RequirementAssignment requirement : nodeTemplate.getRequirements().getAll()) {
+            String targetName = requirement.getNodeTemplateName();
+            NodeTemplate targetNode = _findNodeTemplate(targetName);
+            NodeType targetType = (NodeType) targetNode.getTypeDefinition();
+            for (CapabilityTypeDef capDef : targetType.getCapabilitiesObjects()) {
+                if (capDef.inheritsFrom((ArrayList<String>) hostedOnRel.get("valid_target_types"))) {
+                    if (_propertyExistsInType(targetType)) {
+                        return targetNode;
+                    }
+                    // If requirement was not found, look in node
+                    // template's capabilities
+                    if (args.size() > 2 &&
+                            _getCapabilityProperty(targetNode, (String) args.get(1), (String) args.get(2), false) != null) {
+                        return targetNode;
+                    }
 
-	public String getReqorCap() {
-		if(args.size() > 2) {
-			return (String)args.get(1);
-		}
-		return null;
-	}
-	
+                    return _findHostContainingProperty(targetName);
+                }
+            }
+
+        }
+        return null;
+    }
+
+    private boolean _propertyExistsInType(StatefulEntityType typeDefinition) {
+        LinkedHashMap<String, PropertyDef> propsDef = typeDefinition.getPropertiesDef();
+        return propsDef.keySet().contains((String) args.get(1));
+    }
+
+    @Override
+    public Object result() {
+        Object propertyValue;
+        if (args.size() >= 3) {
+            // First check if there is property with this name
+            NodeTemplate nodeTpl = _findNodeTemplate((String) args.get(0));
+            LinkedHashMap<String, Property> props;
+            if (nodeTpl != null) {
+                props = nodeTpl.getProperties();
+            } else {
+                props = new LinkedHashMap<>();
+            }
+            int index = 2;
+            if (props.get(args.get(1)) != null) {
+                propertyValue = ((Property) props.get(args.get(1))).getValue();
+            } else {
+                index = 3;
+                // then check the req or caps
+                propertyValue = _findReqOrCapProperty((String) args.get(1), (String) args.get(2));
+            }
+
+            if (args.size() > index) {
+                for (Object elem : args.subList(index, args.size() - 1)) {
+                    if (propertyValue instanceof ArrayList) {
+                        int intElem = (int) elem;
+                        propertyValue = _getIndexValue(propertyValue, intElem);
+                    } else {
+                        propertyValue = _getAttributeValue(propertyValue, (String) elem);
+                    }
+                }
+            }
+        } else {
+            propertyValue = _findProperty((String) args.get(1)).getValue();
+        }
+        if (propertyValue instanceof Function) {
+            return ((Function) propertyValue).result();
+        }
+        return getFunction(toscaTpl, context, propertyValue, toscaTpl.getResolveGetInput());
+    }
+
+    public String getNodeTemplateName() {
+        return (String) args.get(0);
+    }
+
+    public String getPropertyName() {
+        if (args.size() > 2) {
+            return (String) args.get(2);
+        }
+        return (String) args.get(1);
+    }
+
+    public String getReqorCap() {
+        if (args.size() > 2) {
+            return (String) args.get(1);
+        }
+        return null;
+    }
+
 }
 
 /*python

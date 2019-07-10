@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,36 +20,32 @@
 
 package org.onap.sdc.toscaparser.api.elements.constraints;
 
+import java.util.Arrays;
+
 public class Equal extends Constraint {
 
-	protected void _setValues() {
+    protected void setValues() {
 
-		constraintKey = EQUAL;
-		
-		for(String s: Schema.PROPERTY_TYPES) {
-			validPropTypes.add(s);
-		}
-		
-	}
-	
-	public Equal(String name,String type,Object c) {
-		super(name,type,c);
-		
-	}
-	
-	protected boolean _isValid(Object val) {
-		// equality of objects is tricky so we're comparing 
-		// the toString() representation
-		if(val.toString().equals(constraintValue.toString())) {
-			return true;
-		}
-		return false;
-	}
-	
-	protected String _errMsg(Object value) {
-	    return String.format("The value \"%s\" of property \"%s\" is not equal to \"%s\"",
-	    		valueMsg,propertyName,constraintValueMsg);
-	}
+        setConstraintKey(EQUAL);
+        validPropTypes.addAll(Arrays.asList(Schema.PROPERTY_TYPES));
+
+    }
+
+    public Equal(String name, String type, Object c) {
+        super(name, type, c);
+
+    }
+
+    protected boolean isValid(Object val) {
+        // equality of objects is tricky so we're comparing
+        // the toString() representation
+        return val.toString().equals(constraintValue.toString());
+    }
+
+    protected String errMsg(Object value) {
+        return String.format("The value \"%s\" of property \"%s\" is not equal to \"%s\"",
+                valueMsg, propertyName, constraintValueMsg);
+    }
 
 }
 

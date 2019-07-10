@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,167 +30,163 @@ import java.util.Map;
 
 public class InterfacesDef extends StatefulEntityType {
 
-	public static final String LIFECYCLE = "tosca.interfaces.node.lifecycle.Standard";
-	public static final String CONFIGURE = "tosca.interfaces.relationship.Configure";
-	public static final String LIFECYCLE_SHORTNAME = "Standard";
-	public static final String CONFIGURE_SHORTNAME = "Configure";
+    public static final String LIFECYCLE = "tosca.interfaces.node.lifecycle.Standard";
+    public static final String CONFIGURE = "tosca.interfaces.relationship.Configure";
+    public static final String LIFECYCLE_SHORTNAME = "Standard";
+    public static final String CONFIGURE_SHORTNAME = "Configure";
 
-	public static final String SECTIONS[] = {
-			LIFECYCLE, CONFIGURE, LIFECYCLE_SHORTNAME,CONFIGURE_SHORTNAME
-	};
+    public static final String[] SECTIONS = {
+            LIFECYCLE, CONFIGURE, LIFECYCLE_SHORTNAME, CONFIGURE_SHORTNAME
+    };
 
-	public static final String IMPLEMENTATION = "implementation";
-	public static final String DESCRIPTION = "description";
-	public static final String INPUTS = "inputs";
+    public static final String IMPLEMENTATION = "implementation";
+    public static final String DESCRIPTION = "description";
+    public static final String INPUTS = "inputs";
 
-	public static final String INTERFACE_DEF_RESERVED_WORDS[] = {
-			"type", "inputs", "derived_from", "version", "description"};
+    public static final String[] INTERFACE_DEF_RESERVED_WORDS = {
+            "type", "inputs", "derived_from", "version", "description"};
 
-	private EntityType ntype;
-	private EntityTemplate nodeTemplate;
+    private EntityType ntype;
+    private EntityTemplate nodeTemplate;
 
-	private String operationName;
-	private Object operationDef;
-	private Object implementation;
-	private LinkedHashMap<String,Object> inputs;
-	private String description;
+    private String operationName;
+    private Object operationDef;
+    private Object implementation;
+    private LinkedHashMap<String, Object> inputs;
+    private String description;
 
-	@SuppressWarnings("unchecked")
-	public InterfacesDef(EntityType inodeType,
-			String interfaceType,
-			EntityTemplate inodeTemplate,
-			String iname,
-			Object ivalue) {
-		// void
-		super();
+    @SuppressWarnings("unchecked")
+    public InterfacesDef(EntityType inodeType,
+                         String interfaceType,
+                         EntityTemplate inodeTemplate,
+                         String iname,
+                         Object ivalue) {
+        // void
+        super();
 
-		ntype = inodeType;
-		nodeTemplate = inodeTemplate;
-		type = interfaceType;
-		operationName = iname;
-		operationDef = ivalue;
-		implementation = null;
-		inputs = null;
-		defs = new LinkedHashMap<String,Object>();
+        ntype = inodeType;
+        nodeTemplate = inodeTemplate;
+        type = interfaceType;
+        operationName = iname;
+        operationDef = ivalue;
+        implementation = null;
+        inputs = null;
+        defs = new LinkedHashMap<>();
 
-		if(interfaceType.equals(LIFECYCLE_SHORTNAME)) {
-			interfaceType = LIFECYCLE;
-		}
-		if(interfaceType.equals(CONFIGURE_SHORTNAME)) {
-			interfaceType = CONFIGURE;
-		}
+        if (interfaceType.equals(LIFECYCLE_SHORTNAME)) {
+            interfaceType = LIFECYCLE;
+        }
+        if (interfaceType.equals(CONFIGURE_SHORTNAME)) {
+            interfaceType = CONFIGURE;
+        }
 
-		// only NodeType has getInterfaces "hasattr(ntype,interfaces)"
-		// while RelationshipType does not
-		if(ntype instanceof NodeType) {
-			if(((NodeType)ntype).getInterfaces() != null &&
-					((NodeType)ntype).getInterfaces().values().contains(interfaceType)) {
-				LinkedHashMap<String,Object> nii = (LinkedHashMap<String,Object>)
-						((NodeType)ntype).getInterfaces().get(interfaceType);
-				interfaceType = (String)nii.get("type");
-			}
-		}
-		if(inodeType != null) {
-			if(nodeTemplate != null && nodeTemplate.getCustomDef() != null &&
-					nodeTemplate.getCustomDef().containsKey(interfaceType)) {
-				defs = (LinkedHashMap<String,Object>)
-						nodeTemplate.getCustomDef().get(interfaceType);
-			}
-			else {
-				defs = (LinkedHashMap<String,Object>)TOSCA_DEF.get(interfaceType);
-			}
-		}
+        // only NodeType has getInterfaces "hasattr(ntype,interfaces)"
+        // while RelationshipType does not
+        if (ntype instanceof NodeType) {
+            if (((NodeType) ntype).getInterfaces() != null
+                    && ((NodeType) ntype).getInterfaces().values().contains(interfaceType)) {
+                LinkedHashMap<String, Object> nii = (LinkedHashMap<String, Object>)
+                        ((NodeType) ntype).getInterfaces().get(interfaceType);
+                interfaceType = (String) nii.get("type");
+            }
+        }
+        if (inodeType != null) {
+            if (nodeTemplate != null && nodeTemplate.getCustomDef() != null
+                    && nodeTemplate.getCustomDef().containsKey(interfaceType)) {
+                defs = (LinkedHashMap<String, Object>)
+                        nodeTemplate.getCustomDef().get(interfaceType);
+            } else {
+                defs = (LinkedHashMap<String, Object>) TOSCA_DEF.get(interfaceType);
+            }
+        }
 
-		if(ivalue != null) {
-			if(ivalue instanceof LinkedHashMap) {
-				for(Map.Entry<String,Object> me: ((LinkedHashMap<String,Object>)ivalue).entrySet()) {
-					if(me.getKey().equals(IMPLEMENTATION)) {
-						implementation = me.getValue();
-					}
-					else if(me.getKey().equals(INPUTS)) {
-						inputs = (LinkedHashMap<String,Object>)me.getValue();
-					}
-					else if(me.getKey().equals(DESCRIPTION)) {
-						description = (String)me.getValue();
-					}
-					else {
-						ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE123", String.format(
-								"UnknownFieldError: \"interfaces\" of template \"%s\" contain unknown field \"%s\"",
-								nodeTemplate.getName(),me.getKey())));
-					}
-				}
-			}
-		}
-	}
+        if (ivalue != null) {
+            if (ivalue instanceof LinkedHashMap) {
+                for (Map.Entry<String, Object> me : ((LinkedHashMap<String, Object>) ivalue).entrySet()) {
+                    if (me.getKey().equals(IMPLEMENTATION)) {
+                        implementation = me.getValue();
+                    } else if (me.getKey().equals(INPUTS)) {
+                        inputs = (LinkedHashMap<String, Object>) me.getValue();
+                    } else if (me.getKey().equals(DESCRIPTION)) {
+                        description = (String) me.getValue();
+                    } else {
+                        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE123", String.format(
+                                "UnknownFieldError: \"interfaces\" of template \"%s\" contain unknown field \"%s\"",
+                                nodeTemplate.getName(), me.getKey())));
+                    }
+                }
+            }
+        }
+    }
 
-	public ArrayList<String> getLifecycleOps() {
-		if(defs != null) {
-			if(type.equals(LIFECYCLE)) {
-				return _ops();
-			}
-		}
-		return null;
-	}
+    public ArrayList<String> getLifecycleOps() {
+        if (defs != null) {
+            if (type.equals(LIFECYCLE)) {
+                return ops();
+            }
+        }
+        return null;
+    }
 
-	public ArrayList<String> getInterfaceOps() {
-		if(defs != null) {
-			ArrayList<String> ops = _ops();
-			ArrayList<String> idrw = new ArrayList<>();
-			for(int i=0; i<InterfacesDef.INTERFACE_DEF_RESERVED_WORDS.length; i++) {
-				idrw.add(InterfacesDef.INTERFACE_DEF_RESERVED_WORDS[i]);
-			}
-			ops.removeAll(idrw);
-			return ops;
-		}
-		return null;
-	}
+    public ArrayList<String> getInterfaceOps() {
+        if (defs != null) {
+            ArrayList<String> ops = ops();
+            ArrayList<String> idrw = new ArrayList<>();
+            for (int i = 0; i < InterfacesDef.INTERFACE_DEF_RESERVED_WORDS.length; i++) {
+                idrw.add(InterfacesDef.INTERFACE_DEF_RESERVED_WORDS[i]);
+            }
+            ops.removeAll(idrw);
+            return ops;
+        }
+        return null;
+    }
 
-	public ArrayList<String> getConfigureOps() {
-		if(defs != null) {
-			if(type.equals(CONFIGURE)) {
-				return _ops();
-			}
-		}
-		return null;
-	}
+    public ArrayList<String> getConfigureOps() {
+        if (defs != null) {
+            if (type.equals(CONFIGURE)) {
+                return ops();
+            }
+        }
+        return null;
+    }
 
-	private ArrayList<String> _ops() {
-		return new ArrayList<String>(defs.keySet());
-	}
+    private ArrayList<String> ops() {
+        return new ArrayList<String>(defs.keySet());
+    }
 
-	// getters/setters
+    // getters/setters
 
-	public LinkedHashMap<String,Object> getInputs() {
-		return inputs;
-	}
+    public LinkedHashMap<String, Object> getInputs() {
+        return inputs;
+    }
 
-	public void setInput(String name,Object value) {
-		inputs.put(name, value);
-	}
+    public void setInput(String name, Object value) {
+        inputs.put(name, value);
+    }
 
-	public Object getImplementation(){
-		return  implementation;
-	}
+    public Object getImplementation() {
+        return implementation;
+    }
 
-	public void setImplementation(Object implementation){
-		this.implementation = implementation;
-	}
+    public void setImplementation(Object implementation) {
+        this.implementation = implementation;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public String getOperationName() {
-		return operationName;
-	}
+    public String getOperationName() {
+        return operationName;
+    }
 
-	public void setOperationName(String operationName) {
-		this.operationName = operationName;
-	}
+    public void setOperationName(String operationName) {
+        this.operationName = operationName;
+    }
 }
 
 

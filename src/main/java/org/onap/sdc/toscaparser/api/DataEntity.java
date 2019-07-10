@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,13 @@
 
 package org.onap.sdc.toscaparser.api;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
-import org.onap.sdc.toscaparser.api.elements.*;
+import org.onap.sdc.toscaparser.api.elements.DataType;
+import org.onap.sdc.toscaparser.api.elements.PortSpec;
+import org.onap.sdc.toscaparser.api.elements.PropertyDef;
+import org.onap.sdc.toscaparser.api.elements.ScalarUnitFrequency;
+import org.onap.sdc.toscaparser.api.elements.ScalarUnitSize;
+import org.onap.sdc.toscaparser.api.elements.ScalarUnitTime;
 import org.onap.sdc.toscaparser.api.elements.constraints.Constraint;
 import org.onap.sdc.toscaparser.api.elements.constraints.Schema;
 import org.onap.sdc.toscaparser.api.functions.Function;
@@ -33,132 +34,134 @@ import org.onap.sdc.toscaparser.api.utils.TOSCAVersionProperty;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 import org.onap.sdc.toscaparser.api.utils.ValidateUtils;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 public class DataEntity {
     // A complex data value entity
-	
-	private LinkedHashMap<String,Object> customDef;
-	private DataType dataType;
-	private LinkedHashMap<String,PropertyDef> schema;
-	private Object value;
-	private String propertyName;
-	
-	public DataEntity(String _dataTypeName,Object _valueDict,
-					  LinkedHashMap<String,Object> _customDef,String _propName) {
-		
+
+    private LinkedHashMap<String, Object> customDef;
+    private DataType dataType;
+    private LinkedHashMap<String, PropertyDef> schema;
+    private Object value;
+    private String propertyName;
+
+    public DataEntity(String _dataTypeName, Object _valueDict,
+                      LinkedHashMap<String, Object> _customDef, String _propName) {
+
         customDef = _customDef;
-        dataType = new DataType(_dataTypeName,_customDef);
+        dataType = new DataType(_dataTypeName, _customDef);
         schema = dataType.getAllProperties();
         value = _valueDict;
         propertyName = _propName;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public Object validate() {
-		// Validate the value by the definition of the datatype
+    }
+
+    @SuppressWarnings("unchecked")
+    public Object validate() {
+        // Validate the value by the definition of the datatype
 
         // A datatype can not have both 'type' and 'properties' definitions.
         // If the datatype has 'type' definition
-        if(dataType.getValueType() != null) {
-            value = DataEntity.validateDatatype(dataType.getValueType(),value,null,customDef,null);
-            Schema schemaCls = new Schema(propertyName,dataType.getDefs());
-            for(Constraint constraint: schemaCls.getConstraints()) {
+        if (dataType.getValueType() != null) {
+            value = DataEntity.validateDatatype(dataType.getValueType(), value, null, customDef, null);
+            Schema schemaCls = new Schema(propertyName, dataType.getDefs());
+            for (Constraint constraint : schemaCls.getConstraints()) {
                 constraint.validate(value);
             }
         }
         // If the datatype has 'properties' definition
         else {
-            if(!(value instanceof LinkedHashMap)) {
-            	//ERROR under investigation
-				String checkedVal = value != null ? value.toString() : null;
+            if (!(value instanceof LinkedHashMap)) {
+                //ERROR under investigation
+                String checkedVal = value != null ? value.toString() : null;
 
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE001", String.format(
-						"TypeMismatchError: \"%s\" is not a map. The type is \"%s\"",
-						checkedVal, dataType.getType())));
-                
-				if (value instanceof List && ((List) value).size() > 0)  {
-					value = ((List) value).get(0);
-				}
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE001", String.format(
+                        "TypeMismatchError: \"%s\" is not a map. The type is \"%s\"",
+                        checkedVal, dataType.getType())));
 
-				if (!(value instanceof LinkedHashMap))  {
-					return value;
-				}
-			}
+                if (value instanceof List && ((List) value).size() > 0) {
+                    value = ((List) value).get(0);
+                }
+
+                if (!(value instanceof LinkedHashMap)) {
+                    return value;
+                }
+            }
 
 
-
-			LinkedHashMap<String,Object> valueDict = (LinkedHashMap<String,Object>)value;
+            LinkedHashMap<String, Object> valueDict = (LinkedHashMap<String, Object>) value;
             ArrayList<String> allowedProps = new ArrayList<>();
             ArrayList<String> requiredProps = new ArrayList<>();
-            LinkedHashMap<String,Object> defaultProps = new LinkedHashMap<>();
-            if(schema != null) {
-            	allowedProps.addAll(schema.keySet());
-            	for(String name: schema.keySet()) {
-            		PropertyDef propDef = schema.get(name);
-            		if(propDef.isRequired()) {
-            			requiredProps.add(name);
-            		}
-            		if(propDef.getDefault() != null) {
-            			defaultProps.put(name,propDef.getDefault());
-            		}
-            	}
+            LinkedHashMap<String, Object> defaultProps = new LinkedHashMap<>();
+            if (schema != null) {
+                allowedProps.addAll(schema.keySet());
+                for (String name : schema.keySet()) {
+                    PropertyDef propDef = schema.get(name);
+                    if (propDef.isRequired()) {
+                        requiredProps.add(name);
+                    }
+                    if (propDef.getDefault() != null) {
+                        defaultProps.put(name, propDef.getDefault());
+                    }
+                }
             }
-            
+
             // check allowed field
-            for(String valueKey: valueDict.keySet()) {
-            	//1710 devlop JSON validation
-            	if(!("json").equals(dataType.getType()) && !allowedProps.contains(valueKey)) {
+            for (String valueKey : valueDict.keySet()) {
+                //1710 devlop JSON validation
+                if (!("json").equals(dataType.getType()) && !allowedProps.contains(valueKey)) {
                     ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE100", String.format(
                             "UnknownFieldError: Data value of type \"%s\" contains unknown field \"%s\"",
-                            dataType.getType(),valueKey)));  
-            	}
+                            dataType.getType(), valueKey)));
+                }
             }
 
             // check default field
-            for(String defKey: defaultProps.keySet()) {
-            	Object defValue = defaultProps.get(defKey);
-            	if(valueDict.get(defKey) == null) {
-            		valueDict.put(defKey, defValue);            		
-            	}
-            	
+            for (String defKey : defaultProps.keySet()) {
+                Object defValue = defaultProps.get(defKey);
+                if (valueDict.get(defKey) == null) {
+                    valueDict.put(defKey, defValue);
+                }
+
             }
-            
+
             // check missing field
             ArrayList<String> missingProp = new ArrayList<>();
-            for(String reqKey: requiredProps) {
-                if(!valueDict.keySet().contains(reqKey)) {
+            for (String reqKey : requiredProps) {
+                if (!valueDict.keySet().contains(reqKey)) {
                     missingProp.add(reqKey);
                 }
             }
-            if(missingProp.size() > 0) {
-                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE003",String.format(
-                    "MissingRequiredFieldError: Data value of type \"%s\" is missing required field(s) \"%s\"",
-                    dataType.getType(),missingProp.toString())));
+            if (missingProp.size() > 0) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE003", String.format(
+                        "MissingRequiredFieldError: Data value of type \"%s\" is missing required field(s) \"%s\"",
+                        dataType.getType(), missingProp.toString())));
             }
-            
+
             // check every field
-            for(String vname: valueDict.keySet()) {
-            	Object vvalue = valueDict.get(vname);
-            	LinkedHashMap<String,Object> schemaName = _findSchema(vname);
-            	if(schemaName == null) {
-            		continue;
-            	}
-            	Schema propSchema = new Schema(vname,schemaName);
+            for (String vname : valueDict.keySet()) {
+                Object vvalue = valueDict.get(vname);
+                LinkedHashMap<String, Object> schemaName = _findSchema(vname);
+                if (schemaName == null) {
+                    continue;
+                }
+                Schema propSchema = new Schema(vname, schemaName);
                 // check if field value meets type defined
-                DataEntity.validateDatatype(propSchema.getType(), 
-                							vvalue,
-                                            propSchema.getEntrySchema(),
-                                            customDef,
-                                            null);
-            	
+                DataEntity.validateDatatype(propSchema.getType(),
+                        vvalue,
+                        propSchema.getEntrySchema(),
+                        customDef,
+                        null);
+
                 // check if field value meets constraints defined
-                if(propSchema.getConstraints() != null) {
-                    for(Constraint constraint: propSchema.getConstraints()) {
-                        if(vvalue instanceof ArrayList) {
-                            for(Object val: (ArrayList<Object>)vvalue) {
+                if (propSchema.getConstraints() != null) {
+                    for (Constraint constraint : propSchema.getConstraints()) {
+                        if (vvalue instanceof ArrayList) {
+                            for (Object val : (ArrayList<Object>) vvalue) {
                                 constraint.validate(val);
                             }
-                        }
-                        else {
+                        } else {
                             constraint.validate(vvalue);
                         }
                     }
@@ -166,134 +169,117 @@ public class DataEntity {
             }
         }
         return value;
-	}
+    }
 
-	private LinkedHashMap<String,Object> _findSchema(String name) {
-		if(schema != null && schema.get(name) != null) {
-			return schema.get(name).getSchema();
-		}
-		return null;
-	}
-	
-	public static Object validateDatatype(String type, 
-										  Object value, 
-										  LinkedHashMap<String,Object> entrySchema, 
-										  LinkedHashMap<String,Object> customDef,
-										  String propName) {
-		// Validate value with given type
+    private LinkedHashMap<String, Object> _findSchema(String name) {
+        if (schema != null && schema.get(name) != null) {
+            return schema.get(name).getSchema();
+        }
+        return null;
+    }
+
+    public static Object validateDatatype(String type,
+                                          Object value,
+                                          LinkedHashMap<String, Object> entrySchema,
+                                          LinkedHashMap<String, Object> customDef,
+                                          String propName) {
+        // Validate value with given type
 
         // If type is list or map, validate its entry by entry_schema(if defined)
         // If type is a user-defined complex datatype, custom_def is required.
 
-		if(Function.isFunction(value)) {
-			return value;
-		}
-		else if (type == null)  {
-			//NOT ANALYZED
-			 ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE002", String.format(
-	                    "MissingType: Type is missing for value \"%s\"",
-	                    value.toString())));
-			 return value;
-		}
-		else if(type.equals(Schema.STRING)) {
+        if (Function.isFunction(value)) {
+            return value;
+        } else if (type == null) {
+            //NOT ANALYZED
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE002", String.format(
+                    "MissingType: Type is missing for value \"%s\"",
+                    value.toString())));
+            return value;
+        } else if (type.equals(Schema.STRING)) {
             return ValidateUtils.validateString(value);
-		}
-		else if(type.equals(Schema.INTEGER)) {
+        } else if (type.equals(Schema.INTEGER)) {
             return ValidateUtils.validateInteger(value);
-		}
-		else if(type.equals(Schema.FLOAT)) {
+        } else if (type.equals(Schema.FLOAT)) {
             return ValidateUtils.validateFloat(value);
-		}
-		else if(type.equals(Schema.NUMBER)) {
+        } else if (type.equals(Schema.NUMBER)) {
             return ValidateUtils.validateNumeric(value);
-		}
-		else if(type.equals(Schema.BOOLEAN)) {
+        } else if (type.equals(Schema.BOOLEAN)) {
             return ValidateUtils.validateBoolean(value);
-		}
-		else if(type.equals(Schema.RANGE)) {
+        } else if (type.equals(Schema.RANGE)) {
             return ValidateUtils.validateRange(value);
-		}
-		else if(type.equals(Schema.TIMESTAMP)) {
+        } else if (type.equals(Schema.TIMESTAMP)) {
             ValidateUtils.validateTimestamp(value);
             return value;
-		}
-		else if(type.equals(Schema.LIST)) {
+        } else if (type.equals(Schema.LIST)) {
             ValidateUtils.validateList(value);
-            if(entrySchema != null) {
-            	DataEntity.validateEntry(value,entrySchema,customDef);
+            if (entrySchema != null) {
+                DataEntity.validateEntry(value, entrySchema, customDef);
             }
             return value;
-		}
-		else if(type.equals(Schema.SCALAR_UNIT_SIZE)) {
+        } else if (type.equals(Schema.SCALAR_UNIT_SIZE)) {
             return (new ScalarUnitSize(value)).validateScalarUnit();
-		}
-		else if(type.equals(Schema.SCALAR_UNIT_FREQUENCY)) {
+        } else if (type.equals(Schema.SCALAR_UNIT_FREQUENCY)) {
             return (new ScalarUnitFrequency(value)).validateScalarUnit();
-		}
-		else if(type.equals(Schema.SCALAR_UNIT_TIME)) {
+        } else if (type.equals(Schema.SCALAR_UNIT_TIME)) {
             return (new ScalarUnitTime(value)).validateScalarUnit();
-		}
-		else if(type.equals(Schema.VERSION)) {
-            return (new TOSCAVersionProperty(value)).getVersion();
-		}
-		else if(type.equals(Schema.MAP)) {
+        } else if (type.equals(Schema.VERSION)) {
+            return (new TOSCAVersionProperty(value.toString())).getVersion();
+        } else if (type.equals(Schema.MAP)) {
             ValidateUtils.validateMap(value);
-            if(entrySchema != null) {
-            	DataEntity.validateEntry(value,entrySchema,customDef);
+            if (entrySchema != null) {
+                DataEntity.validateEntry(value, entrySchema, customDef);
             }
             return value;
-		}
-		else if(type.equals(Schema.PORTSPEC)) {
+        } else if (type.equals(Schema.PORTSPEC)) {
             // tODO(TBD) bug 1567063, validate source & target as PortDef type
             // as complex types not just as integers
-            PortSpec.validateAdditionalReq(value,propName,customDef);
-		}
-        else {
-            DataEntity data = new DataEntity(type,value,customDef,null);
+            PortSpec.validateAdditionalReq(value, propName, customDef);
+        } else {
+            DataEntity data = new DataEntity(type, value, customDef, null);
             return data.validate();
         }
-        
-		return value;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static Object validateEntry(Object value,
-			  						   LinkedHashMap<String,Object> entrySchema,
-									   LinkedHashMap<String,Object> customDef) {
-		
+
+        return value;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Object validateEntry(Object value,
+                                       LinkedHashMap<String, Object> entrySchema,
+                                       LinkedHashMap<String, Object> customDef) {
+
         // Validate entries for map and list
-        Schema schema = new Schema(null,entrySchema);
+        Schema schema = new Schema(null, entrySchema);
         Object valueob = value;
         ArrayList<Object> valueList = null;
-        if(valueob  instanceof LinkedHashMap) {
-            valueList = new ArrayList<Object>(((LinkedHashMap<String,Object>)valueob).values());
+        if (valueob instanceof LinkedHashMap) {
+            valueList = new ArrayList<Object>(((LinkedHashMap<String, Object>) valueob).values());
+        } else if (valueob instanceof ArrayList) {
+            valueList = (ArrayList<Object>) valueob;
         }
-        else if(valueob instanceof ArrayList) {
-        	valueList = (ArrayList<Object>)valueob;
+        if (valueList != null) {
+            for (Object v : valueList) {
+                DataEntity.validateDatatype(schema.getType(), v, schema.getEntrySchema(), customDef, null);
+                if (schema.getConstraints() != null) {
+                    for (Constraint constraint : schema.getConstraints()) {
+                        constraint.validate(v);
+                    }
+                }
+            }
         }
-        if(valueList != null) {
-	        for(Object v: valueList) {
-	            DataEntity.validateDatatype(schema.getType(),v,schema.getEntrySchema(),customDef,null);
-	            if(schema.getConstraints() !=  null) {
-	                for(Constraint constraint: schema.getConstraints()) {
-	                    constraint.validate(v);
-	                }
-	            }
-	        }
-        }
-		return value;
-	}
+        return value;
+    }
 
-	@Override
-	public String toString() {
-		return "DataEntity{" +
-				"customDef=" + customDef +
-				", dataType=" + dataType +
-				", schema=" + schema +
-				", value=" + value +
-				", propertyName='" + propertyName + '\'' +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "DataEntity{" +
+                "customDef=" + customDef +
+                ", dataType=" + dataType +
+                ", schema=" + schema +
+                ", value=" + value +
+                ", propertyName='" + propertyName + '\'' +
+                '}';
+    }
 }
 
 /*python

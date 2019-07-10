@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,140 +20,136 @@
 
 package org.onap.sdc.toscaparser.api.elements;
 
+import org.onap.sdc.toscaparser.api.UnsupportedType;
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
+import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.onap.sdc.toscaparser.api.UnsupportedType;
-import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
-
 
 public class StatefulEntityType extends EntityType {
     // Class representing TOSCA states
 
-    public static final String interfacesNodeLifecycleOperations[] = {
-    	"create", "configure", "start", "stop", "delete"};
+    public static final String[] INTERFACE_NODE_LIFECYCLE_OPERATIONS = {
+            "create", "configure", "start", "stop", "delete"};
 
-    public static final String interfacesRelationshipConfigureOperations[] = {
-    	"post_configure_source", "post_configure_target", "add_target", "remove_target"};
+    public static final String[] INTERFACE_RELATIONSHIP_CONFIGURE_OPERATIONS = {
+            "post_configure_source", "post_configure_target", "add_target", "remove_target"};
 
     public StatefulEntityType() {
-    	// void constructor for subclasses that don't want super
+        // void constructor for subclasses that don't want super
     }
-    
-	@SuppressWarnings("unchecked")
-	public StatefulEntityType(String entityType, String prefix, LinkedHashMap<String,Object> customDef) {
+
+    @SuppressWarnings("unchecked")
+    public StatefulEntityType(String entityType, String prefix, LinkedHashMap<String, Object> customDef) {
 
         String entireEntityType = entityType;
-        if(UnsupportedType.validateType(entireEntityType)) {
+        if (UnsupportedType.validateType(entireEntityType)) {
             defs = null;
-        }
-        else {
-            if(entityType.startsWith(TOSCA + ":")) {
-                entityType = entityType.substring(TOSCA.length()+1);
+        } else {
+            if (entityType.startsWith(TOSCA + ":")) {
+                entityType = entityType.substring(TOSCA.length() + 1);
                 entireEntityType = prefix + entityType;
             }
-            if(!entityType.startsWith(TOSCA)) {
+            if (!entityType.startsWith(TOSCA)) {
                 entireEntityType = prefix + entityType;
             }
-            if(TOSCA_DEF.get(entireEntityType) != null) {
-                defs = (LinkedHashMap<String,Object> )TOSCA_DEF.get(entireEntityType);
+            if (TOSCA_DEF.get(entireEntityType) != null) {
+                defs = (LinkedHashMap<String, Object>) TOSCA_DEF.get(entireEntityType);
                 entityType = entireEntityType;
-            }
-            else if(customDef != null && customDef.get(entityType) != null) {
-                defs = (LinkedHashMap<String,Object> )customDef.get(entityType);
-            }
-            else{
+            } else if (customDef != null && customDef.get(entityType) != null) {
+                defs = (LinkedHashMap<String, Object>) customDef.get(entityType);
+            } else {
                 defs = null;
-				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE136", String.format(
-                    "InvalidTypeError: \"%s\" is not a valid type",entityType))); 
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE136", String.format(
+                        "InvalidTypeError: \"%s\" is not a valid type", entityType)));
             }
         }
         type = entityType;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public ArrayList<PropertyDef> getPropertiesDefObjects() {
-		// Return a list of property definition objects
-		ArrayList<PropertyDef> properties = new ArrayList<PropertyDef>();
-		LinkedHashMap<String,Object> props = (LinkedHashMap<String,Object>)getDefinition(PROPERTIES);
-		if(props != null) {
-			for(Map.Entry<String,Object> me: props.entrySet()) {
-				String pdname = me.getKey();
-				Object to = me.getValue();
-				if(to == null || !(to instanceof LinkedHashMap)) {
-					String s = to == null ? "null" : to.getClass().getSimpleName();
-					ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE137", String.format(
-							"Unexpected type error: property \"%s\" has type \"%s\" (expected dict)",pdname,s))); 
-					continue;
-				}
-				LinkedHashMap<String,Object> pdschema = (LinkedHashMap<String,Object>)to;
-				properties.add(new PropertyDef(pdname,null,pdschema));
-			}
-		}
-		return properties;
-	}
-	
-	public LinkedHashMap<String,PropertyDef> getPropertiesDef() {
-		LinkedHashMap<String,PropertyDef> pds = new LinkedHashMap<String,PropertyDef>();
-		for(PropertyDef pd: getPropertiesDefObjects()) {
-			pds.put(pd.getName(),pd);
-		}
-		return pds;
-	}
-	
-	public PropertyDef getPropertyDefValue(String name) {
-		// Return the property definition associated with a given name
-		PropertyDef pd = null;
-		LinkedHashMap<String,PropertyDef> propsDef = getPropertiesDef();
-		if(propsDef != null) {
-			pd = propsDef.get(name);
-		}
-		return pd;
-	}
-	
-	public ArrayList<AttributeDef> getAttributesDefObjects() {
-		// Return a list of attribute definition objects
-		@SuppressWarnings("unchecked")
-		LinkedHashMap<String,Object> attrs = (LinkedHashMap<String,Object>)getValue(ATTRIBUTES,null,true);
-		ArrayList<AttributeDef> ads = new ArrayList<>();
-		if(attrs != null) {
-			for(Map.Entry<String,Object> me: attrs.entrySet()) {
-				String attr = me.getKey();
-				@SuppressWarnings("unchecked")
-				LinkedHashMap<String,Object> adschema = (LinkedHashMap<String,Object>)me.getValue();
-				ads.add(new AttributeDef(attr,null,adschema));
-			}
-		}
-		return ads;
-	}
+    }
 
-	public LinkedHashMap<String,AttributeDef> getAttributesDef() {
-		// Return a dictionary of attribute definition name-object pairs
-		
-		LinkedHashMap<String,AttributeDef> ads = new LinkedHashMap<>();
-		for(AttributeDef ado: getAttributesDefObjects()) {
-			ads.put(((AttributeDef)ado).getName(),ado);
-		}
-		return ads;
-	}
+    @SuppressWarnings("unchecked")
+    public ArrayList<PropertyDef> getPropertiesDefObjects() {
+        // Return a list of property definition objects
+        ArrayList<PropertyDef> properties = new ArrayList<PropertyDef>();
+        LinkedHashMap<String, Object> props = (LinkedHashMap<String, Object>) getDefinition(PROPERTIES);
+        if (props != null) {
+            for (Map.Entry<String, Object> me : props.entrySet()) {
+                String pdname = me.getKey();
+                Object to = me.getValue();
+                if (to == null || !(to instanceof LinkedHashMap)) {
+                    String s = to == null ? "null" : to.getClass().getSimpleName();
+                    ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE137", String.format(
+                            "Unexpected type error: property \"%s\" has type \"%s\" (expected dict)", pdname, s)));
+                    continue;
+                }
+                LinkedHashMap<String, Object> pdschema = (LinkedHashMap<String, Object>) to;
+                properties.add(new PropertyDef(pdname, null, pdschema));
+            }
+        }
+        return properties;
+    }
 
-	public AttributeDef getAttributeDefValue(String name) {
-		// Return the attribute definition associated with a given name
-		AttributeDef ad = null;
-		LinkedHashMap<String,AttributeDef> attrsDef = getAttributesDef();
-		if(attrsDef != null) {
-			ad = attrsDef.get(name);
-		}
-		return ad;
-	}
-	
-	public String getType() {
-		return type;
-	}
- }
+    public LinkedHashMap<String, PropertyDef> getPropertiesDef() {
+        LinkedHashMap<String, PropertyDef> pds = new LinkedHashMap<String, PropertyDef>();
+        for (PropertyDef pd : getPropertiesDefObjects()) {
+            pds.put(pd.getName(), pd);
+        }
+        return pds;
+    }
+
+    public PropertyDef getPropertyDefValue(String name) {
+        // Return the property definition associated with a given name
+        PropertyDef pd = null;
+        LinkedHashMap<String, PropertyDef> propsDef = getPropertiesDef();
+        if (propsDef != null) {
+            pd = propsDef.get(name);
+        }
+        return pd;
+    }
+
+    public ArrayList<AttributeDef> getAttributesDefObjects() {
+        // Return a list of attribute definition objects
+        @SuppressWarnings("unchecked")
+        LinkedHashMap<String, Object> attrs = (LinkedHashMap<String, Object>) getValue(ATTRIBUTES, null, true);
+        ArrayList<AttributeDef> ads = new ArrayList<>();
+        if (attrs != null) {
+            for (Map.Entry<String, Object> me : attrs.entrySet()) {
+                String attr = me.getKey();
+                @SuppressWarnings("unchecked")
+                LinkedHashMap<String, Object> adschema = (LinkedHashMap<String, Object>) me.getValue();
+                ads.add(new AttributeDef(attr, null, adschema));
+            }
+        }
+        return ads;
+    }
+
+    public LinkedHashMap<String, AttributeDef> getAttributesDef() {
+        // Return a dictionary of attribute definition name-object pairs
+
+        LinkedHashMap<String, AttributeDef> ads = new LinkedHashMap<>();
+        for (AttributeDef ado : getAttributesDefObjects()) {
+            ads.put(((AttributeDef) ado).getName(), ado);
+        }
+        return ads;
+    }
+
+    public AttributeDef getAttributeDefValue(String name) {
+        // Return the attribute definition associated with a given name
+        AttributeDef ad = null;
+        LinkedHashMap<String, AttributeDef> attrsDef = getAttributesDef();
+        if (attrsDef != null) {
+            ad = attrsDef.get(name);
+        }
+        return ad;
+    }
+
+    public String getType() {
+        return type;
+    }
+}
 
 /*python
 

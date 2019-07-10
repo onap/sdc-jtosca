@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,63 +21,62 @@
 package org.onap.sdc.toscaparser.api.elements.constraints;
 
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
+import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.PatternSyntaxException;
 
-import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
-
 public class Pattern extends Constraint {
 
-	@Override
-	protected void _setValues() {
+    @Override
+    protected void setValues() {
 
-		constraintKey = PATTERN;
+        setConstraintKey(PATTERN);
 
-		validTypes.add("String");
-		
-		validPropTypes.add(Schema.STRING);
-		
-	}
-	
-	
-	public Pattern(String name,String type,Object c) {
-		super(name,type,c);
-		
-		if(!validTypes.contains(constraintValue.getClass().getSimpleName())) {
-	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE114", "InvalidSchemaError: The property \"pattern\" expects a string")); 
-		}
-	}
+        addValidTypes(Collections.singletonList("String"));
 
-	@Override
-	protected boolean _isValid(Object value) {
-		try {
-			if(!(value instanceof String)) {
-		        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE115", String.format("ValueError: Input value \"%s\" to \"pattern\" property \"%s\" must be a string",
-		        		value.toString(),propertyName))); 
-				return false;
-			}
-			String strp = constraintValue.toString();
-			String strm = value.toString();
-			java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(strp);
-			Matcher matcher = pattern.matcher(strm);
-			if(matcher.find() && matcher.end() == strm.length()) {
-				return true;
-			}
-			return false;
-		}
-		catch(PatternSyntaxException pse) {
-	        ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE116", String.format("ValueError: Invalid regex \"%s\" in \"pattern\" property \"%s\"",
-	        		constraintValue.toString(),propertyName))); 
-	        return false;
-		}
-	}
+        validPropTypes.add(Schema.STRING);
 
-	@Override
-	protected String _errMsg(Object value) {
-	    return String.format("The value \"%s\" of property \"%s\" does not match the pattern \"%s\"",
-				 value.toString(),propertyName,constraintValue.toString());
-	}
+    }
+
+
+    public Pattern(String name, String type, Object c) {
+        super(name, type, c);
+
+        if (!validTypes.contains(constraintValue.getClass().getSimpleName())) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE114", "InvalidSchemaError: The property \"pattern\" expects a string"));
+        }
+    }
+
+    @Override
+    protected boolean isValid(Object value) {
+        try {
+            if (!(value instanceof String)) {
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE115", String.format("ValueError: Input value \"%s\" to \"pattern\" property \"%s\" must be a string",
+                        value.toString(), propertyName)));
+                return false;
+            }
+            String strp = constraintValue.toString();
+            String strm = value.toString();
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(strp);
+            Matcher matcher = pattern.matcher(strm);
+            if (matcher.find() && matcher.end() == strm.length()) {
+                return true;
+            }
+            return false;
+        } catch (PatternSyntaxException pse) {
+            ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE116", String.format("ValueError: Invalid regex \"%s\" in \"pattern\" property \"%s\"",
+                    constraintValue.toString(), propertyName)));
+            return false;
+        }
+    }
+
+    @Override
+    protected String errMsg(Object value) {
+        return String.format("The value \"%s\" of property \"%s\" does not match the pattern \"%s\"",
+                value.toString(), propertyName, constraintValue.toString());
+    }
 
 }
 

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,109 +20,110 @@
 
 package org.onap.sdc.toscaparser.api.elements.constraints;
 
+import com.google.common.collect.ImmutableMap;
 import org.onap.sdc.toscaparser.api.common.JToscaValidationIssue;
+import org.onap.sdc.toscaparser.api.elements.enums.FileSize;
 import org.onap.sdc.toscaparser.api.utils.ThreadLocalsHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 
 public class Schema {
 
-	private static final String TYPE = "type";
-	private static final String REQUIRED = "required";
-	private static final String DESCRIPTION = "description";
-	private static final String DEFAULT = "default";
-	private static final String CONSTRAINTS = "constraints";
-	private static final String STATUS = "status";
-	private static final String ENTRYSCHEMA = "entry_schema";
-	private static final String KEYS[] = {
-	        TYPE, REQUIRED, DESCRIPTION,DEFAULT, CONSTRAINTS, ENTRYSCHEMA, STATUS};
+    private static final String TYPE = "type";
+    private static final String REQUIRED = "required";
+    private static final String DESCRIPTION = "description";
+    private static final String DEFAULT = "default";
+    private static final String CONSTRAINTS = "constraints";
+    private static final String STATUS = "status";
+    private static final String ENTRYSCHEMA = "entry_schema";
+    private static final String[] KEYS = {
+            TYPE, REQUIRED, DESCRIPTION, DEFAULT, CONSTRAINTS, ENTRYSCHEMA, STATUS};
 
-	public static final String INTEGER = "integer";
-	public static final String STRING = "string";
-	public static final String BOOLEAN = "boolean";
-	public static final String FLOAT = "float";
-	public static final String RANGE = "range";
-	public static final String NUMBER = "number";
-	public static final String TIMESTAMP = "timestamp";
-	public static final String LIST = "list";
-	public static final String MAP = "map";
-	public static final String SCALAR_UNIT_SIZE = "scalar-unit.size";
-	public static final String SCALAR_UNIT_FREQUENCY = "scalar-unit.frequency";
-	public static final String SCALAR_UNIT_TIME = "scalar-unit.time";
-	public static final String VERSION = "version";
-	public static final String PORTDEF = "PortDef";
-	public static final String PORTSPEC = "PortSpec"; //??? PortSpec.SHORTNAME
-	public static final String JSON = "json"; 
+    public static final String INTEGER = "integer";
+    public static final String STRING = "string";
+    public static final String BOOLEAN = "boolean";
+    public static final String FLOAT = "float";
+    public static final String RANGE = "range";
+    public static final String NUMBER = "number";
+    public static final String TIMESTAMP = "timestamp";
+    public static final String LIST = "list";
+    public static final String MAP = "map";
+    public static final String SCALAR_UNIT_SIZE = "scalar-unit.size";
+    public static final String SCALAR_UNIT_FREQUENCY = "scalar-unit.frequency";
+    public static final String SCALAR_UNIT_TIME = "scalar-unit.time";
+    public static final String VERSION = "version";
+    public static final String PORTDEF = "PortDef";
+    public static final String PORTSPEC = "PortSpec"; //??? PortSpec.SHORTNAME
+    public static final String JSON = "json";
 
-	public static final String PROPERTY_TYPES[] = {
-	        INTEGER, STRING, BOOLEAN, FLOAT, RANGE,NUMBER, TIMESTAMP, LIST, MAP,
-	        SCALAR_UNIT_SIZE, SCALAR_UNIT_FREQUENCY, SCALAR_UNIT_TIME,
-	        VERSION, PORTDEF, PORTSPEC, JSON};
+    public static final String[] PROPERTY_TYPES = {
+            INTEGER, STRING, BOOLEAN, FLOAT, RANGE, NUMBER, TIMESTAMP, LIST, MAP,
+            SCALAR_UNIT_SIZE, SCALAR_UNIT_FREQUENCY, SCALAR_UNIT_TIME,
+            VERSION, PORTDEF, PORTSPEC, JSON};
 
-	public static final String SIMPLE_PROPERTY_TYPES[] = {
-			INTEGER, STRING, BOOLEAN, FLOAT, RANGE,NUMBER, TIMESTAMP,
-			SCALAR_UNIT_SIZE, SCALAR_UNIT_FREQUENCY, SCALAR_UNIT_TIME,
-			VERSION};
-	
-	@SuppressWarnings("unused")
-	private static final String SCALAR_UNIT_SIZE_DEFAULT = "B";
-	
-	private static Map<String,Long> SCALAR_UNIT_SIZE_DICT = new HashMap<>();
-	static {
-		SCALAR_UNIT_SIZE_DICT.put("B", 1L);
-		SCALAR_UNIT_SIZE_DICT.put("KB", 1000L);
-		SCALAR_UNIT_SIZE_DICT.put("KIB", 1024L);
-		SCALAR_UNIT_SIZE_DICT.put("MB", 1000000L);
-		SCALAR_UNIT_SIZE_DICT.put("MIB", 1048576L);
-		SCALAR_UNIT_SIZE_DICT.put("GB", 1000000000L);
-		SCALAR_UNIT_SIZE_DICT.put("GIB", 1073741824L);
-		SCALAR_UNIT_SIZE_DICT.put("TB", 1000000000000L);
-		SCALAR_UNIT_SIZE_DICT.put("TIB", 1099511627776L);
-	}
-	
-	private String name;
-	private LinkedHashMap<String,Object> schema;
-	private int _len;
-	private ArrayList<Constraint> constraintsList;
+    public static final String[] SIMPLE_PROPERTY_TYPES = {
+            INTEGER, STRING, BOOLEAN, FLOAT, RANGE, NUMBER, TIMESTAMP,
+            SCALAR_UNIT_SIZE, SCALAR_UNIT_FREQUENCY, SCALAR_UNIT_TIME,
+            VERSION};
 
- 
-	public Schema(String _name,LinkedHashMap<String,Object> _schemaDict) {
-		name = _name;
-		
-        if(!(_schemaDict instanceof LinkedHashMap)) {
+    @SuppressWarnings("unused")
+    private static final String SCALAR_UNIT_SIZE_DEFAULT = "B";
+
+    private static Map<String, Long> scalarUnitSizeDict = ImmutableMap.<String, Long>builder()
+            .put("B", FileSize.B)
+            .put("KB", FileSize.KB)
+            .put("MB", FileSize.MB)
+            .put("GB", FileSize.GB)
+            .put("TB", FileSize.TB)
+            .put("KIB", FileSize.KIB)
+            .put("MIB", FileSize.MIB)
+            .put("GIB", FileSize.GIB)
+            .put("TIB", FileSize.TIB)
+            .build();
+
+
+    private String name;
+    private LinkedHashMap<String, Object> schema;
+    private int len;
+    private ArrayList<Constraint> constraintsList;
+
+
+    public Schema(String name, LinkedHashMap<String, Object> schemaDict) {
+        this.name = name;
+
+        if (!(schemaDict instanceof LinkedHashMap)) {
             //msg = (_('Schema definition of "%(pname)s" must be a dict.')
             //       % dict(pname=name))
             ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE117", String.format(
-            		"InvalidSchemaError: Schema definition of \"%s\" must be a dict",name))); 
+                    "InvalidSchemaError: Schema definition of \"%s\" must be a dict", this.name)));
         }
 
-        if(_schemaDict.get("type") == null) {
+        if (schemaDict.get("type") == null) {
             //msg = (_('Schema definition of "%(pname)s" must have a "type" '
             //         'attribute.') % dict(pname=name))
             ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE118", String.format(
-            		"InvalidSchemaError: Schema definition of \"%s\" must have a \"type\" attribute",name))); 
+                    "InvalidSchemaError: Schema definition of \"%s\" must have a \"type\" attribute", this.name)));
         }
-        
-        schema = _schemaDict;
-        _len = 0; //??? None
+
+        schema = schemaDict;
+        len = 0; //??? None
         constraintsList = new ArrayList<>();
-	}
+    }
 
     public String getType() {
-        return (String)schema.get(TYPE);
+        return (String) schema.get(TYPE);
     }
 
     public boolean isRequired() {
-        return (boolean)schema.getOrDefault(REQUIRED, true);
+        return (boolean) schema.getOrDefault(REQUIRED, true);
     }
 
     public String getDescription() {
-        return (String)schema.getOrDefault(DESCRIPTION,"");
+        return (String) schema.getOrDefault(DESCRIPTION, "");
     }
 
     public Object getDefault() {
@@ -130,53 +131,52 @@ public class Schema {
     }
 
     public String getStatus() {
-        return (String)schema.getOrDefault(STATUS,"");
+        return (String) schema.getOrDefault(STATUS, "");
     }
 
     public static boolean isRequestedTypeSimple(String type) {
-		return Arrays.stream(SIMPLE_PROPERTY_TYPES).anyMatch(t->t.equals(type));
-	}
+        return Arrays.asList(SIMPLE_PROPERTY_TYPES).contains(type);
+    }
 
     @SuppressWarnings("unchecked")
-	public ArrayList<Constraint> getConstraints() {
-        if(constraintsList.size() == 0) {
-        	Object cob = schema.get(CONSTRAINTS);
-        	if(cob instanceof ArrayList) {
-				ArrayList<Object> constraintSchemata = (ArrayList<Object>)cob;
-            	for(Object ob: constraintSchemata) {
-            		if(ob instanceof LinkedHashMap) {
-	            		for(String cClass: ((LinkedHashMap<String,Object>)ob).keySet()) {
-	            			Constraint c = Constraint.factory(cClass,name,getType(),ob);
-	            			if(c != null) {
-	            				constraintsList.add(c);
-	            			}
-	            			else {
-	            				// error
-	            				ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE119", String.format(
-	            					"UnknownFieldError: Constraint type \"%s\" for property \"%s\" is not supported",
-	            					cClass,name))); 
-	            			}
-	            			break;
-	            		}
-            		}
-            	}
-        	}
+    public ArrayList<Constraint> getConstraints() {
+        if (constraintsList.size() == 0) {
+            Object cob = schema.get(CONSTRAINTS);
+            if (cob instanceof ArrayList) {
+                ArrayList<Object> constraintSchemata = (ArrayList<Object>) cob;
+                for (Object ob : constraintSchemata) {
+                    if (ob instanceof LinkedHashMap) {
+                        for (String cClass : ((LinkedHashMap<String, Object>) ob).keySet()) {
+                            Constraint c = Constraint.factory(cClass, name, getType(), ob);
+                            if (c != null) {
+                                constraintsList.add(c);
+                            } else {
+                                // error
+                                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE119", String.format(
+                                        "UnknownFieldError: Constraint type \"%s\" for property \"%s\" is not supported",
+                                        cClass, name)));
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
         }
         return constraintsList;
     }
 
     @SuppressWarnings("unchecked")
-	public LinkedHashMap<String,Object> getEntrySchema() {
-        return (LinkedHashMap<String,Object>)schema.get(ENTRYSCHEMA);
+    public LinkedHashMap<String, Object> getEntrySchema() {
+        return (LinkedHashMap<String, Object>) schema.get(ENTRYSCHEMA);
     }
-    
+
     // Python intrinsic methods...
 
     // substitute for __getitem__ (aka self[key])
     public Object getItem(String key) {
-    	return schema.get(key);
+        return schema.get(key);
     }
-    
+
     /*
     def __iter__(self):
         for k in self.KEYS:
@@ -187,23 +187,24 @@ public class Schema {
             else:
                 yield k
     */
-    
+
     // substitute for __len__ (aka self.len())
     public int getLen() {
-    	int len = 0;
-    	for(String k: KEYS) {
-    		if(schema.get(k) != null) {
-    			len++;
-    		}
-    		_len = len;
-    	}
-    	return _len;
+        int len = 0;
+        for (String k : KEYS) {
+            if (schema.get(k) != null) {
+                len++;
+            }
+            this.len = len;
+        }
+        return this.len;
     }
+
     // getter
-    public LinkedHashMap<String,Object> getSchema() {
-    	return schema;
+    public LinkedHashMap<String, Object> getSchema() {
+        return schema;
     }
-    
+
 }
 
 /*python
@@ -231,7 +232,7 @@ PROPERTY_TYPES = (
 )
 
 SCALAR_UNIT_SIZE_DEFAULT = 'B'
-SCALAR_UNIT_SIZE_DICT = {'B': 1, 'KB': 1000, 'KIB': 1024, 'MB': 1000000,
+scalarUnitSizeDict = {'B': 1, 'KB': 1000, 'KIB': 1024, 'MB': 1000000,
                          'MIB': 1048576, 'GB': 1000000000,
                          'GIB': 1073741824, 'TB': 1000000000000,
                          'TIB': 1099511627776}
@@ -251,7 +252,7 @@ def __init__(self, name, schema_dict):
         ValidationIssueCollector.appendException(InvalidSchemaError(message=msg))
 
     self.schema = schema_dict
-    self._len = None
+    self.len = None
     self.constraints_list = []
 
 @property
@@ -302,7 +303,7 @@ def __iter__(self):
             yield k
 
 def __len__(self):
-    if self._len is None:
-        self._len = len(list(iter(self)))
-    return self._len
+    if self.len is None:
+        self.len = len(list(iter(self)))
+    return self.len
 */
