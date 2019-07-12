@@ -34,7 +34,6 @@
 		<sitePath>/content/sites/site/org/onap/sdc/jtosca/${project.version}</sitePath>
 		<snapshots.path>snapshots</snapshots.path>
 		<releases.path>releases</releases.path>
-		<staging.profile.id>176c31dfe190a</staging.profile.id>
 		<!-- Sonar properties -->
 		<sonar.sourceEncoding>${project.build.sourceEncoding}</sonar.sourceEncoding>
 		<sonar.skipDesign>true</sonar.skipDesign>
@@ -167,19 +166,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-
-			<!-- Staging Plugin -->
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.7</version>
-				<extensions>true</extensions>
-				<configuration>
-					<nexusUrl>${nexus.proxy}</nexusUrl>
-					<stagingProfileId>${staging.profile.id}</stagingProfileId>
-					<serverId>onap-staging</serverId>
-				</configuration>
 			</plugin>
 
 			<plugin>
