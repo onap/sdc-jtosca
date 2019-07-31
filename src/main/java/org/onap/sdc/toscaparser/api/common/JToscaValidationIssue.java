@@ -20,6 +20,8 @@
 
 package org.onap.sdc.toscaparser.api.common;
 
+import java.util.Objects;
+
 public class JToscaValidationIssue {
 
     private String code;
@@ -51,5 +53,23 @@ public class JToscaValidationIssue {
     @Override
     public String toString() {
         return "JToscaError [code=" + code + ", message=" + message + "]";
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final JToscaValidationIssue that = (JToscaValidationIssue) o;
+        return Objects.equals(code, that.code) &&
+            Objects.equals(message, that.message);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code, message);
     }
 }

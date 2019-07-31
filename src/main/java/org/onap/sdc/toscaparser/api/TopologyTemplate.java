@@ -119,7 +119,10 @@ public class TopologyTemplate {
             }
             if ((parsedParams != null && parsedParams.get(input.getName()) == null || parsedParams == null)
                     && input.isRequired() && input.getDefault() == null) {
-                System.out.format("Log warning: The required parameter \"%s\" is not provided\n", input.getName());
+                ThreadLocalsHolder.getCollector().appendValidationIssue(new JToscaValidationIssue("JE003",
+                    String.format("MissingRequiredFieldError: The required input \"%s\" was not provided"
+                        , input.getName()))
+                );
             }
             alInputs.add(input);
         }

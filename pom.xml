@@ -23,6 +23,7 @@
 
 		<!-- ==================== -->
 		<!-- Versions -->
+		<hamcrest.version>2.1</hamcrest.version>
 		<!-- ==================== -->
 		<!-- Global project version -->
 
@@ -64,6 +65,18 @@
 		<!-- <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-classic</artifactId>
             <version>1.1.2</version> <scope>test</scope> </dependency> -->
 
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest</artifactId>
+			<version>${hamcrest.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<version>${hamcrest.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
